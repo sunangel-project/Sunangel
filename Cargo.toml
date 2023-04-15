@@ -2,5 +2,6 @@
 
 members = [
     "messages-common",
+    "api",
     "spot-finder",
 ]
