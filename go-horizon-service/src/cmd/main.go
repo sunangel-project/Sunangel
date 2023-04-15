@@ -25,7 +25,7 @@ func main() {
 	wg.Add(10)
 
 	sub, err := ec.Subscribe(messaging.IN_Q, func(spot_msg *messaging.SpotMessage) {
-		handle_message(spot_msg, kv)
+		handle_message(spot_msg, kv, ec)
 		wg.Done()
 	})
 	if err != nil {
@@ -41,7 +41,11 @@ func main() {
 	nc.Drain()
 }
 
-func handle_message(spot_msg *messaging.SpotMessage, kv nats.KeyValue) {
+func handle_message(
+	spot_msg *messaging.SpotMessage,
+	kv nats.KeyValue,
+	ec *nats.EncodedConn,
+) {
 	loc := location.Location{
 		Latitude:  spot_msg.Spot.Loc.Lat,
 		Longitude: spot_msg.Spot.Loc.Lon,
@@ -77,4 +81,13 @@ func handle_message(spot_msg *messaging.SpotMessage, kv nats.KeyValue) {
 		)
 		*/
 	}
+
+	out_msg := messaging.OutMessage{
+		Part:      spot_msg.Part,
+		Spot:      spot_msg.Spot,
+		RequestId: spot_msg.RequestId,
+		Horizon:   key,
+	}
+
+	ec.Publish(messaging.OUT_Q, out_msg)
 }
