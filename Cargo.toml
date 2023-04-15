@@ -1,5 +1,6 @@
 [workspace]
 
 members = [
+    "messages-common",
     "spot-finder",
 ]

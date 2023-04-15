@@ -604,7 +604,6 @@ checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 [[package]]
 name = "messages-common"
 version = "0.1.2"
-source = "git+http://github.com/sunangel-project/messages-common.git#08904d215217bf8827b115be4ae3a72aee689a27"
 dependencies = [
  "anyhow",
  "bytes",
