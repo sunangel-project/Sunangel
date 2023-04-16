@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"sync"
@@ -15,18 +17,17 @@ import (
 func main() {
 	nc := messaging.Connect()
 	defer nc.Close()
-	ec := messaging.EncodedConnection(nc)
-	defer ec.Close()
 	js := messaging.JetStream(nc)
 	kv := messaging.KeyValueHorizon(js)
 
-	// Use a WaitGroup to wait for 10 messages to arrive
 	wg := sync.WaitGroup{}
-	wg.Add(10)
+	wg.Add(1)
 
-	sub, err := ec.Subscribe(messaging.IN_Q, func(spot_msg *messaging.SpotMessage) {
-		handle_message(spot_msg, kv)
-		wg.Done()
+	sub, err := nc.QueueSubscribe(messaging.IN_Q, "go-horizon", func(msg *nats.Msg) {
+		err := handle_message(msg, kv, nc)
+		if err != nil {
+			log.Printf("Error %v occured when reading message %v", err, msg)
+		}
 	})
 	if err != nil {
 		panic(err)
@@ -41,7 +42,44 @@ func main() {
 	nc.Drain()
 }
 
-func handle_message(spot_msg *messaging.SpotMessage, kv nats.KeyValue) {
+func handle_message(
+	msg *nats.Msg,
+	kv nats.KeyValue,
+	nc *nats.Conn,
+) error {
+	var unstructured_msg map[string]any
+
+	err := json.Unmarshal(msg.Data, &unstructured_msg)
+	if err != nil {
+		return err
+	}
+
+	var spot_msg messaging.SpotMessage
+	err = json.Unmarshal(msg.Data, &spot_msg)
+	if err != nil {
+		return err
+	}
+
+	horizon_key, err := handle_spot_message(&spot_msg, kv)
+	if err != nil {
+		return err
+	}
+
+	unstructured_msg["horizon"] = horizon_key
+
+	out_payload, err := json.Marshal(unstructured_msg)
+	if err != nil {
+		return err
+	}
+	nc.Publish(messaging.OUT_Q, out_payload)
+
+	return nil
+}
+
+func handle_spot_message(
+	spot_msg *messaging.SpotMessage,
+	kv nats.KeyValue,
+) (string, error) {
 	loc := location.Location{
 		Latitude:  spot_msg.Spot.Loc.Lat,
 		Longitude: spot_msg.Spot.Loc.Lon,
@@ -57,6 +95,10 @@ func handle_message(spot_msg *messaging.SpotMessage, kv nats.KeyValue) {
 
 	_, err := kv.Get(key)
 	if err != nil {
+		if !errors.Is(err, nats.ErrKeyNotFound) {
+			return "", err
+		}
+
 		log.Print("Didn't find horizon")
 		hor := horizon.NewHorizon(&loc, radius)
 
@@ -77,4 +119,6 @@ func handle_message(spot_msg *messaging.SpotMessage, kv nats.KeyValue) {
 		)
 		*/
 	}
+
+	return key, nil
 }

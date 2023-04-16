@@ -27,6 +27,7 @@ pub struct SearchResponse {
     request_id: String,
     search_query: SearchQuery,
     spot: Spot,
+    horizon: String,
 }
 
 #[derive(Serialize, Deserialize)]

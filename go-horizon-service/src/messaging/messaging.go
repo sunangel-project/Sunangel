@@ -31,8 +31,16 @@ type SpotSubMessage struct {
 }
 
 type SpotMessage struct {
-	Part PartSubMessage `json:"part"`
-	Spot SpotSubMessage `json:"spot"`
+	Part      PartSubMessage `json:"part"`
+	Spot      SpotSubMessage `json:"spot"`
+	RequestId string         `json:"request_id"`
+}
+
+type OutMessage struct {
+	Part      PartSubMessage `json:"part"`
+	Spot      SpotSubMessage `json:"spot"`
+	RequestId string         `json:"request_id"`
+	Horizon   string         `json:"horizon"`
 }
 
 func Connect() *nats.Conn {
