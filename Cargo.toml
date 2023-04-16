@@ -4,4 +4,5 @@ members = [
     "messages-common",
     "api",
     "spot-finder",
+    "sun-service",
 ]
