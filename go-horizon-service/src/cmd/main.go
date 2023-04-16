@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"sync"
@@ -15,18 +16,19 @@ import (
 func main() {
 	nc := messaging.Connect()
 	defer nc.Close()
-	ec := messaging.EncodedConnection(nc)
-	defer ec.Close()
+	// ec := messaging.EncodedConnection(nc)
+	// defer ec.Close()
 	js := messaging.JetStream(nc)
 	kv := messaging.KeyValueHorizon(js)
 
-	// Use a WaitGroup to wait for 10 messages to arrive
 	wg := sync.WaitGroup{}
-	wg.Add(10)
+	wg.Add(1)
 
-	sub, err := ec.Subscribe(messaging.IN_Q, func(spot_msg *messaging.SpotMessage) {
-		handle_message(spot_msg, kv, ec)
-		wg.Done()
+	sub, err := nc.QueueSubscribe(messaging.IN_Q, "go-horizon", func(msg *nats.Msg) {
+		err := handle_message(msg, kv, nc)
+		if err != nil {
+			// TODO: print or sum
+		}
 	})
 	if err != nil {
 		panic(err)
@@ -42,10 +44,43 @@ func main() {
 }
 
 func handle_message(
+	msg *nats.Msg,
+	kv nats.KeyValue,
+	nc *nats.Conn,
+) error {
+	var unstructured_msg map[string]any
+
+	err := json.Unmarshal(msg.Data, &unstructured_msg)
+	if err != nil {
+		return err
+	}
+
+	var spot_msg messaging.SpotMessage
+	err = json.Unmarshal(msg.Data, &spot_msg)
+	if err != nil {
+		return err
+	}
+
+	horizon_key, err := handle_spot_message(&spot_msg, kv)
+	if err != nil {
+		return err
+	}
+
+	unstructured_msg["horizon"] = horizon_key
+
+	out_payload, err := json.Marshal(unstructured_msg)
+	if err != nil {
+		return err
+	}
+	nc.Publish(messaging.OUT_Q, out_payload)
+
+	return nil
+}
+
+func handle_spot_message(
 	spot_msg *messaging.SpotMessage,
 	kv nats.KeyValue,
-	ec *nats.EncodedConn,
-) {
+) (string, error) {
 	loc := location.Location{
 		Latitude:  spot_msg.Spot.Loc.Lat,
 		Longitude: spot_msg.Spot.Loc.Lon,
@@ -60,7 +95,7 @@ func handle_message(
 	key := fmt.Sprint("horizon-v1.0.0-", id)
 
 	_, err := kv.Get(key)
-	if err != nil {
+	if err != nil { // TODO: Better error handling, first check if key does not exist
 		log.Print("Didn't find horizon")
 		hor := horizon.NewHorizon(&loc, radius)
 
@@ -82,12 +117,5 @@ func handle_message(
 		*/
 	}
 
-	out_msg := messaging.OutMessage{
-		Part:      spot_msg.Part,
-		Spot:      spot_msg.Spot,
-		RequestId: spot_msg.RequestId,
-		Horizon:   key,
-	}
-
-	ec.Publish(messaging.OUT_Q, out_msg)
+	return key, nil
 }

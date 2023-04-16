@@ -10,7 +10,7 @@ use crate::structs::{SearchError, SearchQueryMessage, SearchResponse, SpotsSucce
 
 const SEARCH_Q: &str = "search";
 
-const IN_Q: &str = "spots";
+const IN_Q: &str = "horizons";
 const IN_ERR_Q: &str = "error";
 
 #[derive(Serialize, Deserialize)]
