@@ -19,7 +19,7 @@ func main() {
 			Dir:  0.,
 			Kind: "bench",
 			Loc: messaging.Location{
-				Lat: 48.818600,
+				Lat: 48.818611,
 				Lon: 9.587340,
 			},
 		},

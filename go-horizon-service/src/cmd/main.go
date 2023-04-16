@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"sync"
@@ -16,8 +17,6 @@ import (
 func main() {
 	nc := messaging.Connect()
 	defer nc.Close()
-	// ec := messaging.EncodedConnection(nc)
-	// defer ec.Close()
 	js := messaging.JetStream(nc)
 	kv := messaging.KeyValueHorizon(js)
 
@@ -27,7 +26,7 @@ func main() {
 	sub, err := nc.QueueSubscribe(messaging.IN_Q, "go-horizon", func(msg *nats.Msg) {
 		err := handle_message(msg, kv, nc)
 		if err != nil {
-			// TODO: print or sum
+			log.Printf("Error %v occured when reading message %v", err, msg)
 		}
 	})
 	if err != nil {
@@ -95,7 +94,11 @@ func handle_spot_message(
 	key := fmt.Sprint("horizon-v1.0.0-", id)
 
 	_, err := kv.Get(key)
-	if err != nil { // TODO: Better error handling, first check if key does not exist
+	if err != nil {
+		if !errors.Is(err, nats.ErrKeyNotFound) {
+			return "", err
+		}
+
 		log.Print("Didn't find horizon")
 		hor := horizon.NewHorizon(&loc, radius)
 
