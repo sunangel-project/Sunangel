@@ -20,11 +20,16 @@ func main() {
 	js := messaging.JetStream(nc)
 	kv := messaging.KeyValueHorizon(js)
 
+	err := messaging.Setup_streams(js)
+	if err != nil {
+		panic(err)
+	}
+
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 
-	sub, err := nc.QueueSubscribe(messaging.IN_Q, "go-horizon", func(msg *nats.Msg) {
-		err := handle_message(msg, kv, nc)
+	sub, err := js.QueueSubscribe(messaging.IN_Q, messaging.GROUP, func(msg *nats.Msg) {
+		err := handle_message(msg, kv, js)
 		if err != nil {
 			log.Printf("Error %v occured when reading message %v", err, msg)
 		}
@@ -45,7 +50,7 @@ func main() {
 func handle_message(
 	msg *nats.Msg,
 	kv nats.KeyValue,
-	nc *nats.Conn,
+	js nats.JetStreamContext,
 ) error {
 	var unstructured_msg map[string]any
 
@@ -71,7 +76,7 @@ func handle_message(
 	if err != nil {
 		return err
 	}
-	nc.Publish(messaging.OUT_Q, out_payload)
+	js.Publish(messaging.OUT_SUB_SUNSETS, out_payload)
 
 	return nil
 }

@@ -113,13 +113,13 @@ fn build_output_payload(
         .as_object_mut()
         .ok_or(anyhow!("query was not an object: {query_value:?}"))?;
 
-    output_obj.insert("spot".into(), serde_json::to_value(spot)?);
+    output_obj.insert("spot".into(), json!(spot));
     output_obj.insert(
         "part".into(),
-        serde_json::to_value(PartMessage {
+        json!(PartMessage {
             id: part_num,
             of: total_num,
-        })?,
+        }),
     );
 
     Ok(output)

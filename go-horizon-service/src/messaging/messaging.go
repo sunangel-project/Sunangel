@@ -1,18 +1,23 @@
 package messaging
 
 import (
+	"errors"
 	"log"
+	"time"
 
 	"github.com/nats-io/nats.go"
 )
 
 const STORE_NAME = "horizons"
 
-const IN_Q = "spots"
+const IN_Q = "SPOTS.horizon"
 const GROUP = "horizon-service"
 
-const OUT_Q = "horizons"
-const ERR_Q = "error"
+const OUT_STREAM = "HORIZONS"
+const OUT_SUB_SUNSETS = OUT_STREAM + ".sunset"
+
+const ERR_STREAM = "ERRORS"
+const ERR_SUB = ERR_STREAM + "." + GROUP
 
 type PartSubMessage struct {
 	Id uint `json:"id"`
@@ -86,4 +91,36 @@ func KeyValueHorizon(js nats.JetStreamContext) nats.KeyValue {
 	}
 
 	return kv
+}
+
+func Setup_streams(js nats.JetStreamContext) error {
+	output_stream_config := &nats.StreamConfig{
+		Name:     OUT_STREAM,
+		Subjects: []string{OUT_SUB_SUNSETS},
+		MaxAge:   time.Hour,
+	}
+	_, err := js.StreamInfo(OUT_STREAM)
+	if err != nil {
+		if !errors.Is(err, nats.ErrStreamNotFound) {
+			return err
+		}
+
+		js.AddStream(output_stream_config)
+	}
+
+	error_stream_config := &nats.StreamConfig{
+		Name:     ERR_STREAM,
+		Subjects: []string{ERR_SUB},
+		MaxAge:   time.Hour,
+	}
+	_, err = js.StreamInfo(ERR_STREAM)
+	if err != nil {
+		if !errors.Is(err, nats.ErrStreamNotFound) {
+			return err
+		}
+
+		js.AddStream(error_stream_config)
+	}
+
+	return nil
 }
