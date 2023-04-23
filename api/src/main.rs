@@ -17,7 +17,7 @@ async fn main() -> Result<(), async_nats::Error> {
 
     let log = warp::log("warp_server");
 
-    let context = Context::new().await?;
+    let context = Context::new().await;
     let context2 = context.clone();
 
     let state = warp::any().map(move || context.clone());
