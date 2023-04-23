@@ -16,3 +16,5 @@ serde = "1.0.160"
 serde_json = "1.0.96"
 tokio = { version = "1.27.0", features = ["rt-multi-thread"] }
 messages-common = { path = "../messages-common" }
+log = "0.4.17"
+env_logger = "0.10.0"

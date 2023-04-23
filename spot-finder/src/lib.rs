@@ -1,13 +1,13 @@
-use std::error::Error;
+mod direction;
+pub mod location;
+
 use std::io::Cursor;
 
 use anyhow::bail;
+use location::Location;
 use osm_xml::{Node, OSM};
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
-
-use crate::direction;
-use crate::location::Location;
 
 const OVERPASS_URL: &str = "https://overpass-api.de/api/interpreter";
 
@@ -65,7 +65,7 @@ fn direction_of_node(node: &Node) -> Option<f64> {
         .and_then(Result::ok)
 }
 
-pub async fn find_spots(loc: &Location, rad: u32) -> Result<Vec<Spot>, Box<dyn Error>> {
+pub async fn find_spots(loc: &Location, rad: u32) -> Result<Vec<Spot>, async_nats::Error> {
     let osm_data = get_osm_data(loc, rad).await?;
     let osm = OSM::parse(Cursor::new(osm_data))?;
 

@@ -80,10 +80,8 @@ pub async fn try_queue_subscibe(
     try_subscribe(jetstream, stream, Some(group)).await
 }
 
-/*
-pub async fn connect_to_stream(jetstream: &Context, subject: &str) -> MessageStream {
-    try_connect_to_stream(jetstream, subject)
+pub async fn queue_subscribe(jetstream: &Context, stream: &str, group: &str) -> MessageStream {
+    try_queue_subscibe(jetstream, stream, group)
         .await
         .expect("Could not connect to stream")
 }
-*/

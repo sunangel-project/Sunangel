@@ -1,20 +1,19 @@
-use std::{
-    error::Error,
-    str::{self, FromStr},
-};
+#[tokio::main]
+pub async fn main() -> Result<(), async_nats::Error> {
+    run().await
+}
+
+use std::str::{self, FromStr};
 
 use anyhow::anyhow;
-use async_nats::{Client, Message};
-use futures_util::stream::StreamExt;
+use async_nats::jetstream::{Context, Message};
+use futures_util::{FutureExt, StreamExt};
+use log::info;
 use messages_common::try_get_request_id;
 use serde::{Deserialize, Serialize};
 
-pub mod direction;
-pub mod location;
-pub mod spot_finder;
-
-use location::Location;
 use serde_json::{json, Value};
+use spot_finder::location::Location;
 use spot_finder::{find_spots, Spot};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -43,27 +42,38 @@ struct ErrorMessage {
     input: String,
 }
 
-const IN_Q: &str = "search";
+const IN_Q: &str = "SEARCH";
 const GROUP: &str = "spot-finder";
 
-const OUT_Q: &str = "spots";
-const ERR_Q: &str = "error";
+//const OUT_Q: &str = "spots";
+//const ERR_Q: &str = "error";
 
-#[tokio::main]
-async fn main() -> Result<(), async_nats::Error> {
-    let host = std::env::var("NATS_HOST").unwrap_or("localhost".into());
-    let client = &async_nats::connect(&host).await?;
-    let subscriber = client.queue_subscribe(IN_Q.into(), GROUP.into()).await?;
+async fn run() -> Result<(), async_nats::Error> {
+    env_logger::init();
 
-    println!("Listening to {} for messages in queue '{IN_Q}'", &host);
+    let client = messages_common::connect_nats().await;
+    let jetstream = messages_common::connect_jetstream(client);
+    // let subscriber = client.queue_subscribe(IN_Q.into(), GROUP.into()).await?;
 
-    subscriber
-        .for_each_concurrent(16, |msg| async move {
-            if let Err(err) = handle_message(client, &msg).await {
-                let reason = err.to_string();
+    let messages = messages_common::queue_subscribe(&jetstream, IN_Q, GROUP).await;
 
-                send_error_message(client, &msg, reason).await
+    info!("Listening to NATS for messages in queue '{IN_Q}'");
+
+    messages
+        .for_each_concurrent(16, |message| async {
+            //if let Err(err) = message.map() {
+            //    let reason = err.to_string();
+            //    send_error_message(&jetstream, message, reason).await;
+            //}
+            info!("Received message {:?}", message);
+
+            match message {
+                Ok(message) => handle_message(&jetstream, message).await,
+                Err(_err) => panic!("help"), // todo log error, send error message etc
             }
+            .unwrap();
+
+            ()
         })
         .await;
 
@@ -71,8 +81,8 @@ async fn main() -> Result<(), async_nats::Error> {
 }
 
 // Event Loop
-async fn handle_message(client: &Client, msg: &Message) -> Result<(), Box<dyn Error>> {
-    let payload = str::from_utf8(&msg.payload)?;
+async fn handle_message(_jetstream: &Context, message: Message) -> Result<(), async_nats::Error> {
+    let payload = str::from_utf8(&message.payload)?;
 
     let spots = handle_payload(payload).await?;
     let total_num = spots.len();
@@ -81,24 +91,28 @@ async fn handle_message(client: &Client, msg: &Message) -> Result<(), Box<dyn Er
         return Err(anyhow!("Could not find any spots in this area").into());
     }
 
-    let in_value = Value::from_str(payload)?;
-    for (i, spot) in spots.into_iter().enumerate() {
-        client
-            .publish(
-                OUT_Q.to_string(),
-                build_output_payload(spot, i, total_num, &in_value)?
-                    .to_string()
-                    .into(),
-            )
-            .await?;
+    let _in_value = Value::from_str(payload)?;
+    for (_i, _spot) in spots.into_iter().enumerate() {
+        //    jetstream
+        //        .publish(
+        //            OUT_Q.to_string(),
+        //            build_output_payload(spot, i, total_num, &in_value)?
+        //                .to_string()
+        //                .into(),
+        //        )
+        //        .await?;
     }
+
+    message.ack().await.unwrap();
 
     Ok(())
 }
 
-async fn handle_payload(payload: &str) -> Result<Vec<Spot>, Box<dyn Error>> {
+async fn handle_payload(payload: &str) -> Result<Vec<Spot>, async_nats::Error> {
     let in_message: InMessage = serde_json::from_str(payload)?;
     let query = in_message.search_query;
+
+    info!("Extraxted query {:?}, running spot finder", query);
     find_spots(&query.loc, query.rad).await
 }
 
@@ -107,7 +121,7 @@ fn build_output_payload(
     part_num: usize,
     total_num: usize,
     query_value: &Value,
-) -> Result<Value, Box<dyn Error>> {
+) -> Result<Value, async_nats::Error> {
     let mut output = query_value.clone();
     let output_obj = output
         .as_object_mut()
@@ -125,14 +139,22 @@ fn build_output_payload(
     Ok(output)
 }
 
-async fn send_error_message(client: &Client, msg: &Message, reason: String) {
-    client
-        .publish(
-            ERR_Q.to_string(),
-            build_error_payload(msg, &reason).to_string().into(),
-        )
-        .await
-        .unwrap_or_else(|err| println!("error {err} when trying to send {reason}"))
+async fn send_error_message(
+    _jetstream: &Context,
+    message: Result<Message, async_nats::Error>,
+    _reason: String,
+) -> Result<(), async_nats::Error> {
+    let message = message.unwrap();
+
+    //  jetstream
+    //      .publish(
+    //          ERR_Q.to_string(),
+    //          build_error_payload(&message, &reason).to_string().into(),
+    //      )
+    //      .await
+    //      .unwrap();
+
+    Ok(())
 }
 
 fn build_error_payload(msg: &Message, reason: &String) -> String {

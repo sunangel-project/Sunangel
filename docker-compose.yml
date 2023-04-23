@@ -7,11 +7,11 @@ services:
       - "4222:4222"
     command: "--name main --jetstream --http_port 8222"
   
-  spot-finder:
-    image: spot-finder
-    build:
-      context: .
-      dockerfile: ./Dockerfiles/spot-finder
-    depends_on: ["nats"]
-    environment:
-     - NATS_HOST=nats
+      # spot-finder:
+      #   image: spot-finder
+      #   build:
+      #     context: .
+      #     dockerfile: ./Dockerfiles/spot-finder
+      #   depends_on: ["nats"]
+      #   environment:
+      #    - NATS_HOST=nats
