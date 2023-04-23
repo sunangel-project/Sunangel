@@ -38,9 +38,10 @@ pub async fn create_stream(jetstream: &Context, stream: &str) -> jetstream::stre
 pub type MessageStream =
     Pin<Box<dyn Stream<Item = Result<jetstream::Message, Box<dyn Error + Send + Sync>>> + Send>>;
 
-pub async fn try_connect_to_stream(
+async fn try_subscribe(
     jetstream: &Context,
     stream: &str,
+    group: Option<&str>,
 ) -> Result<MessageStream, Box<dyn Error + Send + Sync>> {
     try_create_stream(jetstream, stream).await?;
 
@@ -50,9 +51,9 @@ pub async fn try_connect_to_stream(
     debug!("Trying to create consumer for {stream:?}");
     let consumer = stream
         .get_or_create_consumer(
-            "consumer",
+            group.unwrap_or("sole_consumer"), // todo allow customizing this name if group not specified
             async_nats::jetstream::consumer::pull::Config {
-                durable_name: Some("consumer".to_string()),
+                durable_name: group.map(str::to_string),
                 ..Default::default()
             },
         )
@@ -61,6 +62,22 @@ pub async fn try_connect_to_stream(
     let messages = consumer.messages().await?;
 
     Ok(Box::pin(messages))
+}
+
+pub async fn try_pub_sub_subscribe(
+    jetstream: &Context,
+    stream: &str,
+    _name: &str,
+) -> Result<MessageStream, Box<dyn Error + Send + Sync>> {
+    try_subscribe(jetstream, stream, None).await
+}
+
+pub async fn try_queue_subscibe(
+    jetstream: &Context,
+    stream: &str,
+    group: &str,
+) -> Result<MessageStream, Box<dyn Error + Send + Sync>> {
+    try_subscribe(jetstream, stream, Some(group)).await
 }
 
 /*

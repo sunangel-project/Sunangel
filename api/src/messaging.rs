@@ -18,6 +18,8 @@ const IN_STREAM: &str = "HORIZONS";
 const IN_ERR_STREAM: &str = "ERRORS";
 //const IN_ERR_Q: &str = "ERRORS.*";
 
+const CONSUMER_NAME: &str = "api";
+
 #[derive(Serialize, Deserialize)]
 struct Location {
     lat: f64,
@@ -51,8 +53,10 @@ pub async fn send_search_query(
 pub async fn get_messages_stream(
     jetstream: &Context,
 ) -> Result<MessageStream, Box<dyn Error + Send + Sync>> {
-    let messages_in = messages_common::try_connect_to_stream(jetstream, IN_STREAM).await?;
-    let messages_err = messages_common::try_connect_to_stream(jetstream, IN_ERR_STREAM).await?;
+    let messages_in =
+        messages_common::try_pub_sub_subscribe(jetstream, IN_STREAM, CONSUMER_NAME).await?;
+    let messages_err =
+        messages_common::try_pub_sub_subscribe(jetstream, IN_ERR_STREAM, CONSUMER_NAME).await?;
 
     let subscriber = select(messages_in, messages_err);
 
