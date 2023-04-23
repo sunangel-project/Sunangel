@@ -9,11 +9,9 @@ use async_nats::jetstream::{self, Message};
 use juniper::{graphql_object, graphql_subscription, graphql_value, EmptyMutation, FieldError};
 use uuid::Uuid;
 
-use crate::{
-    messaging::{get_messages_stream, send_search_query},
-    structs::{
-        APISearchQuery, SearchError, SearchQuery, SearchQueryMessage, SearchResponse, SpotsSuccess,
-    },
+use crate::messaging;
+use crate::structs::{
+    APISearchQuery, SearchError, SearchQuery, SearchQueryMessage, SearchResponse, SpotsSuccess,
 };
 
 ///////////
@@ -30,6 +28,8 @@ impl Context {
     pub async fn new() -> Self {
         let client = messages_common::connect_nats().await;
         let jetstream = messages_common::connect_jetstream(client);
+
+        messaging::create_streams(&jetstream).await;
 
         Self { jetstream }
     }
@@ -67,7 +67,7 @@ impl Subscription {
             search_query,
         };
 
-        let sent = send_search_query(&context.jetstream, search_message).await.map_err(|err| {
+        let sent = messaging::send_search_query(&context.jetstream, search_message).await.map_err(|err| {
             error!("Couldn't send search query to NATS");
 
             Box::pin(stream! {
@@ -79,16 +79,16 @@ impl Subscription {
 
         match sent {
             Err(err_stream) => err_stream,
-            Ok(_) => connect_to_response_messages(&context, request_id).await,
+            Ok(_) => connect_to_response_messages(context, request_id).await,
         }
     }
 }
 
 async fn connect_to_response_messages(context: &Context, request_id: String) -> SpotStreamPin {
-    let messages = get_messages_stream(&context.jetstream)
+    let messages = messaging::get_messages_stream(&context.jetstream)
         .await
         .map_err(|err| {
-            error!("Couldn't subscribe to NATS");
+            error!("Couldn't subscribe to NATS: {err}");
 
             Box::pin(stream! {
                 yield Err(

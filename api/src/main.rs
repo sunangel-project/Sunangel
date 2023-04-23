@@ -3,6 +3,7 @@ use std::sync::Arc;
 use futures::FutureExt;
 use juniper_graphql_ws::ConnectionConfig;
 use juniper_warp::{playground_filter, subscriptions::serve_graphql_ws};
+use log::info;
 use warp::Filter;
 
 use crate::api::{schema, Context};
@@ -25,9 +26,7 @@ async fn main() -> Result<(), async_nats::Error> {
 
     let root_node = Arc::new(schema());
 
-    println!(
-        "Server running on http://localhost:6660,\nplayground: http://localhost:6660/playground"
-    );
+    info!("Server running on http://localhost:6660, playground: http://localhost:6660/playground");
 
     let routes = (warp::path("subscriptions")
         .and(warp::ws())
