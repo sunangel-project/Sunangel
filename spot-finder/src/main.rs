@@ -42,11 +42,12 @@ struct ErrorMessage {
     input: String,
 }
 
-const IN_Q: &str = "SEARCH";
+const IN_STREAM: &str = "SEARCH";
 const GROUP: &str = "spot-finder";
 
-const OUT_Q: &str = "SPOTS";
-const ERR_Q: &str = "ERRORS";
+const OUT_STREAM: &str = "SPOTS";
+const OUT_SUBJECT: &str = "horizon";
+const ERR_STREAM: &str = "ERRORS";
 
 async fn run() -> Result<(), async_nats::Error> {
     env_logger::init();
@@ -54,12 +55,12 @@ async fn run() -> Result<(), async_nats::Error> {
     let client = messages_common::connect_nats().await;
     let jetstream = messages_common::connect_jetstream(client);
 
-    messages_common::create_stream(&jetstream, OUT_Q).await;
-    messages_common::create_stream(&jetstream, ERR_Q).await;
+    messages_common::create_stream(&jetstream, OUT_STREAM).await;
+    messages_common::create_stream(&jetstream, ERR_STREAM).await;
 
-    let messages = messages_common::queue_subscribe(&jetstream, IN_Q, GROUP).await;
+    let messages = messages_common::queue_subscribe(&jetstream, IN_STREAM, GROUP).await;
 
-    info!("Listening to NATS for messages in queue '{IN_Q}'");
+    info!("Listening to NATS for messages in queue '{IN_STREAM}'");
 
     messages
         .for_each_concurrent(16, |message| async {
@@ -105,7 +106,7 @@ async fn handle_message(jetstream: &Context, message: &Message) -> Result<(), as
     for (i, spot) in spots.into_iter().enumerate() {
         jetstream
             .publish(
-                OUT_Q.to_string(),
+                format!("{OUT_STREAM}.{OUT_SUBJECT}"),
                 build_output_payload(spot, i, total_num, &in_value)?
                     .to_string()
                     .into(),
@@ -158,7 +159,7 @@ async fn send_error_message(
 
     jetstream
         .publish(
-            ERR_Q.to_string(),
+            format!("{ERR_STREAM}.{GROUP}"),
             build_error_payload(&message, error).to_string().into(),
         )
         .await
