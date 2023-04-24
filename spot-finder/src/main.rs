@@ -7,8 +7,8 @@ use std::str::{self, FromStr};
 
 use anyhow::anyhow;
 use async_nats::jetstream::{Context, Message};
-use futures_util::{FutureExt, StreamExt};
-use log::info;
+use futures_util::StreamExt;
+use log::{error, info};
 use messages_common::try_get_request_id;
 use serde::{Deserialize, Serialize};
 
@@ -45,15 +45,17 @@ struct ErrorMessage {
 const IN_Q: &str = "SEARCH";
 const GROUP: &str = "spot-finder";
 
-//const OUT_Q: &str = "spots";
-//const ERR_Q: &str = "error";
+const OUT_Q: &str = "SPOTS";
+const ERR_Q: &str = "ERRORS";
 
 async fn run() -> Result<(), async_nats::Error> {
     env_logger::init();
 
     let client = messages_common::connect_nats().await;
     let jetstream = messages_common::connect_jetstream(client);
-    // let subscriber = client.queue_subscribe(IN_Q.into(), GROUP.into()).await?;
+
+    messages_common::create_stream(&jetstream, OUT_Q).await;
+    messages_common::create_stream(&jetstream, ERR_Q).await;
 
     let messages = messages_common::queue_subscribe(&jetstream, IN_Q, GROUP).await;
 
@@ -61,19 +63,25 @@ async fn run() -> Result<(), async_nats::Error> {
 
     messages
         .for_each_concurrent(16, |message| async {
-            //if let Err(err) = message.map() {
-            //    let reason = err.to_string();
-            //    send_error_message(&jetstream, message, reason).await;
-            //}
             info!("Received message {:?}", message);
 
             match message {
-                Ok(message) => handle_message(&jetstream, message).await,
-                Err(_err) => panic!("help"), // todo log error, send error message etc
+                Ok(message) => {
+                    let res = handle_message(&jetstream, &message).await;
+                    if let Err(err) = res {
+                        error!("Could not handle received message: {err}");
+                        send_error_message(&jetstream, Some(message), err)
+                            .await
+                            .unwrap_or_else(|err| error!("Could not send error message: {err}"));
+                    }
+                }
+                Err(err) => {
+                    error!("Problem with received message: {err}");
+                    send_error_message(&jetstream, None, err)
+                        .await
+                        .unwrap_or_else(|err| error!("Could not send out error message: {err}"));
+                }
             }
-            .unwrap();
-
-            ()
         })
         .await;
 
@@ -81,7 +89,7 @@ async fn run() -> Result<(), async_nats::Error> {
 }
 
 // Event Loop
-async fn handle_message(_jetstream: &Context, message: Message) -> Result<(), async_nats::Error> {
+async fn handle_message(jetstream: &Context, message: &Message) -> Result<(), async_nats::Error> {
     let payload = str::from_utf8(&message.payload)?;
 
     let spots = handle_payload(payload).await?;
@@ -91,16 +99,18 @@ async fn handle_message(_jetstream: &Context, message: Message) -> Result<(), as
         return Err(anyhow!("Could not find any spots in this area").into());
     }
 
-    let _in_value = Value::from_str(payload)?;
-    for (_i, _spot) in spots.into_iter().enumerate() {
-        //    jetstream
-        //        .publish(
-        //            OUT_Q.to_string(),
-        //            build_output_payload(spot, i, total_num, &in_value)?
-        //                .to_string()
-        //                .into(),
-        //        )
-        //        .await?;
+    info!("Found {total_num} spots");
+
+    let in_value = Value::from_str(payload)?;
+    for (i, spot) in spots.into_iter().enumerate() {
+        jetstream
+            .publish(
+                OUT_Q.to_string(),
+                build_output_payload(spot, i, total_num, &in_value)?
+                    .to_string()
+                    .into(),
+            )
+            .await?;
     }
 
     message.ack().await.unwrap();
@@ -140,28 +150,28 @@ fn build_output_payload(
 }
 
 async fn send_error_message(
-    _jetstream: &Context,
-    message: Result<Message, async_nats::Error>,
-    _reason: String,
+    jetstream: &Context,
+    message: Option<Message>,
+    error: async_nats::Error,
 ) -> Result<(), async_nats::Error> {
     let message = message.unwrap();
 
-    //  jetstream
-    //      .publish(
-    //          ERR_Q.to_string(),
-    //          build_error_payload(&message, &reason).to_string().into(),
-    //      )
-    //      .await
-    //      .unwrap();
+    jetstream
+        .publish(
+            ERR_Q.to_string(),
+            build_error_payload(&message, error).to_string().into(),
+        )
+        .await
+        .unwrap();
 
     Ok(())
 }
 
-fn build_error_payload(msg: &Message, reason: &String) -> String {
+fn build_error_payload(msg: &Message, error: async_nats::Error) -> String {
     json!(ErrorMessage {
         request_id: try_get_request_id(&msg.payload).unwrap_or("UNKNOWN".to_string()),
         sender: GROUP.to_string(),
-        reason: reason.to_string(),
+        reason: error.to_string(),
         input: format!("{msg:?}"),
     })
     .to_string()
