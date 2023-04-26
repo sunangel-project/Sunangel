@@ -20,6 +20,7 @@ func main() {
 	js := messaging.JetStream(nc)
 	kv := messaging.KeyValueHorizon(js)
 
+	log.Println("Setting up all streams")
 	err := messaging.Setup_streams(js)
 	if err != nil {
 		panic(err)
@@ -28,10 +29,12 @@ func main() {
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 
+	log.Printf("Subscribing to queue %v\n", messaging.IN_Q)
 	sub, err := js.QueueSubscribe(messaging.IN_Q, messaging.GROUP, func(msg *nats.Msg) {
+		log.Println("Received message")
 		err := handle_message(msg, kv, js)
 		if err != nil {
-			log.Printf("Error %v occured when reading message %v", err, msg)
+			log.Printf("Error %v occured when reading message %v\n", err, msg)
 		}
 	})
 	if err != nil {
@@ -64,6 +67,8 @@ func handle_message(
 	if err != nil {
 		return err
 	}
+
+	log.Printf("Decoded message: %+v", spot_msg)
 
 	horizon_key, err := handle_spot_message(&spot_msg, kv)
 	if err != nil {

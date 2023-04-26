@@ -12,11 +12,10 @@ use crate::structs::{SearchError, SearchQueryMessage, SearchResponse, SpotsSucce
 const SEARCH_STREAM: &str = "SEARCH";
 const SEARCH_Q: &str = "SEARCH.request";
 
-const IN_STREAM: &str = "HORIZONS";
-// const IN_Q: &str = "HORIZONS.sunset";
+const IN_STREAM: &str = "SUNSETS";
+// const IN_SUBJECT: &str = "sunset"; // we don't filter
 
 const IN_ERR_STREAM: &str = "ERRORS";
-//const IN_ERR_Q: &str = "ERRORS.*";
 
 const CONSUMER_NAME: &str = "api";
 
