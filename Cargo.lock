@@ -1798,6 +1798,8 @@ dependencies = [
  "futures-util",
  "log",
  "messages-common",
+ "serde",
+ "serde_json",
  "tokio",
 ]
 
