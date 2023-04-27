@@ -1,6 +1,6 @@
 use std::{env, error::Error, pin::Pin};
 
-use async_nats::jetstream::{self, Context};
+use async_nats::jetstream::{self, kv::Store, Context};
 use futures_util::Stream;
 use log::debug;
 
@@ -84,4 +84,14 @@ pub async fn queue_subscribe(jetstream: &Context, stream: &str, group: &str) -> 
     try_queue_subscibe(jetstream, stream, group)
         .await
         .expect("Could not connect to stream")
+}
+
+pub async fn connect_kv_store(jetstream: &Context, name: &str) -> Store {
+    jetstream
+        .create_key_value(async_nats::jetstream::kv::Config {
+            bucket: name.to_string(),
+            ..Default::default()
+        })
+        .await
+        .expect("Could not connect to key value store")
 }

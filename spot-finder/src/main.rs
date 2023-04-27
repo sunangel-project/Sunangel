@@ -1,5 +1,5 @@
 #[tokio::main]
-pub async fn main() -> Result<(), async_nats::Error> {
+pub async fn main() {
     run().await
 }
 
@@ -49,7 +49,7 @@ const OUT_STREAM: &str = "SPOTS";
 const OUT_SUBJECT: &str = "horizon";
 const ERR_STREAM: &str = "ERRORS";
 
-async fn run() -> Result<(), async_nats::Error> {
+async fn run() {
     env_logger::init();
 
     let client = messages_common::connect_nats().await;
@@ -86,7 +86,7 @@ async fn run() -> Result<(), async_nats::Error> {
         })
         .await;
 
-    Ok(())
+    ()
 }
 
 // Event Loop
