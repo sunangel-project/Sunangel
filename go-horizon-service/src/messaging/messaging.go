@@ -96,8 +96,7 @@ func KeyValueHorizon(js nats.JetStreamContext) nats.KeyValue {
 func Setup_streams(js nats.JetStreamContext) error {
 	output_stream_config := &nats.StreamConfig{
 		Name:     OUT_STREAM,
-		Subjects: []string{OUT_SUB_SUNSETS},
-		MaxAge:   time.Hour,
+		Subjects: []string{OUT_STREAM, OUT_STREAM + ".*"},
 	}
 	_, err := js.StreamInfo(OUT_STREAM)
 	if err != nil {
@@ -110,7 +109,7 @@ func Setup_streams(js nats.JetStreamContext) error {
 
 	error_stream_config := &nats.StreamConfig{
 		Name:     ERR_STREAM,
-		Subjects: []string{ERR_SUB},
+		Subjects: []string{ERR_STREAM, ERR_STREAM + ".*"},
 		MaxAge:   time.Hour,
 	}
 	_, err = js.StreamInfo(ERR_STREAM)

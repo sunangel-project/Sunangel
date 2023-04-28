@@ -1,3 +1,4 @@
+use async_nats::jetstream::{kv::Store, Context};
 use futures_util::StreamExt;
 use log::info;
 
@@ -11,16 +12,7 @@ async fn main() {
     let messages = messaging::messages(&jetstream).await;
 
     // Somehow generate in function
-    let handle_message_res = |message| async {
-        info!("Received message {:?}", message);
-
-        match message {
-            Ok(message) => messaging::handle_message(message, &jetstream, &store)
-                .await
-                .unwrap_or_else(|_| todo!("send error message")),
-            Err(_) => todo!("send error message"),
-        };
-    };
+    let handle_message_res = messaging::generate_handle_message_res(&jetstream, &store);
 
     messages.for_each_concurrent(16, handle_message_res).await;
 }

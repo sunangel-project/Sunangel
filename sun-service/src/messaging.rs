@@ -2,10 +2,11 @@ use async_nats::{
     jetstream::{kv::Store, Context, Message},
     Error,
 };
+use futures_util::Future;
 use log::info;
 use messages_common::MessageStream;
 use serde::{Deserialize, Serialize};
-use std::str;
+use std::{pin::Pin, str};
 
 const IN_STREAM: &str = "HORIZONS";
 const HORIZON_STORE: &str = "horizons";
@@ -32,14 +33,23 @@ pub async fn messages(jetstream: &Context) -> MessageStream {
     messages_common::queue_subscribe(jetstream, IN_STREAM, GROUP).await
 }
 
-/*
-fn generate_handle_message_res(
-    jetstream: &Context,
-    store: &Store,
-) -> Box<dyn Fn(Result<Message, Error>) -> dyn Future<Output = ()>> {
-    Box::new()
+pub fn generate_handle_message_res<'a>(
+    jetstream: &'a Context,
+    store: &'a Store,
+) -> Box<dyn FnMut(Result<Message, Error>) -> Pin<Box<dyn Future<Output = ()> + 'a>> + 'a> {
+    Box::new(move |message| {
+        Box::pin(async move {
+            info!("Received message {:?}", message);
+
+            match message {
+                Ok(message) => handle_message(message, &jetstream, &store)
+                    .await
+                    .unwrap_or_else(|_| todo!("send error message")),
+                Err(_) => todo!("send error message"),
+            };
+        })
+    })
 }
-*/
 
 pub async fn handle_message(
     message: Message,
