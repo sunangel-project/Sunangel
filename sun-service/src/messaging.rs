@@ -33,10 +33,13 @@ pub async fn messages(jetstream: &Context) -> MessageStream {
     messages_common::queue_subscribe(jetstream, IN_STREAM, GROUP).await
 }
 
+type HandleMessageFun<'a> =
+    Box<dyn FnMut(Result<Message, Error>) -> Pin<Box<dyn Future<Output = ()> + 'a>> + 'a>;
+
 pub fn generate_handle_message_res<'a>(
     jetstream: &'a Context,
     store: &'a Store,
-) -> Box<dyn FnMut(Result<Message, Error>) -> Pin<Box<dyn Future<Output = ()> + 'a>> + 'a> {
+) -> HandleMessageFun<'a> {
     Box::new(move |message| {
         Box::pin(async move {
             info!("Received message {:?}", message);
