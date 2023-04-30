@@ -1804,6 +1804,7 @@ name = "sun-service"
 version = "0.1.0"
 dependencies = [
  "async-nats",
+ "chrono",
  "env_logger",
  "futures-util",
  "log",
