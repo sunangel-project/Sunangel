@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use async_nats::{
     jetstream::{kv::Store, Context, Message},
     Error,
@@ -7,6 +8,8 @@ use log::info;
 use messages_common::MessageStream;
 use serde::{Deserialize, Serialize};
 use std::{pin::Pin, str};
+
+use crate::horizon::Horizon;
 
 const IN_STREAM: &str = "HORIZONS";
 const HORIZON_STORE: &str = "horizons";
@@ -62,8 +65,12 @@ pub async fn handle_message(
     let payload = str::from_utf8(&message.payload)?;
     let message: InMessage = serde_json::from_str(payload)?;
 
-    let horizon = store.get(&message.horizon).await?;
-    info!("Retreived horizon '{}'", message.horizon);
+    let horizon = store.get(&message.horizon).await?.ok_or(anyhow!(
+        "Could not get a byte array for horizon '{}'",
+        message.horizon
+    ))?;
+    let horizon = Horizon::decode(horizon)?;
+    info!("Retreived and decoded horizon '{}'", message.horizon);
 
     // Calculations
 

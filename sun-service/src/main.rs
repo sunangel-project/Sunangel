@@ -1,7 +1,6 @@
-use async_nats::jetstream::{kv::Store, Context};
 use futures_util::StreamExt;
-use log::info;
 
+mod horizon;
 mod messaging;
 
 #[tokio::main]

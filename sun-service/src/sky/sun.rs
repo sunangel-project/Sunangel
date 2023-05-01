@@ -1,3 +1,5 @@
+use crate::angle;
+
 use super::{SkyObject, SkyPosition};
 
 struct Sun;
@@ -12,7 +14,7 @@ impl SkyObject for Sun {
 
         SkyPosition {
             altitude: 90. - solar_pos.zenith_angle,
-            azimuth: solar_pos.azimuth - 180.,
+            azimuth: angle::normalize_degrees(solar_pos.azimuth - 180.),
         }
     }
 }
