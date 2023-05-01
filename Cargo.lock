@@ -1749,6 +1749,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "spa"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ab074195b3f78a133cd7b7998142cf39dfaac71f6e990eaeecd14f5524db009a"
+dependencies = [
+ "chrono",
+]
+
+[[package]]
 name = "spin"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1811,6 +1820,7 @@ dependencies = [
  "messages-common",
  "serde",
  "serde_json",
+ "spa",
  "tokio",
 ]
 

@@ -1,9 +1,6 @@
 name: Update Dependencies
 
 on:
-  push:
-    branches:
-      - develop
   schedule:
     - cron:  '0 5 * * 6'
 
