@@ -1,14 +1,16 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Duration, Utc};
 
 use crate::location::Location;
 
 pub mod sun;
 
-struct SkyPosition {
-    altitude: f64,
-    azimuth: f64,
+pub struct SkyPosition {
+    pub altitude: f64,
+    pub azimuth: f64,
 }
 
-trait SkyObject {
-    fn position(time: DateTime<Utc>, location: Location) -> SkyPosition;
+pub trait SkyObject {
+    fn new() -> Self;
+    fn period(&self) -> Duration;
+    fn position(&self, time: &DateTime<Utc>, location: &Location) -> SkyPosition;
 }

@@ -1,15 +1,23 @@
-use crate::angle;
+use chrono::{DateTime, Duration, Utc};
+
+use crate::{angle, location::Location};
 
 use super::{SkyObject, SkyPosition};
 
 struct Sun;
 
 impl SkyObject for Sun {
-    fn position(
-        time: chrono::DateTime<chrono::Utc>,
-        location: crate::location::Location,
-    ) -> super::SkyPosition {
-        let solar_pos = spa::calc_solar_position(time, location.lat, location.lon)
+    fn new() -> Self {
+        Sun {}
+    }
+
+    fn period(&self) -> Duration {
+        Duration::days(1)
+    }
+
+    // TODO: replace with own implementation, clone is not sustainable all the time
+    fn position(&self, time: &DateTime<Utc>, location: &Location) -> SkyPosition {
+        let solar_pos = spa::calc_solar_position(time.clone(), location.lat, location.lon)
             .expect("Coordinates should always be valid");
 
         SkyPosition {
@@ -41,7 +49,7 @@ mod test {
             lon: 11.6,
         };
 
-        let pos = Sun::position(time, location);
+        let pos = Sun::new().position(time, location);
 
         let epsilon = 0.05;
         assert!(

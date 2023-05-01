@@ -1,5 +1,6 @@
 use futures_util::StreamExt;
 
+mod angle;
 mod horizon;
 mod messaging;
 

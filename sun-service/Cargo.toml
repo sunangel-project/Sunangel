@@ -16,4 +16,5 @@ messages-common = { path = "../messages-common" }
 serde = "1.0.160"
 serde_json = "1.0.96"
 spa = "0.3.1"
+thiserror = "1.0.40"
 tokio = { version = "1.28.0", features = ["rt-multi-thread"] }

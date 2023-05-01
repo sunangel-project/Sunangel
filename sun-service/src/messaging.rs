@@ -69,7 +69,7 @@ pub async fn handle_message(
         "Could not get a byte array for horizon '{}'",
         message.horizon
     ))?;
-    let horizon = Horizon::decode(horizon)?;
+    let horizon: Horizon = horizon.try_into()?;
     info!("Retreived and decoded horizon '{}'", message.horizon);
 
     // Calculations
