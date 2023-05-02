@@ -7,10 +7,10 @@ use horizon::Horizon;
 use location::Location;
 use sky::{SkyObject, SkyPosition};
 
-mod angle;
-mod horizon;
-mod julian;
-mod location;
+pub mod angle;
+pub mod horizon;
+pub mod julian;
+pub mod location;
 pub mod sky;
 
 pub struct HorizonEvents {
@@ -62,7 +62,7 @@ fn calculate_candidate_ranges<O>(
 where
     O: SkyObject,
 {
-    for r in 0..MAX_RESOLUTION_EXP {
+    for r in 1..MAX_RESOLUTION_EXP {
         let duration = object.period() / r as i32;
         let candidates: Vec<(CandidateRange, CandidateType)> = (0..(2i32.pow(r as u32)))
             .filter_map(|i| {
@@ -109,4 +109,80 @@ where
     let hor_altitude = horizon.altitude_at(azimuth.to_radians());
 
     obj_altitude > hor_altitude
+}
+
+#[cfg(test)]
+mod test {
+    use std::f64::consts::PI;
+
+    use chrono::{DateTime, Duration, NaiveDate, NaiveDateTime, NaiveTime, Timelike, Utc};
+
+    use crate::{
+        calculate_candidate_ranges,
+        horizon::{Horizon, HORIZON_SAMPLES},
+        location::Location,
+        sky::{SkyObject, SkyPosition},
+    };
+
+    const SECONDS_IN_DAY: u32 = 24 * 60 * 60;
+
+    struct TestSkyObject;
+
+    impl SkyObject for TestSkyObject {
+        fn new() -> Self {
+            TestSkyObject {}
+        }
+
+        fn period(&self) -> Duration {
+            Duration::days(1)
+        }
+
+        fn position(
+            &self,
+            time: &chrono::DateTime<chrono::Utc>,
+            _location: &crate::location::Location,
+        ) -> crate::sky::SkyPosition {
+            let seconds = time.num_seconds_from_midnight() as f64;
+
+            let azimuth = 2. * PI * (seconds / SECONDS_IN_DAY as f64);
+            let altitude = -(PI / 2.) * azimuth.cos();
+
+            SkyPosition { altitude, azimuth }
+        }
+    }
+
+    #[test]
+    fn candidate_ranges_flat() {
+        let altitudes = [0.; HORIZON_SAMPLES];
+        let horizon = Horizon::new(altitudes);
+
+        let test_object = TestSkyObject {};
+        let time: DateTime<Utc> = DateTime::from_utc(
+            NaiveDateTime::new(
+                NaiveDate::from_ymd_opt(2006, 8, 6).unwrap(),
+                NaiveTime::from_hms_opt(0, 0, 0).unwrap(),
+            ),
+            Utc,
+        );
+
+        let location = Location {
+            lat: 48.1,
+            lon: 11.6,
+        };
+
+        let (rise_range, set_range) =
+            calculate_candidate_ranges(&test_object, &time, &location, &horizon).unwrap();
+
+        assert_eq!(12, rise_range.0.hour());
+        assert_eq!(0, rise_range.0.minute());
+
+        assert_eq!(0, rise_range.1.hour());
+        assert_eq!(0, rise_range.1.minute());
+
+        assert_eq!(0, set_range.0.hour());
+        assert_eq!(0, set_range.0.minute());
+
+        assert_eq!(12, set_range.1.hour());
+        assert_eq!(0, set_range.1.minute());
+    }
 }

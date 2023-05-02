@@ -4,8 +4,8 @@ use anyhow::{anyhow, Error};
 
 use crate::angle;
 
-const HORIZON_SAMPLES: usize = 1024;
-const HORIZON_ANGLE: f64 = 2. * PI / (HORIZON_SAMPLES as f64);
+pub const HORIZON_SAMPLES: usize = 1024;
+pub const HORIZON_ANGLE: f64 = 2. * PI / (HORIZON_SAMPLES as f64);
 
 const BYTES_IN_F64: usize = 8;
 
@@ -14,6 +14,10 @@ pub struct Horizon {
 }
 
 impl Horizon {
+    pub fn new(altitudes: [f64; HORIZON_SAMPLES]) -> Self {
+        Self { altitudes }
+    }
+
     pub fn altitude_at(&self, pos: f64) -> f64 {
         let pos = angle::normalize_radians(pos);
 

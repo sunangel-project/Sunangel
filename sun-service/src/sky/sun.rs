@@ -4,7 +4,7 @@ use crate::{angle, location::Location};
 
 use super::{SkyObject, SkyPosition};
 
-struct Sun;
+pub struct Sun;
 
 impl SkyObject for Sun {
     fn new() -> Self {
@@ -21,8 +21,8 @@ impl SkyObject for Sun {
             .expect("Coordinates should always be valid");
 
         SkyPosition {
-            altitude: 90. - solar_pos.zenith_angle,
-            azimuth: angle::normalize_degrees(solar_pos.azimuth - 180.),
+            altitude: (90. - solar_pos.zenith_angle).to_radians(),
+            azimuth: angle::normalize_degrees(solar_pos.azimuth - 180.).to_radians(),
         }
     }
 }
@@ -49,16 +49,16 @@ mod test {
             lon: 11.6,
         };
 
-        let pos = Sun::new().position(time, location);
+        let pos = Sun::new().position(&time, &location);
 
         let epsilon = 0.05;
         assert!(
-            (pos.altitude - 19.110).abs() < epsilon,
+            (pos.altitude - 19.110_f64.to_radians()).abs() < epsilon,
             "altitude was {}",
             pos.altitude
         );
         assert!(
-            (pos.azimuth + 94.062).abs() < epsilon,
+            (pos.azimuth + 94.062_f64.to_radians()).abs() < epsilon,
             "azimuth was {}",
             pos.azimuth
         );
