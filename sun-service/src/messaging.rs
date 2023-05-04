@@ -3,13 +3,15 @@ use async_nats::{
     jetstream::{kv::Store, Context, Message},
     Error,
 };
+use chrono::Utc;
 use futures_util::Future;
 use log::info;
 use messages_common::MessageStream;
 use serde::{Deserialize, Serialize};
 use std::{pin::Pin, str};
+use sun_service::{sky::sun::Sun, Location, SkyObject};
 
-use crate::horizon::Horizon;
+use sun_service::Horizon;
 
 const IN_STREAM: &str = "HORIZONS";
 const HORIZON_STORE: &str = "horizons";
@@ -48,7 +50,7 @@ pub fn generate_handle_message_res<'a>(
             info!("Received message {:?}", message);
 
             match message {
-                Ok(message) => handle_message(message, &jetstream, &store)
+                Ok(message) => handle_message(message, jetstream, store)
                     .await
                     .unwrap_or_else(|_| todo!("send error message")),
                 Err(_) => todo!("send error message"),
@@ -59,7 +61,7 @@ pub fn generate_handle_message_res<'a>(
 
 pub async fn handle_message(
     message: Message,
-    jetstream: &Context,
+    _jetstream: &Context,
     store: &Store,
 ) -> Result<(), Error> {
     let payload = str::from_utf8(&message.payload)?;
@@ -72,9 +74,11 @@ pub async fn handle_message(
     let horizon: Horizon = horizon.try_into()?;
     info!("Retreived and decoded horizon '{}'", message.horizon);
 
-    // Calculations
+    let sun = Sun::new();
+    let time = Utc::now(); // TODO: get from message (need to add to message)
+    let _result = sun_service::calculate_rise_and_set(sun, &time, &message.loc, &horizon)?;
 
-    // Send result
+    // TODO: Send result
 
     Ok(())
 }
@@ -88,4 +92,5 @@ pub async fn handle_message(
 #[derive(Debug, Serialize, Deserialize)]
 struct InMessage {
     horizon: String,
+    loc: Location,
 }

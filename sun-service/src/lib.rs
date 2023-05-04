@@ -3,15 +3,15 @@ use std::error::Error;
 use chrono::{DateTime, Utc};
 use thiserror::Error;
 
-use horizon::Horizon;
-use location::Location;
-use sky::{SkyObject, SkyPosition};
-
 pub mod angle;
 pub mod horizon;
 pub mod julian;
 pub mod location;
 pub mod sky;
+
+pub use horizon::{Horizon, HORIZON_SAMPLES};
+pub use location::Location;
+pub use sky::{SkyObject, SkyPosition};
 
 pub struct HorizonEvents {
     pub rise: DateTime<Utc>,
@@ -31,18 +31,16 @@ pub fn calculate_rise_and_set<O>(
     time: &DateTime<Utc>,
     location: &Location,
     horizon: &Horizon,
-) -> Result<HorizonEvents, Box<dyn Error>>
+) -> Result<HorizonEvents, Box<dyn Error + Send + Sync>>
 where
     O: SkyObject,
 {
     let (rise_range, set_range) = calculate_candidate_ranges(&object, time, location, horizon)?;
 
-    // Binary search candidate ranges
+    let rise = calculate_horizon_point(&object, rise_range, location, horizon);
+    let set = calculate_horizon_point(&object, set_range, location, horizon);
 
-    Ok(HorizonEvents {
-        rise: Utc::now(),
-        set: Utc::now(),
-    })
+    Ok(HorizonEvents { rise, set })
 }
 
 const MAX_RESOLUTION_EXP: usize = 5;
@@ -74,9 +72,9 @@ where
 
                 if left_up != right_up {
                     let candidate_type = if left_up {
-                        CandidateType::Rise
-                    } else {
                         CandidateType::Set
+                    } else {
+                        CandidateType::Rise
                     };
                     Some(((left, right), candidate_type))
                 } else {
@@ -96,6 +94,46 @@ where
     }
 
     Err(HorizonEventError::CandidateRange)
+}
+
+const TOLERANCE: f64 = 1e-5;
+
+fn calculate_horizon_point<O>(
+    object: &O,
+    range: CandidateRange,
+    location: &Location,
+    horizon: &Horizon,
+) -> DateTime<Utc>
+where
+    O: SkyObject,
+{
+    let (mut left, mut right) = range;
+
+    // If the left altitude is less than the horizon, we are searching for a rise
+    // Swapping left and right will allow us to reuse the algorithm for finding a set below
+    let SkyPosition { altitude, azimuth } = object.position(&left, location);
+    let left_horizontarget_altitude = horizon.altitude_at(azimuth);
+    if altitude < left_horizontarget_altitude {
+        (right, left) = (left, right);
+    }
+
+    loop {
+        let difference = right - left;
+        let middle = left
+            .checked_add_signed(difference / 2)
+            .expect("should never overflow");
+
+        let SkyPosition { altitude, azimuth } = object.position(&middle, location);
+        let target_altitude = horizon.altitude_at(azimuth);
+
+        if (altitude - target_altitude).abs() < TOLERANCE {
+            return middle;
+        } else if altitude > target_altitude {
+            left = middle;
+        } else {
+            right = middle;
+        }
+    }
 }
 
 fn is_up<O>(object: &O, time: &DateTime<Utc>, location: &Location, horizon: &Horizon) -> bool
@@ -173,16 +211,16 @@ mod test {
         let (rise_range, set_range) =
             calculate_candidate_ranges(&test_object, &time, &location, &horizon).unwrap();
 
-        assert_eq!(12, rise_range.0.hour());
+        assert_eq!(0, rise_range.0.hour());
         assert_eq!(0, rise_range.0.minute());
 
-        assert_eq!(0, rise_range.1.hour());
+        assert_eq!(12, rise_range.1.hour());
         assert_eq!(0, rise_range.1.minute());
 
-        assert_eq!(0, set_range.0.hour());
+        assert_eq!(12, set_range.0.hour());
         assert_eq!(0, set_range.0.minute());
 
-        assert_eq!(12, set_range.1.hour());
+        assert_eq!(0, set_range.1.hour());
         assert_eq!(0, set_range.1.minute());
     }
 }

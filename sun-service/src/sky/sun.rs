@@ -17,7 +17,7 @@ impl SkyObject for Sun {
 
     // TODO: replace with own implementation, clone is not sustainable all the time
     fn position(&self, time: &DateTime<Utc>, location: &Location) -> SkyPosition {
-        let solar_pos = spa::calc_solar_position(time.clone(), location.lat, location.lon)
+        let solar_pos = spa::calc_solar_position(*time, location.lat, location.lon)
             .expect("Coordinates should always be valid");
 
         SkyPosition {

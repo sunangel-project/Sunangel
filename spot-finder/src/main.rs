@@ -86,7 +86,7 @@ async fn run() {
         })
         .await;
 
-    ()
+    
 }
 
 // Event Loop
