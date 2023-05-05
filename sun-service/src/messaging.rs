@@ -9,9 +9,8 @@ use log::info;
 use messages_common::MessageStream;
 use serde::{Deserialize, Serialize};
 use std::{pin::Pin, str};
-use sun_service::{sky::sun::Sun, Location, SkyObject};
 
-use sun_service::Horizon;
+use crate::{sky::sun::Sun, Horizon, Location, SkyObject};
 
 const IN_STREAM: &str = "HORIZONS";
 const HORIZON_STORE: &str = "horizons";
@@ -76,7 +75,7 @@ pub async fn handle_message(
 
     let sun = Sun::new();
     let time = Utc::now(); // TODO: get from message (need to add to message)
-    let _result = sun_service::calculate_rise_and_set(sun, &time, &message.loc, &horizon)?;
+    let _result = crate::calculate_rise_and_set(sun, &time, &message.loc, &horizon)?;
 
     // TODO: Send result
 
@@ -94,3 +93,4 @@ struct InMessage {
     horizon: String,
     loc: Location,
 }
+

@@ -1,8 +1,6 @@
 use futures_util::StreamExt;
 
-mod angle;
-mod horizon;
-mod messaging;
+use sun_service::messaging;
 
 #[tokio::main]
 async fn main() {

@@ -9,6 +9,8 @@ pub mod julian;
 pub mod location;
 pub mod sky;
 
+pub mod messaging;
+
 pub use horizon::{Horizon, HORIZON_SAMPLES};
 pub use location::Location;
 pub use sky::{SkyObject, SkyPosition};
