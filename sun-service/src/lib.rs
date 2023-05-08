@@ -1,6 +1,8 @@
 use std::error::Error;
 
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Duration, Utc};
+use log::{info, warn};
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 pub mod angle;
@@ -15,9 +17,22 @@ pub use horizon::{Horizon, HORIZON_SAMPLES};
 pub use location::Location;
 pub use sky::{SkyObject, SkyPosition};
 
+#[derive(Serialize, Deserialize)]
+pub struct HorizonEvent {
+    time: DateTime<Utc>,
+    altitude: f64,
+    azimuth: f64,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct SunHorizonEvents {
+    pub rise: HorizonEvent,
+    pub set: HorizonEvent,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct HorizonEvents {
-    pub rise: DateTime<Utc>,
-    pub set: DateTime<Utc>,
+    sun: SunHorizonEvents,
 }
 
 #[derive(Debug, Error)]
@@ -42,7 +57,9 @@ where
     let rise = calculate_horizon_point(&object, rise_range, location, horizon);
     let set = calculate_horizon_point(&object, set_range, location, horizon);
 
-    Ok(HorizonEvents { rise, set })
+    Ok(HorizonEvents {
+        sun: SunHorizonEvents { rise, set },
+    })
 }
 
 const MAX_RESOLUTION_EXP: usize = 5;
@@ -105,7 +122,7 @@ fn calculate_horizon_point<O>(
     range: CandidateRange,
     location: &Location,
     horizon: &Horizon,
-) -> DateTime<Utc>
+) -> HorizonEvent
 where
     O: SkyObject,
 {
@@ -128,8 +145,23 @@ where
         let SkyPosition { altitude, azimuth } = object.position(&middle, location);
         let target_altitude = horizon.altitude_at(azimuth);
 
+        if left - right < Duration::milliseconds(100) {
+            // TODO: Hints at problen, resolve some
+            // other way
+            warn!("Below 100ms interval: {:?} - {:?}", left, right);
+            return HorizonEvent {
+                time: middle,
+                altitude,
+                azimuth,
+            };
+        }
+
         if (altitude - target_altitude).abs() < TOLERANCE {
-            return middle;
+            return HorizonEvent {
+                time: middle,
+                altitude,
+                azimuth,
+            };
         } else if altitude > target_altitude {
             left = middle;
         } else {

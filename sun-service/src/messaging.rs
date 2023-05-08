@@ -5,12 +5,14 @@ use async_nats::{
 };
 use chrono::Utc;
 use futures_util::Future;
-use log::info;
+use log::{info, warn};
 use messages_common::MessageStream;
 use serde::{Deserialize, Serialize};
+use serde_json::{json, Value};
+use std::str::FromStr;
 use std::{pin::Pin, str};
 
-use crate::{sky::sun::Sun, Horizon, Location, SkyObject};
+use crate::{sky::sun::Sun, Horizon, HorizonEvents, Location, SkyObject};
 
 const IN_STREAM: &str = "HORIZONS";
 const HORIZON_STORE: &str = "horizons";
@@ -51,46 +53,69 @@ pub fn generate_handle_message_res<'a>(
             match message {
                 Ok(message) => handle_message(message, jetstream, store)
                     .await
-                    .unwrap_or_else(|_| todo!("send error message")),
+                    .unwrap_or_else(|err| {
+                        warn!("{err}");
+                        todo!("send error message")
+                    }),
                 Err(_) => todo!("send error message"),
             };
         })
     })
 }
 
+#[derive(Serialize, Deserialize)]
+struct Spot {
+    loc: Location,
+}
+
+#[derive(Serialize, Deserialize)]
+struct InMessage {
+    horizon: String,
+    spot: Spot,
+}
+
 pub async fn handle_message(
     message: Message,
-    _jetstream: &Context,
+    jetstream: &Context,
     store: &Store,
 ) -> Result<(), Error> {
     let payload = str::from_utf8(&message.payload)?;
-    let message: InMessage = serde_json::from_str(payload)?;
+    let decoded_message: InMessage = serde_json::from_str(payload)?;
 
-    let horizon = store.get(&message.horizon).await?.ok_or(anyhow!(
+    let horizon = store.get(&decoded_message.horizon).await?.ok_or(anyhow!(
         "Could not get a byte array for horizon '{}'",
-        message.horizon
+        decoded_message.horizon
     ))?;
     let horizon: Horizon = horizon.try_into()?;
-    info!("Retreived and decoded horizon '{}'", message.horizon);
+    info!(
+        "Retreived and decoded horizon '{}'",
+        decoded_message.horizon
+    );
 
     let sun = Sun::new();
     let time = Utc::now(); // TODO: get from message (need to add to message)
-    let _result = crate::calculate_rise_and_set(sun, &time, &message.loc, &horizon)?;
+    let result = crate::calculate_rise_and_set(sun, &time, &decoded_message.spot.loc, &horizon)?;
 
-    // TODO: Send result
+    let in_value = Value::from_str(payload)?;
+    jetstream
+        .publish(
+            OUT_STREAM.to_string(),
+            build_output(in_value, result)?.to_string().into(),
+        )
+        .await?;
+
+    message.ack().await?;
 
     Ok(())
 }
 
-// In Message
-// b"{\"horizon\":\"horizon-v1.0.0-30752d0b-cfe7-5d6b-9bd0-61cea706c6ea\",
-// "part\":{\"id\":48,\"of\":49},\"request_id\":\"232d243e-285f-433c-b143-c216492f115f\",
-// "search_query\":{\"loc\":{\"lat\":48.81909,\"lon\":9.59523},\"rad\":2000},\"spot\":{\"dir\":null,\"kind\":\"bench\",
-// "loc\":{\"lat\":48.8292947,\"lon\":9.588803}}}"
+fn build_output(in_value: Value, result: HorizonEvents) -> Result<Value, Error> {
+    let mut output = in_value.clone();
+    let output_obj = output.as_object_mut().ok_or(anyhow!(
+        "in message was not an object, could not build output message"
+    ))?;
 
-#[derive(Debug, Serialize, Deserialize)]
-struct InMessage {
-    horizon: String,
-    loc: Location,
+    output_obj.insert("sunset".to_string(), json!(result));
+
+    Ok(output)
 }
-
