@@ -92,6 +92,8 @@ pub async fn handle_message(
         decoded_message.horizon
     );
 
+    //info!("horizon: {:?}", horizon);
+
     let sun = Sun::new();
     let time = Utc::now(); // TODO: get from message (need to add to message)
     let result = crate::calculate_rise_and_set(sun, &time, &decoded_message.spot.loc, &horizon)?;
@@ -110,7 +112,7 @@ pub async fn handle_message(
 }
 
 fn build_output(in_value: Value, result: HorizonEvents) -> Result<Value, Error> {
-    let mut output = in_value.clone();
+    let mut output = in_value;
     let output_obj = output.as_object_mut().ok_or(anyhow!(
         "in message was not an object, could not build output message"
     ))?;

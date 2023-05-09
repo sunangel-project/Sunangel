@@ -21,7 +21,7 @@ impl SkyObject for Sun {
             .expect("Coordinates should always be valid");
 
         SkyPosition {
-            altitude: (90. - solar_pos.zenith_angle).to_radians(),
+            altitude: angle::normalize_degrees(90. - solar_pos.zenith_angle).to_radians(),
             azimuth: angle::normalize_degrees(solar_pos.azimuth - 180.).to_radians(),
         }
     }

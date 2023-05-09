@@ -9,6 +9,7 @@ pub const HORIZON_ANGLE: f64 = 2. * PI / (HORIZON_SAMPLES as f64);
 
 const BYTES_IN_F64: usize = 8;
 
+#[derive(Debug)]
 pub struct Horizon {
     altitudes: [f64; HORIZON_SAMPLES],
 }

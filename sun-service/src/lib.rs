@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use chrono::{DateTime, Duration, Utc};
-use log::{info, warn};
+use log::{debug, warn};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -145,10 +145,11 @@ where
         let SkyPosition { altitude, azimuth } = object.position(&middle, location);
         let target_altitude = horizon.altitude_at(azimuth);
 
-        if left - right < Duration::milliseconds(100) {
-            // TODO: Hints at problen, resolve some
-            // other way
-            warn!("Below 100ms interval: {:?} - {:?}", left, right);
+        debug!("left: {left}, right: {right}");
+        debug!("middle: {altitude} at {middle}, target: {target_altitude}");
+
+        if (left - right).num_milliseconds().abs() < Duration::seconds(1).num_milliseconds().abs() {
+            warn!("Below 1s interval: {:?} - {:?}", left, right);
             return HorizonEvent {
                 time: middle,
                 altitude,
@@ -157,6 +158,7 @@ where
         }
 
         if (altitude - target_altitude).abs() < TOLERANCE {
+            debug!("######## found point at {middle}");
             return HorizonEvent {
                 time: middle,
                 altitude,
