@@ -19,9 +19,9 @@ pub use sky::{SkyObject, SkyPosition};
 
 #[derive(Serialize, Deserialize)]
 pub struct HorizonEvent {
-    time: DateTime<Utc>,
-    altitude: f64,
-    azimuth: f64,
+    pub time: DateTime<Utc>,
+    pub altitude: f64,
+    pub azimuth: f64,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -32,7 +32,7 @@ pub struct SunHorizonEvents {
 
 #[derive(Serialize, Deserialize)]
 pub struct HorizonEvents {
-    sun: SunHorizonEvents,
+    pub sun: SunHorizonEvents,
 }
 
 #[derive(Debug, Error)]
