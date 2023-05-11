@@ -1720,6 +1720,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "74233d3b3b2f6d4b006dc19dee745e73e2a6bfb6f93607cd3b02bd5b00797d7c"
 
 [[package]]
+name = "sky-service"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-nats",
+ "chrono",
+ "env_logger",
+ "futures-util",
+ "log",
+ "messages-common",
+ "serde",
+ "serde_json",
+ "spa",
+ "thiserror",
+ "tokio",
+]
+
+[[package]]
 name = "slab"
 version = "0.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1808,24 +1826,6 @@ name = "subtle"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "81cdd64d312baedb58e21336b31bc043b77e01cc99033ce76ef539f78e965ebc"
-
-[[package]]
-name = "sun-service"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-nats",
- "chrono",
- "env_logger",
- "futures-util",
- "log",
- "messages-common",
- "serde",
- "serde_json",
- "spa",
- "thiserror",
- "tokio",
-]
 
 [[package]]
 name = "syn"

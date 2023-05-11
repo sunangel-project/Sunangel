@@ -2,14 +2,14 @@ use std::f64::consts::PI;
 
 use chrono::{DateTime, Duration, NaiveDate, NaiveDateTime, NaiveTime, Timelike, Utc};
 
-use sun_service;
-use sun_service::Horizon;
-use sun_service::HorizonEvent;
-use sun_service::HorizonEvents;
-use sun_service::Location;
-use sun_service::SkyObject;
-use sun_service::SkyPosition;
-use sun_service::HORIZON_SAMPLES;
+use sky_service;
+use sky_service::Horizon;
+use sky_service::HorizonEvent;
+use sky_service::HorizonEvents;
+use sky_service::Location;
+use sky_service::SkyObject;
+use sky_service::SkyPosition;
+use sky_service::HORIZON_SAMPLES;
 
 const SECONDS_IN_DAY: u32 = 24 * 60 * 60;
 
@@ -56,7 +56,7 @@ fn set_flat() {
     let HorizonEvents {
         rise: HorizonEvent { time: rise, .. },
         set: HorizonEvent { time: set, .. },
-    } = sun_service::calculate_rise_and_set(test_object, &time, &location, &horizon).unwrap();
+    } = sky_service::calculate_rise_and_set(test_object, &time, &location, &horizon).unwrap();
 
     assert_eq!(rise.hour(), 6);
     assert_eq!(rise.minute(), 0);

@@ -55,7 +55,7 @@ async fn main() -> Result<(), async_nats::Error> {
         .and(playground_filter("/graphql", Some("/subscriptions"))))
     .with(log);
 
-    warp::serve(routes).run(([127, 0, 0, 1], 6660)).await;
+    warp::serve(routes).run(([0, 0, 0, 0], 6660)).await;
 
     Ok(())
 }

@@ -3,6 +3,7 @@ package messaging
 import (
 	"errors"
 	"log"
+	"os"
 	"time"
 
 	"github.com/nats-io/nats.go"
@@ -49,8 +50,12 @@ type OutMessage struct {
 }
 
 func Connect() *nats.Conn {
-	// TODO: get host from env
-	nc, err := nats.Connect(nats.DefaultURL)
+	natsURL := os.Getenv("NATS_HOST")
+	if natsURL == "" {
+		natsURL = nats.DefaultURL
+	}
+
+	nc, err := nats.Connect(natsURL)
 	if err != nil {
 		panic(err)
 	}

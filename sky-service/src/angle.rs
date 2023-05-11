@@ -11,7 +11,7 @@ use std::f64::consts::PI;
 /// # Examples
 ///
 /// ```
-/// use sun_service::angle;
+/// use sky_service::angle;
 ///
 /// let normalized = angle::normalize_degrees(360. + 12.5);
 ///
@@ -33,7 +33,7 @@ pub fn normalize_degrees(d: f64) -> f64 {
 ///
 /// ```
 /// use std::f64::consts::PI;
-/// use sun_service::angle;
+/// use sky_service::angle;
 ///
 /// let normalized = angle::normalize_radians(2. * PI + 1.);
 ///

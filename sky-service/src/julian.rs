@@ -10,7 +10,7 @@ const SECONDS_PER_DAY: f64 = (60 * 60 * 24) as f64;
 ///
 /// ```
 /// use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
-/// use sun_service::julian;
+/// use sky_service::julian;
 ///
 /// let time: DateTime<Utc> = DateTime::from_utc(
 ///     NaiveDateTime::new(

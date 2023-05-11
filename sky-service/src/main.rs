@@ -1,6 +1,6 @@
 use futures_util::StreamExt;
 
-use sun_service::messaging;
+use sky_service::messaging;
 
 #[tokio::main]
 async fn main() {
