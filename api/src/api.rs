@@ -1,7 +1,7 @@
 use async_stream::stream;
 use futures::{future, StreamExt};
 use futures_util::Stream;
-use log::error;
+use log::{error, info};
 use messages_common::MessageStream;
 use std::{pin::Pin, str};
 
@@ -120,12 +120,16 @@ async fn transform_spot_message(message: Message) -> Result<SpotsSuccess, FieldE
 
     match res_response {
         Ok(response) => {
+            info!("Received response from microservices: {response:?}");
+
             message.ack().await?;
 
             Ok(response.into())
         }
         Err(_) => {
             let error: SearchError = serde_json::from_str(payload_str)?;
+
+            error!("Received error from microservices: {error:?}");
 
             Err(FieldError::new(
                 "Internal server error",

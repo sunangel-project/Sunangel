@@ -55,14 +55,14 @@ pub fn generate_handle_message_res<'a>(
                     let res = handle_message(&message, jetstream, store).await;
                     if let Err(err) = res {
                         error!("Could not handle received message: {err}");
-                        send_error_message(&jetstream, Some(message), err)
+                        send_error_message(jetstream, Some(message), err)
                             .await
                             .unwrap_or_else(|err| error!("Could not send error message: {err}"));
                     }
                 }
                 Err(err) => {
                     error!("Problem with received message: {err}");
-                    send_error_message(&jetstream, None, err)
+                    send_error_message(jetstream, None, err)
                         .await
                         .unwrap_or_else(|err| error!("Could not send out error message: {err}"));
                 }

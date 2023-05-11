@@ -8,29 +8,30 @@ use serde::{Deserialize, Serialize};
 
 /// In
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct Part {
     id: u32,
     of: u32,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct Spot {
     dir: Option<f64>,
     kind: String,
     loc: Location,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SearchResponse {
     part: Part,
     request_id: String,
     search_query: SearchQuery,
     spot: Spot,
     horizon: String,
+    events: HorizonEventsCollection,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SearchError {
     pub input: String,
     pub reason: String,
@@ -44,7 +45,7 @@ pub struct SearchError {
 
 // Out
 
-#[derive(GraphQLObject, Serialize, Deserialize)]
+#[derive(Debug, GraphQLObject, Serialize, Deserialize)]
 pub struct Location {
     pub lat: f64,
     pub lon: f64,
@@ -59,30 +60,37 @@ impl From<LocationIn> for Location {
     }
 }
 
-#[derive(GraphQLObject)]
+#[derive(Debug, GraphQLObject, Serialize, Deserialize)]
 pub struct HorizonEvent {
     pub time: DateTime<Utc>,
-    pub alt: f64,
-    pub azi: f64,
+    pub altitude: f64,
+    pub azimuth: f64,
+}
+
+#[derive(Debug, GraphQLObject, Serialize, Deserialize)]
+pub struct HorizonEvents {
+    pub rise: HorizonEvent,
+    pub set: HorizonEvent,
+}
+
+#[derive(Debug, GraphQLObject, Serialize, Deserialize)]
+pub struct HorizonEventsCollection {
+    sun: HorizonEvents,
 }
 
 #[derive(GraphQLObject)]
 pub struct APISpot {
     pub location: Location,
     pub kind: String,
-    pub sunset: HorizonEvent,
+    pub events: HorizonEventsCollection,
 }
 
-impl From<Spot> for APISpot {
-    fn from(value: Spot) -> Self {
+impl From<SearchResponse> for APISpot {
+    fn from(value: SearchResponse) -> Self {
         APISpot {
-            location: value.loc,
-            kind: value.kind,
-            sunset: HorizonEvent {
-                time: Utc::now(),
-                alt: 270.,
-                azi: 1.,
-            },
+            location: value.spot.loc,
+            kind: value.spot.kind,
+            events: value.events,
         }
     }
 }
@@ -107,7 +115,7 @@ impl From<SearchResponse> for SpotsSuccess {
             SpotAnswerStatus::Finished
         };
 
-        let spot = APISpot::from(value.spot);
+        let spot = APISpot::from(value);
 
         SpotsSuccess { status, spot }
     }
@@ -135,7 +143,7 @@ pub struct APISearchQuery {
 
 /// Out
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SearchQuery {
     loc: Location,
     rad: i32,
