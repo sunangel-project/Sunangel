@@ -5,7 +5,7 @@ use async_nats::{
 };
 use chrono::Utc;
 use futures_util::Future;
-use log::{info, warn};
+use log::{error, info};
 use messages_common::MessageStream;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -51,13 +51,21 @@ pub fn generate_handle_message_res<'a>(
             info!("Received message {:?}", message);
 
             match message {
-                Ok(message) => handle_message(message, jetstream, store)
-                    .await
-                    .unwrap_or_else(|err| {
-                        warn!("{err}");
-                        todo!("send error message")
-                    }),
-                Err(_) => todo!("send error message"),
+                Ok(message) => {
+                    let res = handle_message(&message, jetstream, store).await;
+                    if let Err(err) = res {
+                        error!("Could not handle received message: {err}");
+                        send_error_message(&jetstream, Some(message), err)
+                            .await
+                            .unwrap_or_else(|err| error!("Could not send error message: {err}"));
+                    }
+                }
+                Err(err) => {
+                    error!("Problem with received message: {err}");
+                    send_error_message(&jetstream, None, err)
+                        .await
+                        .unwrap_or_else(|err| error!("Could not send out error message: {err}"));
+                }
             };
         })
     })
@@ -80,7 +88,7 @@ struct OutEvents {
 }
 
 pub async fn handle_message(
-    message: Message,
+    message: &Message,
     jetstream: &Context,
     store: &Store,
 ) -> Result<(), Error> {
@@ -126,4 +134,41 @@ fn build_output(in_value: Value, result: OutEvents) -> Result<Value, Error> {
     output_obj.insert("events".to_string(), json!(result));
 
     Ok(output)
+}
+
+async fn send_error_message(
+    jetstream: &Context,
+    message: Option<Message>,
+    error: async_nats::Error,
+) -> Result<(), async_nats::Error> {
+    let message = message.unwrap();
+
+    jetstream
+        .publish(
+            format!("{ERR_STREAM}.{GROUP}"),
+            build_error_payload(&message, error).to_string().into(),
+        )
+        .await
+        .unwrap();
+
+    Ok(())
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct ErrorMessage {
+    request_id: String,
+    sender: String,
+    reason: String,
+    input: String,
+}
+
+fn build_error_payload(msg: &Message, error: async_nats::Error) -> String {
+    json!(ErrorMessage {
+        request_id: messages_common::try_get_request_id(&msg.payload)
+            .unwrap_or("UNKNOWN".to_string()),
+        sender: GROUP.to_string(),
+        reason: error.to_string(),
+        input: format!("{msg:?}"),
+    })
+    .to_string()
 }
