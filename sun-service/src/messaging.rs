@@ -74,6 +74,11 @@ struct InMessage {
     spot: Spot,
 }
 
+#[derive(Serialize, Deserialize)]
+struct OutEvents {
+    sun: HorizonEvents,
+}
+
 pub async fn handle_message(
     message: Message,
     jetstream: &Context,
@@ -92,11 +97,12 @@ pub async fn handle_message(
         decoded_message.horizon
     );
 
-    //info!("horizon: {:?}", horizon);
-
     let sun = Sun::new();
     let time = Utc::now(); // TODO: get from message (need to add to message)
-    let result = crate::calculate_rise_and_set(sun, &time, &decoded_message.spot.loc, &horizon)?;
+    let sun_events =
+        crate::calculate_rise_and_set(sun, &time, &decoded_message.spot.loc, &horizon)?;
+
+    let result = OutEvents { sun: sun_events };
 
     let in_value = Value::from_str(payload)?;
     jetstream
@@ -111,13 +117,13 @@ pub async fn handle_message(
     Ok(())
 }
 
-fn build_output(in_value: Value, result: HorizonEvents) -> Result<Value, Error> {
+fn build_output(in_value: Value, result: OutEvents) -> Result<Value, Error> {
     let mut output = in_value;
     let output_obj = output.as_object_mut().ok_or(anyhow!(
         "in message was not an object, could not build output message"
     ))?;
 
-    output_obj.insert("sunset".to_string(), json!(result));
+    output_obj.insert("events".to_string(), json!(result));
 
     Ok(output)
 }

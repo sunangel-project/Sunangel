@@ -9,7 +9,6 @@ use sun_service::HorizonEvents;
 use sun_service::Location;
 use sun_service::SkyObject;
 use sun_service::SkyPosition;
-use sun_service::SunHorizonEvents;
 use sun_service::HORIZON_SAMPLES;
 
 const SECONDS_IN_DAY: u32 = 24 * 60 * 60;
@@ -55,11 +54,8 @@ fn set_flat() {
     };
 
     let HorizonEvents {
-        sun:
-            SunHorizonEvents {
-                rise: HorizonEvent { time: rise, .. },
-                set: HorizonEvent { time: set, .. },
-            },
+        rise: HorizonEvent { time: rise, .. },
+        set: HorizonEvent { time: set, .. },
     } = sun_service::calculate_rise_and_set(test_object, &time, &location, &horizon).unwrap();
 
     assert_eq!(rise.hour(), 6);

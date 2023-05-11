@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use chrono::{DateTime, Duration, Utc};
-use log::{debug, warn};
+use log::warn;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -25,14 +25,9 @@ pub struct HorizonEvent {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct SunHorizonEvents {
+pub struct HorizonEvents {
     pub rise: HorizonEvent,
     pub set: HorizonEvent,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct HorizonEvents {
-    pub sun: SunHorizonEvents,
 }
 
 #[derive(Debug, Error)]
@@ -57,9 +52,7 @@ where
     let rise = calculate_horizon_point(&object, rise_range, location, horizon);
     let set = calculate_horizon_point(&object, set_range, location, horizon);
 
-    Ok(HorizonEvents {
-        sun: SunHorizonEvents { rise, set },
-    })
+    Ok(HorizonEvents { rise, set })
 }
 
 const MAX_RESOLUTION_EXP: usize = 5;
@@ -115,7 +108,7 @@ where
     Err(HorizonEventError::CandidateRange)
 }
 
-const TOLERANCE: f64 = 1e-5;
+const TOLERANCE: f64 = 1e-3; // About 0.06°
 
 fn calculate_horizon_point<O>(
     object: &O,
@@ -145,11 +138,11 @@ where
         let SkyPosition { altitude, azimuth } = object.position(&middle, location);
         let target_altitude = horizon.altitude_at(azimuth);
 
-        debug!("left: {left}, right: {right}");
-        debug!("middle: {altitude} at {middle}, target: {target_altitude}");
-
-        if (left - right).num_milliseconds().abs() < Duration::seconds(1).num_milliseconds().abs() {
-            warn!("Below 1s interval: {:?} - {:?}", left, right);
+        if (left - right).num_milliseconds().abs() < Duration::seconds(1).num_milliseconds() {
+            warn!("Below 1s interval: {middle},");
+            warn!("{altitude}, target: {target_altitude}");
+            // Most of the time ok, sometimes horribly wrong
+            // TODO: catch horribly wrong results
             return HorizonEvent {
                 time: middle,
                 altitude,
@@ -158,7 +151,6 @@ where
         }
 
         if (altitude - target_altitude).abs() < TOLERANCE {
-            debug!("######## found point at {middle}");
             return HorizonEvent {
                 time: middle,
                 altitude,
