@@ -24,7 +24,7 @@ services:
    build:
      context: .
      dockerfile: ./Dockerfiles/spot-finder
-   depends_on: ["nats"]
+   depends_on: ["nats", "api"]
    environment:
     - NATS_HOST=nats
     - RUST_LOG=info
@@ -34,7 +34,7 @@ services:
    build:
      context: .
      dockerfile: ./Dockerfiles/horizon-service
-   depends_on: ["nats"]
+   depends_on: ["nats", "spot-finder"]
    environment:
     - NATS_HOST=nats
   
@@ -43,7 +43,7 @@ services:
    build:
      context: .
      dockerfile: ./Dockerfiles/sky-service
-   depends_on: ["nats"]
+   depends_on: ["nats", "horizon-service"]
    environment:
     - NATS_HOST=nats
     - RUST_LOG=info
