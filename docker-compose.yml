@@ -8,16 +8,16 @@ services:
     command: "--name main --jetstream --http_port 8222"
   
   api:
-   image: api
-   build:
-     context: .
-     dockerfile: ./Dockerfiles/api
-   ports:
-     - "6660:6660"
-   depends_on: ["nats"]
-   environment:
-    - NATS_HOST=nats
-    - RUST_LOG=info
+    image: api
+    build:
+      context: .
+      dockerfile: ./Dockerfiles/api
+    ports:
+      - "6660:6660"
+    depends_on: ["nats"]
+    environment:
+     - NATS_HOST=nats
+     - RUST_LOG=info
   
   spot-finder:
    image: spot-finder

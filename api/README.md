@@ -1,5 +1,8 @@
 # API ![version](https://img.shields.io/badge/v0.0.0-blue.svg)
 
+TODO: replace `juniper` with crates when new version of `juniper_actix` is released.
+Also remember to remove `git clone juniper` from `Dockerfile`.
+
 ## Testing Queries
 
 ### Interactively
