@@ -3,7 +3,7 @@ use std::time::Duration;
 use actix_cors::Cors;
 use actix_web::{
     http::header,
-    middleware,
+    middleware::{self, Logger},
     web::{self, Data},
     App, Error, HttpRequest, HttpResponse, HttpServer,
 };
@@ -30,6 +30,7 @@ async fn graphql(
     let context = Context::new().await; // TODO: create context once in main, then create two
                                         // closures for graphql and subscriptions referencing the
                                         // same context
+
     graphql_handler(&schema, &context, req, payload).await
 }
 
@@ -48,7 +49,7 @@ async fn subscriptions(
     subscriptions_handler(req, stream, schema, config).await
 }
 
-#[tokio::main]
+#[actix_web::main]
 async fn main() -> Result<(), async_nats::Error> {
     env_logger::init();
 
@@ -57,12 +58,14 @@ async fn main() -> Result<(), async_nats::Error> {
     HttpServer::new(move || {
         App::new()
             .app_data(Data::new(schema()))
+            .wrap(Logger::default())
             .wrap(
                 Cors::default()
                     .allow_any_origin()
                     .allowed_methods(vec!["POST", "GET"])
-                    .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
-                    .allowed_header(header::CONTENT_TYPE)
+                    .allow_any_header()
+                    //.allowed_headers(vec![header::ACCEPT, header::AUTHORIZATION])
+                    //.allowed_header(header::CONTENT_TYPE)
                     .supports_credentials()
                     .max_age(3600),
             )

@@ -4,8 +4,8 @@ import searching from '../searching'
 export default {
     data() {
         return {
-            lat: 48.74517,
-            lon: 9.10666,
+            lat: 48.81872,
+            lon: 9.58781,
             radius: 2000,
         }
     },

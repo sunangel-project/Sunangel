@@ -6,7 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokio = { version = "1.28", features = ["macros", "rt-multi-thread"] }
 juniper = { path = "../../juniper/juniper", features = ["chrono"] }
 juniper_graphql_ws = { path = "../../juniper/juniper_graphql_ws" }
 juniper_actix = { path = "../../juniper/juniper_actix", features = ["subscriptions"] }
