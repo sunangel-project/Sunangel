@@ -17,30 +17,30 @@ const client = new Client({
 
 let query = gql`
 subscription spot($lat: Float!, $lon: Float!, $radius: Int!) {
-    spots(query: { location: { lat: $lat, lon: $lon }, radius: $radius }) {
-        status
-        spot {
-            location {
-                lat
-                lon
-            }
-            kind
-            events {
-                sun {
-                    rise {
-                        time
-                        altitude
-                        azimuth
-                    }
-                    set {
-                        time
-                        altitude
-                        azimuth
-                    }
-                }
-            }
+  spots(query: { location: { lat: $lat, lon: $lon }, radius: $radius }) {
+    status
+    spot {
+      location {
+        lat
+        lon
+      }
+      kind
+      events {
+        sun {
+          rise {
+            time
+            altitude
+            azimuth
+          }
+          set {
+            time
+            altitude
+            azimuth
+          }
         }
+      }
     }
+  }
 }
 `
 
