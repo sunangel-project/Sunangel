@@ -4,8 +4,30 @@ import Map from './components/Map.vue'
 </script>
 
 <template>
-    <Map />
-    <SearchInput />
+    <div class="grid">
+        <div class="map">
+            <Map />
+        </div>
+        <div class="input">
+            <SearchInput />
+        </div>
+    </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.grid {
+    display: grid;
+    grid-template-columns: 80% 10%;
+    grid-template-rows: 100%;
+}
+
+.map {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.input {
+    grid-column: 2;
+    grid-row: 1;
+}
+</style>
