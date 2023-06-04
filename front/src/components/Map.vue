@@ -9,13 +9,7 @@
 
         <ol-vector-layer>
             <ol-source-vector>
-                <ol-feature>
-                    <ol-geom-circle :center="center" :radius="radius"></ol-geom-circle>
-                    <ol-style>
-                        <ol-style-stroke color="blue" :width="3"></ol-style-stroke>
-                        <ol-style-fill color="rgba(20,0,100,0.1)"></ol-style-fill>
-                    </ol-style>
-                </ol-feature>
+                <SearchCircle :center="searchCenter" :radius="searchRadius" />
             </ol-source-vector>
         </ol-vector-layer>
     </ol-map>
@@ -25,10 +19,14 @@
 import { ref } from "vue";
 import proj4 from "proj4";
 
+import SearchCircle from "./mapElements/SearchCircle.vue"
+
 const projection = ref("EPSG:3857");
 const center = ref(proj4(projection.value, [9.58781, 48.81872]));
 //const zoom = ref(13);
 const zoom = ref(16);
 const rotation = ref(0);
-const radius = ref(2000);
+
+const searchCenter = ref(center.value);
+const searchRadius = ref(2000);
 </script>
