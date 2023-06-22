@@ -10,6 +10,7 @@
         <ol-vector-layer>
             <ol-source-vector>
                 <SearchCircle :center="searchCenter" :radius="searchRadius" />
+                <SpotPoint :coordinates="searchCenter" />
             </ol-source-vector>
         </ol-vector-layer>
     </ol-map>
@@ -20,10 +21,10 @@ import { ref } from "vue";
 import proj4 from "proj4";
 
 import SearchCircle from "./mapElements/SearchCircle.vue"
+import SpotPoint from "./mapElements/SpotPoint.vue"
 
 const projection = ref("EPSG:3857");
 const center = ref(proj4(projection.value, [9.58781, 48.81872]));
-//const zoom = ref(13);
 const zoom = ref(16);
 const rotation = ref(0);
 
