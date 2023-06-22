@@ -1,11 +1,38 @@
 use chrono::{DateTime, Duration, Utc};
-
-use crate::{angle, location::Location};
+use spa::FloatOps;
 
 use super::{SkyObject, SkyPosition};
+use crate::{angle, location::Location};
+
+pub struct StdFloatOps;
+impl FloatOps for StdFloatOps {
+    fn sin(x: f64) -> f64 {
+        x.sin()
+    }
+    fn cos(x: f64) -> f64 {
+        x.cos()
+    }
+    fn tan(x: f64) -> f64 {
+        x.tan()
+    }
+    fn asin(x: f64) -> f64 {
+        x.asin()
+    }
+    fn acos(x: f64) -> f64 {
+        x.acos()
+    }
+    fn atan(x: f64) -> f64 {
+        x.atan()
+    }
+    fn atan2(y: f64, x: f64) -> f64 {
+        y.atan2(x)
+    }
+    fn trunc(x: f64) -> f64 {
+        x.trunc()
+    }
+}
 
 pub struct Sun;
-
 impl SkyObject for Sun {
     fn new() -> Self {
         Sun {}
@@ -17,7 +44,7 @@ impl SkyObject for Sun {
 
     // TODO: replace with own implementation, clone is not sustainable all the time
     fn position(&self, time: &DateTime<Utc>, location: &Location) -> SkyPosition {
-        let solar_pos = spa::calc_solar_position(*time, location.lat, location.lon)
+        let solar_pos = spa::solar_position::<StdFloatOps>(*time, location.lat, location.lon)
             .expect("Coordinates should always be valid");
 
         SkyPosition {

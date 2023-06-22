@@ -1,16 +1,45 @@
-import { gql, Client, cacheExchange, fetchExchange, subscriptionExchange } from '@urql/vue';
-import { SubscriptionClient } from 'subscriptions-transport-ws';
+import {
+    cacheExchange,
+    Client,
+    fetchExchange,
+    gql,
+    subscriptionExchange,
+} from "@urql/vue";
+import { SubscriptionClient } from "subscriptions-transport-ws";
+
+interface HorizonEvent {
+    altitude: number;
+    azimuth: number;
+    time: string;
+}
+
+interface Result {
+    kind: string;
+    location: {
+        lat: number;
+        lon: number;
+    };
+    events: {
+        sun: {
+            rise: HorizonEvent;
+            set: HorizonEvent;
+        };
+    };
+}
 
 // TODO: handle connection fail
-const subscriptionClient = new SubscriptionClient('ws://localhost:6660/subscriptions', { reconnect: false });
+const subscriptionClient = new SubscriptionClient(
+    "ws://localhost:6660/subscriptions",
+    { reconnect: false },
+);
 
 const client = new Client({
-    url: 'http://localhost:6660/graphql',
+    url: "http://localhost:6660/graphql",
     exchanges: [
         cacheExchange,
         fetchExchange,
         subscriptionExchange({
-            forwardSubscription: request => subscriptionClient.request(request),
+            forwardSubscription: (request) => subscriptionClient.request(request),
         }),
     ],
 });
@@ -42,7 +71,7 @@ subscription spot($lat: Float!, $lon: Float!, $radius: Int!) {
     }
   }
 }
-`
+`;
 
 function search(lat: number, lon: number, radius: number) {
     const unsubscribe = client
@@ -51,14 +80,15 @@ function search(lat: number, lon: number, radius: number) {
             {
                 lat: lat,
                 lon: lon,
-                radius: radius
-            }
+                radius: radius,
+            },
         )
-        .subscribe(result => {
+        .subscribe(raw => {
+            let result = raw.data?.spots.spot; // TODO: test for spots, spot, data?
             console.log(result);
-        })
+        });
 }
 
 export default {
-    search: search
-}
+    search: search,
+};
