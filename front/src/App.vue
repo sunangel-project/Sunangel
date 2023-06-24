@@ -1,8 +1,3 @@
-<script setup lang="ts">
-import SearchInput from './components/SearchInput.vue'
-import Map from './components/Map.vue'
-</script>
-
 <template>
     <div class="grid">
         <div class="map">
@@ -13,6 +8,64 @@ import Map from './components/Map.vue'
         </div>
     </div>
 </template>
+
+<script setup lang="ts">
+import SearchInput from './components/SearchInput.vue'
+import Map from './components/Map.vue'
+import { gql, useQuery, useSubscription } from '@urql/vue';
+
+let query = gql`
+subscription spot($lat: Float!, $lon: Float!, $radius: Int!) {
+  spots(query: { location: { lat: $lat, lon: $lon }, radius: $radius }) {
+    status
+    spot {
+      location {
+        lat
+        lon
+      }
+      kind
+      events {
+        sun {
+          rise {
+            time
+            altitude
+            azimuth
+          }
+          set {
+            time
+            altitude
+            azimuth
+          }
+        }
+      }
+    }
+  }
+}
+`;
+
+
+let result = useSubscription({
+    query: query,
+    variables:
+    {
+        lat: 48.81872,
+        lon: 9.58781,
+        radius: 2000,
+    },
+})
+
+const sleep = (ms: number) => {
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+console.log(result)
+console.log(result.fetching)
+sleep(10000).then(() => {
+    console.log(result.data.value)
+    console.log(result)
+})
+
+</script>
 
 <style scoped>
 .grid {
