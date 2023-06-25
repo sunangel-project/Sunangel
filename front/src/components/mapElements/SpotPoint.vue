@@ -12,17 +12,19 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 
+import { projection } from "../../projection"
+import proj4 from 'proj4';
+
 const radius = ref(10);
 const fillColor = ref("green");
 
-// different props
 const props = defineProps({
-    coordinates: {
-        type: Array,
-        default: [0, 0],
-        validator(value: number[]): boolean {
-            return value.length == 2
-        }
-    }
+    spot: {
+        type: Object,
+    },
 })
+
+const spot = props.spot!;
+const coordinates = ref(proj4(projection.value, [spot.location.lon, spot.location.lat]))
+
 </script>

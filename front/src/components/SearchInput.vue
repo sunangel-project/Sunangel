@@ -1,20 +1,6 @@
-<script lang="ts">
-import searching from '../searching'
-
-export default {
-    data() {
-        return {
-            lat: 48.81872,
-            lon: 9.58781,
-            radius: 2000,
-        }
-    },
-    methods: {
-        search: function () {
-            searching.search(this.lat, this.lon, this.radius)
-        }
-    }
-}
+<script lang="ts" setup>
+import { search } from '../searching'
+import { inputs, spots } from "../state"
 </script>
 
 <template>
@@ -22,18 +8,24 @@ export default {
 
     <div>
         Latitude:
-        <input v-model="lat">
+        <input v-model="inputs.lat" type="number">
     </div>
 
     <div>
         Longitude:
-        <input v-model="lon">
+        <input v-model="inputs.lon" type="number">
     </div>
 
     <div>
         Search Radius:
-        <input v-model="radius" type="number">
+        <input v-model="inputs.radius" type="number">
     </div>
 
     <button @click="search">Search</button>
+
+    <ul>
+        <li v-for="spot in spots.spots">
+            {{ spot }}
+        </li>
+    </ul>
 </template>

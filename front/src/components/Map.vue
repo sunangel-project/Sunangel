@@ -10,24 +10,24 @@
         <ol-vector-layer>
             <ol-source-vector>
                 <SearchCircle :center="searchCenter" :radius="searchRadius" />
-                <SpotPoint :coordinates="searchCenter" />
+                <SpotPoint v-for="spot in spots.spots" :spot="spot" />
             </ol-source-vector>
         </ol-vector-layer>
     </ol-map>
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
-import proj4 from "proj4";
+import { computed, ref } from "vue";
 
 import SearchCircle from "./mapElements/SearchCircle.vue"
 import SpotPoint from "./mapElements/SpotPoint.vue"
+import { inputs, spots } from "../state"
+import { projection, project } from "../projection"
 
-const projection = ref("EPSG:3857");
-const center = ref(proj4(projection.value, [9.58781, 48.81872]));
-const zoom = ref(16);
+const center = computed(() => project(inputs.lat, inputs.lon));
+const zoom = ref(15);
 const rotation = ref(0);
 
-const searchCenter = ref(center.value);
-const searchRadius = ref(2000);
+const searchCenter = center;
+const searchRadius = computed(() => inputs.radius);
 </script>

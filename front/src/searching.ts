@@ -1,14 +1,5 @@
-import {
-    cacheExchange,
-    Client,
-    fetchExchange,
-    gql,
-    provideClient,
-    subscriptionExchange,
-    useQuery,
-} from "@urql/vue";
-import { SubscriptionClient } from "subscriptions-transport-ws";
-import { provide } from "vue";
+import { gql, useSubscription } from '@urql/vue';
+import { inputs, spots } from "./state";
 
 interface HorizonEvent {
     altitude: number;
@@ -16,7 +7,7 @@ interface HorizonEvent {
     time: string;
 }
 
-interface Result {
+export interface Result {
     kind: string;
     location: {
         lat: number;
@@ -30,26 +21,57 @@ interface Result {
     };
 }
 
+export function search() {
+    if (spots.loading) { // TODO: set true here and set false when receiving responses
+        return // TODO: warning
+    }
 
-
-function search(lat: number, lon: number, radius: number) {
-    /*
-    const unsubscribe = client
-        .subscription(
-            query,
-            {
-                lat: lat,
-                lon: lon,
-                radius: radius,
-            },
-        )
-        .subscribe(raw => {
-            let result = raw.data?.spots.spot; // TODO: test for spots, spot, data?
-            console.log(result);
-        });
-        */
+    spots.spots = []
+    spots.subscription?.executeSubscription()
 }
 
-export default {
-    search: search,
-};
+export function setupSpotsSubscription() {
+    let query = gql`
+subscription spot($lat: Float!, $lon: Float!, $radius: Int!) {
+  spots(query: { location: { lat: $lat, lon: $lon }, radius: $radius }) {
+    status
+    spot {
+      location {
+        lat
+        lon
+      }
+      kind
+      events {
+        sun {
+          rise {
+            time
+            altitude
+            azimuth
+          }
+          set {
+            time
+            altitude
+            azimuth
+          }
+        }
+      }
+    }
+  }
+}
+`;
+
+    spots.subscription = useSubscription(
+        {
+            query: query,
+            variables: inputs,
+            pause: true,
+        },
+        (_, s) => {
+            if (typeof s === "object") {
+                spots.spots.push(s.spots.spot)
+            } else {
+                console.log('was not correct type')
+            }
+        },
+    );
+}
