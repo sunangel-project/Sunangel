@@ -1,61 +1,92 @@
-use std::sync::Arc;
+use std::time::Duration;
 
-use futures::FutureExt;
+use actix_cors::Cors;
+use actix_web::{
+    http::header,
+    middleware::{self, Logger},
+    web::{self, Data},
+    App, Error, HttpRequest, HttpResponse, HttpServer,
+};
+
+use juniper_actix::{graphql_handler, playground_handler, subscriptions::subscriptions_handler};
 use juniper_graphql_ws::ConnectionConfig;
-use juniper_warp::{playground_filter, subscriptions::serve_graphql_ws};
 use log::info;
-use warp::Filter;
 
-use crate::api::{schema, Context};
+use crate::api::{schema, Context, Schema};
 
 pub mod api;
 pub mod messaging;
 pub mod structs;
 
-#[tokio::main]
+async fn playground() -> Result<HttpResponse, Error> {
+    playground_handler("/graphql", Some("/subscriptions")).await
+}
+
+async fn graphql(
+    req: actix_web::HttpRequest,
+    payload: actix_web::web::Payload,
+    schema: web::Data<Schema>,
+) -> Result<HttpResponse, Error> {
+    let context = Context::new().await; // TODO: create context once in main, then create two
+                                        // closures for graphql and subscriptions referencing the
+                                        // same context
+
+    graphql_handler(&schema, &context, req, payload).await
+}
+
+async fn subscriptions(
+    req: HttpRequest,
+    stream: web::Payload,
+    schema: web::Data<Schema>,
+) -> Result<HttpResponse, Error> {
+    let context = Context::new().await;
+    let schema = schema.into_inner();
+    let config = ConnectionConfig::new(context);
+    // set the keep alive interval to 15 secs so that it doesn't timeout in playground
+    // playground has a hard-coded timeout set to 20 secs
+    let config = config.with_keep_alive_interval(Duration::from_secs(15));
+
+    subscriptions_handler(req, stream, schema, config).await
+}
+
+#[actix_web::main]
 async fn main() -> Result<(), async_nats::Error> {
     env_logger::init();
 
-    let log = warp::log("warp_server");
-
-    let context = Context::new().await;
-    let context2 = context.clone();
-
-    let state = warp::any().map(move || context.clone());
-    let graphql_filter = juniper_warp::make_graphql_filter(schema(), state.boxed());
-
-    let root_node = Arc::new(schema());
-
     info!("Server running on http://localhost:6660, playground: http://localhost:6660/playground");
 
-    let routes = (warp::path("subscriptions")
-        .and(warp::ws())
-        .map(move |ws: warp::ws::Ws| {
-            let root_node = root_node.clone();
-            let ctx = context2.clone();
-
-            ws.on_upgrade(move |websocket| async move {
-                serve_graphql_ws(websocket, root_node, ConnectionConfig::new(ctx))
-                    .map(|r| {
-                        if let Err(err) = r {
-                            println!("Websocket error: {err}")
-                        }
-                    })
-                    .await
-            })
-        }))
-    .map(|reply| {
-        // TODO #584: remove this workaround
-        // still needed? https://github.com/graphql-rust/juniper/issues/584
-        warp::reply::with_header(reply, "Sec-WebSocket-Protocol", "graphql-ws")
+    HttpServer::new(move || {
+        App::new()
+            .app_data(Data::new(schema()))
+            .wrap(Logger::default())
+            .wrap(
+                Cors::default()
+                    .allow_any_origin()
+                    .allowed_methods(vec!["POST", "GET"])
+                    .allow_any_header()
+                    //.allowed_headers(vec![header::ACCEPT, header::AUTHORIZATION])
+                    //.allowed_header(header::CONTENT_TYPE)
+                    .supports_credentials()
+                    .max_age(3600),
+            )
+            .wrap(middleware::Compress::default())
+            .wrap(middleware::Logger::default())
+            .service(web::resource("/subscriptions").route(web::get().to(subscriptions)))
+            .service(
+                web::resource("/graphql")
+                    .route(web::post().to(graphql))
+                    .route(web::get().to(graphql)),
+            )
+            .service(web::resource("/playground").route(web::get().to(playground)))
+            .default_service(web::to(|| async {
+                HttpResponse::Found()
+                    .append_header((header::LOCATION, "/playground"))
+                    .finish()
+            }))
     })
-    .or(warp::post().and(warp::path("graphql")).and(graphql_filter))
-    .or(warp::get()
-        .and(warp::path("playground"))
-        .and(playground_filter("/graphql", Some("/subscriptions"))))
-    .with(log);
-
-    warp::serve(routes).run(([0, 0, 0, 0], 6660)).await;
+    .bind("0.0.0.0:6660")?
+    .run()
+    .await?;
 
     Ok(())
 }
