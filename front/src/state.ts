@@ -3,6 +3,8 @@ import { reactive } from "vue";
 import type { Result } from "./searching";
 import type { UseSubscriptionResponse } from "@urql/vue";
 
+// TODO: all data top level
+
 interface SpotsState {
     loading: Boolean,
     spots: Result[],

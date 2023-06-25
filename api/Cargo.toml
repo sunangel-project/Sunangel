@@ -6,9 +6,14 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-juniper = { path = "../../juniper/juniper", features = ["chrono"] }
-juniper_graphql_ws = { path = "../../juniper/juniper_graphql_ws" }
-juniper_actix = { path = "../../juniper/juniper_actix", features = ["subscriptions"] }
+#juniper = { path = "../../juniper/juniper", features = ["chrono"] }
+#juniper_graphql_ws = { path = "../../juniper/juniper_graphql_ws" }
+#juniper_actix = { path = "../../juniper/juniper_actix", features = ["subscriptions"] }
+juniper = { git = "https://github.com/graphql-rust/juniper", branch="master", features = ["chrono"] }
+juniper_graphql_ws = {git = "https://github.com/graphql-rust/juniper", branch="master" }
+juniper_actix = { git = "https://github.com/graphql-rust/juniper", branch="master",  features = ["subscriptions"] }
+# TODO: revert juniper back to official version when 0.16 released
+
 actix-web = "4.3.1"
 actix-cors = "0.6.4"
 chrono = { version = "0.4.26", features = ["serde"] }

@@ -1261,6 +1261,7 @@ dependencies = [
 [[package]]
 name = "juniper"
 version = "0.16.0-dev"
+source = "git+https://github.com/graphql-rust/juniper?branch=master#74710d8a591c99425bb3226f15cbeb66db8036c0"
 dependencies = [
  "async-trait",
  "bson",
@@ -1282,6 +1283,7 @@ dependencies = [
 [[package]]
 name = "juniper_actix"
 version = "0.5.0-dev"
+source = "git+https://github.com/graphql-rust/juniper?branch=master#74710d8a591c99425bb3226f15cbeb66db8036c0"
 dependencies = [
  "actix",
  "actix-http",
@@ -1302,6 +1304,7 @@ dependencies = [
 [[package]]
 name = "juniper_codegen"
 version = "0.16.0-dev"
+source = "git+https://github.com/graphql-rust/juniper?branch=master#74710d8a591c99425bb3226f15cbeb66db8036c0"
 dependencies = [
  "proc-macro-error",
  "proc-macro2",
@@ -1313,6 +1316,7 @@ dependencies = [
 [[package]]
 name = "juniper_graphql_ws"
 version = "0.4.0-dev"
+source = "git+https://github.com/graphql-rust/juniper?branch=master#74710d8a591c99425bb3226f15cbeb66db8036c0"
 dependencies = [
  "juniper",
  "juniper_subscriptions",
@@ -1323,6 +1327,7 @@ dependencies = [
 [[package]]
 name = "juniper_subscriptions"
 version = "0.17.0-dev"
+source = "git+https://github.com/graphql-rust/juniper?branch=master#74710d8a591c99425bb3226f15cbeb66db8036c0"
 dependencies = [
  "futures",
  "juniper",
