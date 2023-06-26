@@ -1,7 +1,7 @@
 <template>
     <!-- style is fucked up and here, otherwise it wont work -->
     <ol-map :loadTilesWhileAnimating="true" :loadTilesWhileInteracting="true" style="height: 1px; min-height: 100vh;">
-        <ol-view ref="view" :center="center" :rotation="rotation" :zoom="zoom" :projection="projection" />
+        <ol-view ref="view" :center="mapCenter" :zoom="mapZoom" :projection="projection" />
 
         <ol-tile-layer>
             <ol-source-osm />
@@ -17,17 +17,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue";
-
 import SearchCircle from "./mapElements/SearchCircle.vue"
 import SpotPoint from "./mapElements/SpotPoint.vue"
-import { inputs, spots } from "../state"
-import { projection, project } from "../projection"
-
-const center = computed(() => project(inputs.lat, inputs.lon));
-const zoom = ref(15);
-const rotation = ref(0);
-
-const searchCenter = center;
-const searchRadius = computed(() => inputs.radius);
+import { searchCenter, searchRadius, mapCenter, mapZoom, spots } from "../state"
+import { projection } from "../projection"
 </script>
