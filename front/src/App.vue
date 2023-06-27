@@ -1,9 +1,14 @@
 <script setup lang="ts">
+import { onMounted } from 'vue';
+
 import SearchInput from './components/SearchInput.vue'
 import Map from './components/Map.vue'
 
 import { setupSpotsSubscription } from './searching';
 setupSpotsSubscription()
+
+import { restoreState } from './state';
+onMounted(restoreState);
 </script>
 
 <template>
