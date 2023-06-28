@@ -1,11 +1,8 @@
-import { computed, onMounted, reactive, ref, watch } from "vue";
+import { computed, reactive, watch } from "vue";
 
 import type { Result } from "./searching";
 import type { UseSubscriptionResponse } from "@urql/vue";
-import { invertProject, project } from "./projection";
-import { serialize } from "v8";
-
-// TODO: all data top level
+import { project } from "./projection";
 
 interface SpotsState {
     loading: Boolean,
@@ -27,56 +24,65 @@ interface Inputs {
     radius: number,
 }
 
-export const inputs: Inputs = reactive({
+const defaultInputs: Inputs = {
     lat: 48.81872,
     lon: 9.58781,
     radius: 2000,
-})
-
-watch(inputs, (newVal) => {
-    localStorage.setItem('search.inputs', JSON.stringify(newVal));
-});
-
+}
+export const inputs: Inputs = reactive(
+    loadObjectFromLocal('search.inputs', defaultInputs),
+)
 export const searchCenter = computed(() => project(inputs.lat, inputs.lon));
-export const searchRadius = computed(() => inputs.radius);
+
+watch(inputs, (inputs) => {
+    storeObjectLocal('search.inputs', inputs);
+});
 
 // Map state
 
-const mapState = reactive({
-    center: project(inputs.lat, inputs.lon),
+interface MapState {
+    center: number[],
+    zoom: number,
+}
+
+const defaultMapState: MapState = {
+    center: project(defaultInputs.lat, defaultInputs.lon),
     zoom: 14,
-});
+};
+export const mapState: MapState = reactive(
+    loadObjectFromLocal('map.state', defaultMapState),
+);
 
-export const mapCenter = computed(() => mapState.center);
-export const mapZoom = computed(() => mapState.zoom);
-
-export function storeMapCenter(center: number[]) {
-    localStorage.setItem('map.state.center', JSON.stringify(center));
+let mapStateToStore = defaultMapState;
+export function centerChanged(center: number[]) {
+    mapStateToStore.center = center;
 }
-export function storeMapZoom(zoom: number) {
-    localStorage.setItem('map.state.zoom', zoom.toString());
+export function zoomChanged(zoom: number) {
+    mapStateToStore.zoom = zoom;
+}
+export function storeMapState() {
+    storeObjectLocal('map.state', mapStateToStore);
 }
 
-// Load data from local storage
+// Utils
 
-export function restoreState() { // TODO: sanity checks
-    // Inputs
-    const inputsString = localStorage.getItem('search.inputs');
-    if (inputsString != null) {
-        const inputsValues = JSON.parse(inputsString);
-        inputs.lat = inputsValues.lat;
-        inputs.lon = inputsValues.lon;
-        inputs.radius = inputsValues.radius;
-    }
+function storeObjectLocal(name: string, object: any) {
+    const objectString = JSON.stringify(object);
+    localStorage.setItem(name, objectString);
+}
 
-    // Map
-    const centerString = localStorage.getItem('map.state.center');
-    if (centerString != null) {
-        const center = JSON.parse(centerString);
-        mapState.center = center;
-    }
-    const zoomString = localStorage.getItem('map.state.zoom')
-    if (zoomString != null) {
-        mapState.zoom = parseFloat(zoomString);
+function hasSameProps(a: any, b: any) {
+    var aKeys = Object.keys(a).sort();
+    var bKeys = Object.keys(b).sort();
+    return JSON.stringify(aKeys) === JSON.stringify(bKeys);
+}
+
+function loadObjectFromLocal<T>(name: string, deflt: T): T {
+    const objectString = localStorage.getItem(name) ?? '{}';
+    const object = JSON.parse(objectString);
+    if (hasSameProps(object, deflt)) {
+        return object;
+    } else {
+        return deflt;
     }
 }

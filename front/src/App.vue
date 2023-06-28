@@ -7,8 +7,6 @@ import Map from './components/Map.vue'
 import { setupSpotsSubscription } from './searching';
 setupSpotsSubscription()
 
-import { restoreState } from './state';
-onMounted(restoreState);
 </script>
 
 <template>
