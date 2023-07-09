@@ -3,6 +3,10 @@ name: Update Dependencies
 on:
   schedule:
     - cron:  '0 5 * * 6'
+  push:
+    branches:
+      - develop
+      - feature/api-restructure
 
 jobs:
   update-dep:
