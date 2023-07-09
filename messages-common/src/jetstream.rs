@@ -51,7 +51,7 @@ async fn try_subscribe(
     debug!("Trying to create consumer for {stream:?}");
     let consumer = stream
         .get_or_create_consumer(
-            group.unwrap_or("sole_consumer"), // todo allow customizing this name if group not specified
+            group.unwrap_or("sole_consumer"),
             async_nats::jetstream::consumer::pull::Config {
                 durable_name: group.map(str::to_string),
                 ..Default::default()
@@ -67,7 +67,6 @@ async fn try_subscribe(
 pub async fn try_pub_sub_subscribe(
     jetstream: &Context,
     stream: &str,
-    _name: &str,
 ) -> Result<MessageStream, Box<dyn Error + Send + Sync>> {
     try_subscribe(jetstream, stream, None).await
 }

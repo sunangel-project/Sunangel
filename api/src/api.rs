@@ -85,6 +85,13 @@ impl Subscription {
 }
 
 async fn connect_to_response_messages(context: &Context, request_id: String) -> SpotStreamPin {
+    return Box::pin(stream! {
+        yield Err(FieldError::new("todo: implement", graphql_value!(None)));
+    });
+}
+
+/*
+async fn connect_to_response_messages(context: &Context, request_id: String) -> SpotStreamPin {
     let messages = messaging::get_messages_stream(&context.jetstream)
         .await
         .map_err(|err| {
@@ -138,6 +145,7 @@ async fn transform_spot_message(message: Message) -> Result<SpotsSuccess, FieldE
         }
     }
 }
+*/
 
 ////////////
 // Schema //
