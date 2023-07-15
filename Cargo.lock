@@ -854,9 +854,9 @@ dependencies = [
 
 [[package]]
 name = "equivalent"
-version = "1.0.0"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88bffebc5d80432c9b140ee17875ff173a8ab62faad5b257da912bd2f6c1c0a1"
+checksum = "5443807d6dff69373d433ab9ef5378ad8df50ca6298caf15de6e52e24aaf54d5"
 
 [[package]]
 name = "errno"
@@ -1278,7 +1278,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cb0889898416213fab133e1d33a0e5858a48177452750691bde3666d0fdbaf8b"
 dependencies = [
  "hermit-abi",
- "rustix 0.38.3",
+ "rustix 0.38.4",
  "windows-sys",
 ]
 
@@ -1309,7 +1309,7 @@ dependencies = [
 [[package]]
 name = "juniper"
 version = "0.16.0-dev"
-source = "git+https://github.com/graphql-rust/juniper?branch=master#d9dfae6d59584434206d183b8e7881782813e1bd"
+source = "git+https://github.com/graphql-rust/juniper?branch=master#a297b9b67e0b07e37ca52aa1b093b8ab4988c7c3"
 dependencies = [
  "async-trait",
  "bson",
@@ -1331,7 +1331,7 @@ dependencies = [
 [[package]]
 name = "juniper_actix"
 version = "0.5.0-dev"
-source = "git+https://github.com/graphql-rust/juniper?branch=master#d9dfae6d59584434206d183b8e7881782813e1bd"
+source = "git+https://github.com/graphql-rust/juniper?branch=master#a297b9b67e0b07e37ca52aa1b093b8ab4988c7c3"
 dependencies = [
  "actix",
  "actix-http",
@@ -1352,7 +1352,7 @@ dependencies = [
 [[package]]
 name = "juniper_codegen"
 version = "0.16.0-dev"
-source = "git+https://github.com/graphql-rust/juniper?branch=master#d9dfae6d59584434206d183b8e7881782813e1bd"
+source = "git+https://github.com/graphql-rust/juniper?branch=master#a297b9b67e0b07e37ca52aa1b093b8ab4988c7c3"
 dependencies = [
  "proc-macro-error",
  "proc-macro2",
@@ -1364,7 +1364,7 @@ dependencies = [
 [[package]]
 name = "juniper_graphql_ws"
 version = "0.4.0-dev"
-source = "git+https://github.com/graphql-rust/juniper?branch=master#d9dfae6d59584434206d183b8e7881782813e1bd"
+source = "git+https://github.com/graphql-rust/juniper?branch=master#a297b9b67e0b07e37ca52aa1b093b8ab4988c7c3"
 dependencies = [
  "juniper",
  "juniper_subscriptions",
@@ -1375,7 +1375,7 @@ dependencies = [
 [[package]]
 name = "juniper_subscriptions"
 version = "0.17.0-dev"
-source = "git+https://github.com/graphql-rust/juniper?branch=master#d9dfae6d59584434206d183b8e7881782813e1bd"
+source = "git+https://github.com/graphql-rust/juniper?branch=master#a297b9b67e0b07e37ca52aa1b093b8ab4988c7c3"
 dependencies = [
  "futures",
  "juniper",
@@ -1834,9 +1834,9 @@ dependencies = [
 
 [[package]]
 name = "regex-automata"
-version = "0.3.2"
+version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83d3daa6976cffb758ec878f108ba0e062a45b2d6ca3a2cca965338855476caf"
+checksum = "39354c10dd07468c2e73926b23bb9c2caca74c5501e38a35da70406f1d923310"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -1845,9 +1845,9 @@ dependencies = [
 
 [[package]]
 name = "regex-syntax"
-version = "0.7.3"
+version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2ab07dc67230e4a4718e70fd5c20055a4334b121f1f9db8fe63ef39ce9b8c846"
+checksum = "e5ea92a5b6195c6ef2a0295ea818b312502c6fc94dde986c5553242e18fd4ce2"
 
 [[package]]
 name = "reqwest"
@@ -1932,9 +1932,9 @@ dependencies = [
 
 [[package]]
 name = "rustix"
-version = "0.38.3"
+version = "0.38.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac5ffa1efe7548069688cd7028f32591853cd7b5b756d41bcffd2353e4fc75b4"
+checksum = "0a962918ea88d644592894bc6dc55acc6c0956488adcebbfb6e273506b7fd6e5"
 dependencies = [
  "bitflags 2.3.3",
  "errno",
@@ -1945,9 +1945,9 @@ dependencies = [
 
 [[package]]
 name = "rustls"
-version = "0.21.3"
+version = "0.21.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b19faa85ecb5197342b54f987b142fb3e30d0c90da40f80ef4fa9a726e6676ed"
+checksum = "79ea77c539259495ce8ca47f53e66ae0330a8819f67e23ac96ca02f50e7b7d36"
 dependencies = [
  "log",
  "ring",
@@ -2048,9 +2048,9 @@ checksum = "bebd363326d05ec3e2f532ab7660680f3b02130d780c299bca73469d521bc0ed"
 
 [[package]]
 name = "serde"
-version = "1.0.170"
+version = "1.0.171"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a56657f512baabca8f840542f9ca8152aecf182c473c26e46e58d6aab4f6e439"
+checksum = "30e27d1e4fd7659406c492fd6cfaf2066ba8773de45ca75e855590f856dc34a9"
 dependencies = [
  "serde_derive",
 ]
@@ -2066,9 +2066,9 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-version = "1.0.170"
+version = "1.0.171"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "77d477848e6b23adba0db397777d5aad864555bc17fd9c89abb3b8009788b7b8"
+checksum = "389894603bd18c46fa56231694f8d827779c0951a667087194cf9de94ed24682"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2077,9 +2077,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.100"
+version = "1.0.102"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f1e14e89be7aa4c4b78bdbdc9eb5bf8517829a600ae8eaa39a6e1d960b5185c"
+checksum = "b5062a995d481b2308b6064e9af76011f2921c35f97b0468811ed9f6cd91dfed"
 dependencies = [
  "indexmap 2.0.0",
  "itoa",
