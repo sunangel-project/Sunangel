@@ -19,13 +19,13 @@ actix-cors = "0.6.4"
 chrono = { version = "0.4.26", features = ["serde"] }
 async-nats = "0.29.0"
 futures-util = "0.3.28"
-serde = "1.0.171"
-serde_json = "1.0.102"
-uuid = { version = "1.4.0", features = ["v4"] }
+serde = "1.0.174"
+serde_json = "1.0.103"
+uuid = { version = "1.4.1", features = ["v4"] }
 messages-common = { path = "../messages-common" }
 futures = "0.3.28"
 log = "0.4.19"
-anyhow = "1.0.71"
+anyhow = "1.0.72"
 bytes = "1.4.0"
 env_logger = "0.10.0"
 async-stream = "0.3.5"
