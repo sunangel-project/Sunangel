@@ -6,15 +6,15 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.71"
+anyhow = "1.0.72"
 async-nats = "0.29.0"
 chrono = { version = "0.4.26", features = ["serde"] }
 env_logger = "0.10.0"
 futures-util = "0.3.28"
 log = "0.4.19"
 messages-common = { path = "../messages-common" }
-serde = "1.0.171"
-serde_json = "1.0.102"
+serde = "1.0.174"
+serde_json = "1.0.103"
 spa = "0.4.0"
-thiserror = "1.0.43"
+thiserror = "1.0.44"
 tokio = { version = "1.29.1", features = ["rt-multi-thread"] }
