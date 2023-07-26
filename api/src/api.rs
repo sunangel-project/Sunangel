@@ -1,8 +1,9 @@
 use async_stream::stream;
+use chrono::Utc;
 use futures::{future, StreamExt};
 use futures_util::Stream;
 use log::{error, info};
-use messages_common::MessageStream;
+use messages_common::{request_id, MessageStream};
 use std::{pin::Pin, str};
 
 use async_nats::jetstream::{self, Message};
@@ -11,7 +12,9 @@ use uuid::Uuid;
 
 use crate::messaging;
 use crate::structs::{
-    APISearchQuery, SearchError, SearchQuery, SearchQueryMessage, SearchResponse, SpotsSuccess,
+    APISearchQuery, APISpot, HorizonEvent, HorizonEvents, HorizonEventsCollection, Location,
+    LocationIn, SearchError, SearchQuery, SearchQueryMessage, SearchResponse, SpotAnswerStatus,
+    SpotsSuccess,
 };
 
 ///////////
@@ -21,6 +24,7 @@ use crate::structs::{
 #[derive(Clone)]
 pub struct Context {
     jetstream: jetstream::Context,
+    fake: bool,
 }
 impl juniper::Context for Context {}
 
@@ -31,7 +35,9 @@ impl Context {
 
         messaging::create_streams(&jetstream).await;
 
-        Self { jetstream }
+        let fake = std::env::var("FAKE").map(|val| val == "1").unwrap_or(false);
+
+        Self { jetstream, fake }
     }
 }
 
@@ -54,20 +60,55 @@ impl Query {
 
 pub struct Subscription;
 
-type SpotStreamPin = Pin<Box<dyn Stream<Item = Result<SpotsSuccess, FieldError>> + Send>>;
+type SpotStream = dyn Stream<Item = Result<SpotsSuccess, FieldError>> + Send;
+type SpotStreamPin = Pin<Box<SpotStream>>;
 
 #[graphql_subscription(context = Context)]
 impl Subscription {
     async fn spots(#[graphql(context)] context: &Context, query: APISearchQuery) -> SpotStreamPin {
-        let request_id = Uuid::new_v4().to_string();
+        if context.fake {
+            fake_result_stream(query)
+        } else {
+            real_result_stream(context, query).await
+        }
+    }
+}
 
-        let search_query = SearchQuery::from(query);
-        let search_message = SearchQueryMessage {
-            request_id: request_id.clone(),
-            search_query,
-        };
+fn fake_result_stream(query: APISearchQuery) -> SpotStreamPin {
+    let lat = query.location.lat;
+    let lon = query.location.lon;
+    let events = HorizonEventsCollection::fake();
+    let dist = 0.001;
+    Box::pin(stream! {
+        for i in 0..4 {
+            let lat = lat + if i > 1 { dist } else { -dist };
+            let lon = lon + if i % 2 == 0 { dist } else { -dist };
+            yield Ok(SpotsSuccess {
+                status: if i == 3 {
+                    SpotAnswerStatus::Finished
+                } else {
+                    SpotAnswerStatus::Running
+                },
+                spot: APISpot {
+                    location: Location { lat, lon },
+                    kind: String::from("fake"),
+                    events: events.clone(),
+                },
+            })
+        }
+    })
+}
 
-        let sent = messaging::send_search_query(&context.jetstream, search_message).await.map_err(|err| {
+async fn real_result_stream(context: &Context, query: APISearchQuery) -> SpotStreamPin {
+    let request_id = Uuid::new_v4().to_string();
+
+    let query = SearchQuery::from(query);
+    let search_message = SearchQueryMessage {
+        id: request_id.clone(),
+        query,
+    };
+
+    let sent = messaging::send_search_query(&context.jetstream, search_message).await.map_err(|err| {
             error!("Couldn't send search query to NATS");
 
             Box::pin(stream! {
@@ -77,10 +118,9 @@ impl Subscription {
             })
         });
 
-        match sent {
-            Err(err_stream) => err_stream,
-            Ok(_) => connect_to_response_messages(context, request_id).await,
-        }
+    match sent {
+        Err(err_stream) => err_stream,
+        Ok(_) => connect_to_response_messages(context, request_id).await,
     }
 }
 

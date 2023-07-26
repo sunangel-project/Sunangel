@@ -60,22 +60,41 @@ impl From<LocationIn> for Location {
     }
 }
 
-#[derive(Debug, GraphQLObject, Serialize, Deserialize)]
+#[derive(Debug, Clone, GraphQLObject, Serialize, Deserialize)]
 pub struct HorizonEvent {
     pub time: DateTime<Utc>,
     pub altitude: f64,
     pub azimuth: f64,
 }
 
-#[derive(Debug, GraphQLObject, Serialize, Deserialize)]
+#[derive(Debug, Clone, GraphQLObject, Serialize, Deserialize)]
 pub struct HorizonEvents {
     pub rise: HorizonEvent,
     pub set: HorizonEvent,
 }
 
-#[derive(Debug, GraphQLObject, Serialize, Deserialize)]
+#[derive(Debug, Clone, GraphQLObject, Serialize, Deserialize)]
 pub struct HorizonEventsCollection {
     sun: HorizonEvents,
+}
+
+impl HorizonEventsCollection {
+    pub fn fake() -> Self {
+        Self {
+            sun: HorizonEvents {
+                rise: HorizonEvent {
+                    time: Utc::now(),
+                    altitude: 0.,
+                    azimuth: 0.,
+                },
+                set: HorizonEvent {
+                    time: Utc::now(),
+                    altitude: 0.,
+                    azimuth: 0.,
+                },
+            },
+        }
+    }
 }
 
 #[derive(GraphQLObject)]
@@ -160,6 +179,6 @@ impl From<APISearchQuery> for SearchQuery {
 
 #[derive(Serialize, Deserialize)]
 pub struct SearchQueryMessage {
-    pub request_id: String,
-    pub search_query: SearchQuery,
+    pub id: String,
+    pub query: SearchQuery,
 }
