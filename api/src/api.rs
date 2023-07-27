@@ -1,9 +1,9 @@
 use async_stream::stream;
-use chrono::Utc;
-use futures::{future, StreamExt};
+
+use futures::StreamExt;
 use futures_util::Stream;
 use log::{error, info};
-use messages_common::{request_id, MessageStream};
+use messages_common::MessageStream;
 use std::collections::HashSet;
 use std::{pin::Pin, str};
 
@@ -13,9 +13,8 @@ use uuid::Uuid;
 
 use crate::messaging;
 use crate::structs::{
-    APISearchQuery, APISpot, HorizonEvent, HorizonEvents, HorizonEventsCollection, Location,
-    LocationIn, SearchError, SearchQuery, SearchQueryMessage, SearchResponse, SpotAnswerStatus,
-    SpotsSuccess,
+    APISearchQuery, APISpot, HorizonEventsCollection, Location, SearchError, SearchQuery,
+    SearchQueryMessage, SearchResponse, SpotAnswerStatus, SpotsSuccess,
 };
 
 ///////////
@@ -148,7 +147,7 @@ async fn translate_response_messages(
     mut messages: MessageStream,
     request_id: String,
 ) -> SpotStreamPin {
-    return Box::pin(stream! {
+    Box::pin(stream! {
         let mut received_ids = HashSet::<u32>::new();
         while let Some(message) = messages.next().await {
             match message {
@@ -169,7 +168,7 @@ async fn translate_response_messages(
                 }
             }
         }
-    });
+    })
 }
 
 async fn transform_spot_message(

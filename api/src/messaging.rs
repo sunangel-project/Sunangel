@@ -1,14 +1,14 @@
-use async_nats::{jetstream::Context, Message};
+use async_nats::{jetstream::Context};
 use futures_util::stream::select;
 
-use juniper::{graphql_value, FieldError};
+
 use log::info;
 use messages_common::MessageStream;
 use serde::{Deserialize, Serialize};
 use std::{error::Error, str};
-use uuid::Uuid;
 
-use crate::structs::{SearchError, SearchQueryMessage, SearchResponse, SpotsSuccess};
+
+use crate::structs::{SearchQueryMessage};
 
 const SEARCH_STREAM: &str = "SEARCH";
 const SEARCH_Q: &str = "SEARCH.request";
