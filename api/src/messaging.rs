@@ -56,31 +56,3 @@ pub async fn get_messages_stream(
 
     Ok(Box::pin(subscriber))
 }
-
-pub fn api_answer_from_message(message: Message) -> Result<SpotsSuccess, FieldError> {
-    let payload = str::from_utf8(&message.payload)?;
-
-    let maybe_spot = serde_json::from_str::<SearchResponse>(payload);
-    match maybe_spot {
-        Ok(spot) => Ok(SpotsSuccess::from(spot)),
-        Err(_) => Err(try_decode_error(payload)),
-    }
-}
-
-fn try_decode_error(payload: &str) -> FieldError {
-    let maybe_error = serde_json::from_str::<SearchError>(payload);
-    match maybe_error {
-        Ok(error) => FieldError::new(
-            "Internal Server Error while executing search request",
-            graphql_value!(format!(
-                // TODO: serde value to graphql error?
-                "reason '{}' with input '{}' from '{}'",
-                error.reason, error.input, error.sender
-            )),
-        ),
-        Err(_) => FieldError::new(
-            "Could not decode search request response",
-            graphql_value!(payload),
-        ),
-    }
-}

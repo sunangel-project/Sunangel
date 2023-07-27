@@ -4,6 +4,7 @@ use futures::{future, StreamExt};
 use futures_util::Stream;
 use log::{error, info};
 use messages_common::{request_id, MessageStream};
+use std::collections::HashSet;
 use std::{pin::Pin, str};
 
 use async_nats::jetstream::{self, Message};
@@ -148,6 +149,7 @@ async fn translate_response_messages(
     request_id: String,
 ) -> SpotStreamPin {
     return Box::pin(stream! {
+        let mut received_ids = HashSet::<u32>::new();
         while let Some(message) = messages.next().await {
             match message {
                 Err(error) => yield Err(FieldError::new(
@@ -159,7 +161,7 @@ async fn translate_response_messages(
                         continue;
                     }
 
-                    let (spot, last) = transform_spot_message(message).await?;
+                    let (spot, last) = transform_spot_message(message, &mut received_ids).await?;
                     yield Ok(spot);
                     if last {
                         break;
@@ -170,7 +172,10 @@ async fn translate_response_messages(
     });
 }
 
-async fn transform_spot_message(message: Message) -> Result<(SpotsSuccess, bool), FieldError> {
+async fn transform_spot_message(
+    message: Message,
+    received_ids: &mut HashSet<u32>,
+) -> Result<(SpotsSuccess, bool), FieldError> {
     let payload_str = str::from_utf8(&message.payload)?;
     let res_response: Result<SearchResponse, serde_json::Error> = serde_json::from_str(payload_str);
 
@@ -178,9 +183,25 @@ async fn transform_spot_message(message: Message) -> Result<(SpotsSuccess, bool)
         Ok(response) => {
             info!("Received response from microservices: {response:?}");
 
-            message.ack().await?;
+            // This implementation using a HashSet is wasteful
+            // TODO: Maybe alternative implementation using a vector?
+            if received_ids.is_empty() {
+                for id in 0..response.part.of {
+                    received_ids.insert(id);
+                }
+            }
+            received_ids.remove(&response.part.id);
+            let last = received_ids.is_empty();
 
-            Ok((response.into(), false))
+            let status = if last {
+                SpotAnswerStatus::Finished
+            } else {
+                SpotAnswerStatus::Running
+            };
+            let spot = APISpot::from(response);
+
+            message.ack().await?;
+            Ok((SpotsSuccess { status, spot }, last))
         }
         Err(_) => {
             let error: SearchError = serde_json::from_str(payload_str)?;

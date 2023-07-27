@@ -9,9 +9,9 @@ use serde::{Deserialize, Serialize};
 /// In
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Part {
-    id: u32,
-    of: u32,
+pub struct Part {
+    pub id: u32,
+    pub of: u32,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -23,7 +23,7 @@ struct Spot {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SearchResponse {
-    part: Part,
+    pub part: Part,
     request_id: String,
     search_query: SearchQuery,
     spot: Spot,
@@ -124,20 +124,6 @@ pub enum SpotAnswerStatus {
 pub struct SpotsSuccess {
     pub status: SpotAnswerStatus,
     pub spot: APISpot,
-}
-
-impl From<SearchResponse> for SpotsSuccess {
-    fn from(value: SearchResponse) -> Self {
-        let status = if value.part.id < value.part.of - 1 {
-            SpotAnswerStatus::Running
-        } else {
-            SpotAnswerStatus::Finished
-        };
-
-        let spot = APISpot::from(value);
-
-        SpotsSuccess { status, spot }
-    }
 }
 
 //////////////////////////////////////////////////////////////////////////////
