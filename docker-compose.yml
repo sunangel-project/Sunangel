@@ -18,7 +18,7 @@ services:
     environment:
      - NATS_HOST=nats
      - RUST_LOG=info
-     - FAKE=1
+     - FAKE=0
   
   spot-finder:
    image: spot-finder

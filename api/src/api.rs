@@ -99,13 +99,13 @@ fn fake_result_stream(query: APISearchQuery) -> SpotStreamPin {
     })
 }
 
-async fn real_result_stream(context: &Context, query: APISearchQuery) -> SpotStreamPin {
+async fn real_result_stream(context: &Context, search_query: APISearchQuery) -> SpotStreamPin {
     let request_id = Uuid::new_v4().to_string();
 
-    let query = SearchQuery::from(query);
+    let search_query = SearchQuery::from(search_query);
     let search_message = SearchQueryMessage {
-        id: request_id.clone(),
-        query,
+        request_id: request_id.clone(),
+        search_query,
     };
 
     let sent = messaging::send_search_query(&context.jetstream, search_message).await.map_err(|err| {
@@ -125,13 +125,6 @@ async fn real_result_stream(context: &Context, query: APISearchQuery) -> SpotStr
 }
 
 async fn connect_to_response_messages(context: &Context, request_id: String) -> SpotStreamPin {
-    return Box::pin(stream! {
-        yield Err(FieldError::new("todo: implement", graphql_value!(None)));
-    });
-}
-
-/*
-async fn connect_to_response_messages(context: &Context, request_id: String) -> SpotStreamPin {
     let messages = messaging::get_messages_stream(&context.jetstream)
         .await
         .map_err(|err| {
@@ -146,22 +139,38 @@ async fn connect_to_response_messages(context: &Context, request_id: String) -> 
 
     match messages {
         Err(error_stream) => error_stream,
-        Ok(messages) => filter_messages(messages, request_id).await,
+        Ok(messages) => translate_response_messages(messages, request_id).await,
     }
 }
 
-async fn filter_messages(messages: MessageStream, request_id: String) -> SpotStreamPin {
-    messages
-        .filter_map(|message| async { message.ok() })
-        .filter(move |message| {
-            future::ready(messages_common::get_request_id(&message.payload) == request_id)
-        })
-        // Need filter_map, bc map does not allow async closures
-        .filter_map(|message| async { Some(transform_spot_message(message).await) })
-        .boxed()
+async fn translate_response_messages(
+    mut messages: MessageStream,
+    request_id: String,
+) -> SpotStreamPin {
+    return Box::pin(stream! {
+        while let Some(message) = messages.next().await {
+            match message {
+                Err(error) => yield Err(FieldError::new(
+                    "Error while receiving responses",
+                    graphql_value!(error.to_string()),
+                )),
+                Ok(message) => {
+                    if messages_common::get_request_id(&message.payload) != request_id {
+                        continue;
+                    }
+
+                    let (spot, last) = transform_spot_message(message).await?;
+                    yield Ok(spot);
+                    if last {
+                        break;
+                    }
+                }
+            }
+        }
+    });
 }
 
-async fn transform_spot_message(message: Message) -> Result<SpotsSuccess, FieldError> {
+async fn transform_spot_message(message: Message) -> Result<(SpotsSuccess, bool), FieldError> {
     let payload_str = str::from_utf8(&message.payload)?;
     let res_response: Result<SearchResponse, serde_json::Error> = serde_json::from_str(payload_str);
 
@@ -171,7 +180,7 @@ async fn transform_spot_message(message: Message) -> Result<SpotsSuccess, FieldE
 
             message.ack().await?;
 
-            Ok(response.into())
+            Ok((response.into(), false))
         }
         Err(_) => {
             let error: SearchError = serde_json::from_str(payload_str)?;
@@ -185,7 +194,6 @@ async fn transform_spot_message(message: Message) -> Result<SpotsSuccess, FieldE
         }
     }
 }
-*/
 
 ////////////
 // Schema //

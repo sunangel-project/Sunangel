@@ -179,6 +179,6 @@ impl From<APISearchQuery> for SearchQuery {
 
 #[derive(Serialize, Deserialize)]
 pub struct SearchQueryMessage {
-    pub id: String,
-    pub query: SearchQuery,
+    pub request_id: String,
+    pub search_query: SearchQuery,
 }
