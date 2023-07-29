@@ -2,7 +2,7 @@ name: Update Dependencies
 
 on:
   schedule:
-    - cron:  '0 4 * * SAT'
+    - cron:  '0 3 28 * *'
 
 jobs:
   update-dep:
