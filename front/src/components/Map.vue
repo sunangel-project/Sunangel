@@ -9,8 +9,7 @@
             <ol-source-osm />
         </ol-tile-layer>
 
-        <ol-interaction-select @select="featureSelected" :removeCondition="removeCondition" :condition="selectCondition"
-            :filter="selectInteactionFilter">
+        <ol-interaction-select @select="featureSelected" :condition="selectCondition" :filter="selectInteactionFilter">
             <ol-style>
                 <ol-style-circle :radius="radius">
                     <ol-style-fill :color="'blue'"></ol-style-fill>

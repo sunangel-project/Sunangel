@@ -22,10 +22,4 @@ import { inputs, spots } from "../state"
     </div>
 
     <button @click="search">Search</button>
-
-    <ul>
-        <li v-for="spot in spots.spots">
-            {{ spot }}
-        </li>
-    </ul>
 </template>

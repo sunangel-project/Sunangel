@@ -1,12 +1,32 @@
 import { computed, reactive, watch } from "vue";
 
-import type { Result } from "./searching";
 import type { UseSubscriptionResponse } from "@urql/vue";
 import { project } from "./projection";
 
+export interface HorizonEvent {
+    altitude: number;
+    azimuth: number;
+    time: string;
+}
+
+export interface Spot {
+    selected: boolean;
+    kind: string;
+    location: {
+        lat: number;
+        lon: number;
+    };
+    events: {
+        sun: {
+            rise: HorizonEvent;
+            set: HorizonEvent;
+        };
+    };
+}
+
 interface SpotsState {
     loading: Boolean,
-    spots: Result[],
+    spots: Spot[],
     subscription: UseSubscriptionResponse | undefined,
 }
 
