@@ -11,11 +11,7 @@
 
         <!--- select spots --->
         <ol-interaction-select @select="featureSelected" :condition="selectCondition" :filter="selectInteactionFilter">
-            <ol-style>
-                <ol-style-circle :radius="radius">
-                    <ol-style-fill :color="'blue'"></ol-style-fill>
-                </ol-style-circle>
-            </ol-style>
+            <SpotPointStyle :selected="true" />
         </ol-interaction-select>
 
         <ol-vector-layer>
@@ -30,10 +26,11 @@
 <script lang="ts" setup>
 import SearchCircle from "./mapElements/SearchCircle.vue"
 import SpotPoint from "./mapElements/SpotPoint.vue"
+import SpotPointStyle from "./mapElements/SpotPointStyle.vue"
 import { searchCenter, inputs, mapState, centerChanged, zoomChanged, storeMapState, spots, selectedSpotIds } from "../state"
 import { projection } from "../projection"
 
-import { inject, ref } from "vue";
+import { inject } from "vue";
 const selectConditions = inject("ol-selectconditions");
 const selectCondition = selectConditions.click;
 
@@ -51,6 +48,4 @@ function featureSelected(event: any) {
 function selectInteactionFilter(feature: any) {
     return feature.values_.kind === 'spot';
 };
-
-const radius = ref(10); // duplicate
 </script>
