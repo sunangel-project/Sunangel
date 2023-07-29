@@ -10,7 +10,7 @@ export interface HorizonEvent {
 }
 
 export interface Spot {
-    selected: boolean;
+    id: string;
     kind: string;
     location: {
         lat: number;
@@ -35,6 +35,8 @@ export const spots: SpotsState = reactive({
     spots: [],
     subscription: undefined,
 });
+
+export const selectedSpotIds: Set<string> = reactive(new Set());
 
 // Search input state
 

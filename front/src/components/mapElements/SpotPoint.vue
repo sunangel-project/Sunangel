@@ -1,5 +1,5 @@
 <template>
-    <ol-feature :properties="{ 'id': 0 }">
+    <ol-feature :properties="featureProperties">
         <ol-geom-point :coordinates="coordinates"></ol-geom-point>
         <ol-style>
             <ol-style-circle :radius="radius">
@@ -25,6 +25,10 @@ const props = defineProps({
 })
 
 const spot = props.spot!;
-const coordinates = ref(proj4(projection.value, [spot.location.lon, spot.location.lat]))
 
+const featureProperties = {
+    'kind': 'spot',
+    'id': spot.id,
+};
+const coordinates = ref(proj4(projection.value, [spot.location.lon, spot.location.lat]));
 </script>

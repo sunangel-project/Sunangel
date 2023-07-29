@@ -8,9 +8,9 @@
 
 <script lang="ts" setup>
 import { computed } from "vue"
-import { spots } from "../state"
+import { spots, selectedSpotIds } from "../state"
 
 const selectedSpots = computed(
-    () => spots.spots.filter((spot) => spot.selected)
+    () => spots.spots.filter((spot) => selectedSpotIds.has(spot.id))
 )
 </script>

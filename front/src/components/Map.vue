@@ -9,6 +9,7 @@
             <ol-source-osm />
         </ol-tile-layer>
 
+        <!--- select spots --->
         <ol-interaction-select @select="featureSelected" :condition="selectCondition" :filter="selectInteactionFilter">
             <ol-style>
                 <ol-style-circle :radius="radius">
@@ -29,20 +30,26 @@
 <script lang="ts" setup>
 import SearchCircle from "./mapElements/SearchCircle.vue"
 import SpotPoint from "./mapElements/SpotPoint.vue"
-import { searchCenter, inputs, mapState, centerChanged, zoomChanged, storeMapState, spots } from "../state"
+import { searchCenter, inputs, mapState, centerChanged, zoomChanged, storeMapState, spots, selectedSpotIds } from "../state"
 import { projection } from "../projection"
 
 import { inject, ref } from "vue";
 const selectConditions = inject("ol-selectconditions");
 const selectCondition = selectConditions.click;
 
-function featureSelected(event) {
-    console.log(event)
+function featureSelected(event: any) {
+    for (const selectedObj of event.selected) {
+        const id = selectedObj.values_.id;
+        selectedSpotIds.add(id);
+    }
+    for (const deselectedObj of event.deselected) {
+        const id = deselectedObj.values_.id;
+        selectedSpotIds.delete(id);
+    }
 }
 
 function selectInteactionFilter(feature: any) {
-    // TODO: filter for search spots
-    return true;
+    return feature.values_.kind === 'spot';
 };
 
 const radius = ref(10); // duplicate
