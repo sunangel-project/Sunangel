@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
-
 import SearchInput from './components/SearchInput.vue'
+import SpotList from './components/SpotList.vue'
 import Map from './components/Map.vue'
 
 import { setupSpotsSubscription } from './searching';
@@ -16,6 +15,7 @@ setupSpotsSubscription()
         </div>
         <div class="input">
             <SearchInput />
+            <SpotList />
         </div>
     </div>
 </template>

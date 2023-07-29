@@ -1,13 +1,9 @@
 import { gql, useSubscription } from '@urql/vue';
-import { inputs, spots } from "./state";
+import { v4 as uuidv4 } from 'uuid';
+import { inputs, spots, type Spot, type HorizonEvent } from "./state";
 
-interface HorizonEvent {
-    altitude: number;
-    azimuth: number;
-    time: string;
-}
-
-export interface Result {
+interface Result {
+    selected: boolean;
     kind: string;
     location: {
         lat: number;
@@ -67,11 +63,16 @@ subscription spot($lat: Float!, $lon: Float!, $radius: Int!) {
             pause: true,
         },
         (_, s) => {
-            if (typeof s === "object") {
-                spots.spots.push(s.spots.spot)
+            if (typeof s === "object") { // TODO: type safety!
+                spots.spots.push(spotFromResult(s.spots.spot));
             } else {
-                console.log('was not correct type')
+                console.log('was not correct type');
             }
         },
     );
+}
+
+function spotFromResult(result: Result): Spot {
+    const id = uuidv4();
+    return { ...result, id };
 }
