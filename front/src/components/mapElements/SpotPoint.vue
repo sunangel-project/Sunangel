@@ -1,5 +1,5 @@
 <template>
-    <ol-feature>
+    <ol-feature :properties="{ 'id': 0 }">
         <ol-geom-point :coordinates="coordinates"></ol-geom-point>
         <ol-style>
             <ol-style-circle :radius="radius">
