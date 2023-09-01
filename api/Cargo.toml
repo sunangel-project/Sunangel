@@ -14,9 +14,9 @@ juniper_graphql_ws = {git = "https://github.com/graphql-rust/juniper", branch="m
 juniper_actix = { git = "https://github.com/graphql-rust/juniper", branch="master",  features = ["subscriptions"] }
 # TODO: revert juniper back to official version when 0.16 released
 
-actix-web = "4.3.1"
+actix-web = "4.4.0"
 actix-cors = "0.6.4"
-chrono = { version = "0.4.26", features = ["serde"] }
+chrono = { version = "0.4.28", features = ["serde"] }
 async-nats = "0.29.0"
 futures-util = "0.3.28"
 serde = "1.0.188"
