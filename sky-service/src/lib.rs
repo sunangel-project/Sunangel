@@ -124,8 +124,8 @@ where
     // If the left altitude is less than the horizon, we are searching for a rise
     // Swapping left and right will allow us to reuse the algorithm for finding a set below
     let SkyPosition { altitude, azimuth } = object.position(&left, location);
-    let left_horizontarget_altitude = horizon.altitude_at(azimuth);
-    if altitude < left_horizontarget_altitude {
+    let left_horizon_altitude = horizon.altitude_at(azimuth);
+    if altitude < left_horizon_altitude {
         (right, left) = (left, right);
     }
 

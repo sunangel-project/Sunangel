@@ -1,6 +1,35 @@
 # Sunangel Home Edition
 
 
+## Execution
+
+### Backend
+
+Run with `docker` or `podman`.
+
+```
+docker compose up
+```
+
+```
+podman-compose up
+```
+
+For `podman` remember to install `podman-compose` and the [dnsname plugin](https://github.com/containers/dnsname/tree/maig) (package `cni-plugin-dnsname` on openSuse)
+
+### Frontend
+
+Currently, it is not in the `docker-compose` file.
+Run with `npm`.
+
+```
+cd front
+npm install # only needed once
+npm run dev
+```
+
+## Execution
+
 ## Planned Architecture
 
 ![arch](architecture.png)
