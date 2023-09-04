@@ -98,7 +98,7 @@ func KeyValueHorizon(js nats.JetStreamContext) nats.KeyValue {
 	return kv
 }
 
-func Setup_streams(js nats.JetStreamContext) error {
+func SetupStreams(js nats.JetStreamContext) error {
 	output_stream_config := &nats.StreamConfig{
 		Name:     OUT_STREAM,
 		Subjects: []string{OUT_STREAM, OUT_STREAM + ".*"},

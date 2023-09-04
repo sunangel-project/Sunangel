@@ -63,7 +63,7 @@ mod test {
 
     #[test]
     fn sun_position() {
-        let time: DateTime<Utc> = DateTime::from_utc(
+        let time: DateTime<Utc> = DateTime::from_naive_utc_and_offset(
             NaiveDateTime::new(
                 NaiveDate::from_ymd_opt(2006, 8, 6).unwrap(),
                 NaiveTime::from_hms_opt(6, 0, 9).unwrap(),

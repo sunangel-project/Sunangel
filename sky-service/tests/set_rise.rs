@@ -40,7 +40,7 @@ fn set_flat() {
     let horizon = Horizon::new(altitudes);
 
     let test_object = TestSkyObject {};
-    let time: DateTime<Utc> = DateTime::from_utc(
+    let time: DateTime<Utc> = DateTime::from_naive_utc_and_offset(
         NaiveDateTime::new(
             NaiveDate::from_ymd_opt(2006, 8, 6).unwrap(),
             NaiveTime::from_hms_opt(0, 0, 0).unwrap(),
