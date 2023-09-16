@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use chrono::{DateTime, Duration, Utc};
-use log::{debug, warn};
+use log::{warn};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 

@@ -27,10 +27,12 @@
 import SearchCircle from "./mapElements/SearchCircle.vue"
 import SpotPoint from "./mapElements/SpotPoint.vue"
 import SpotPointStyle from "./mapElements/SpotPointStyle.vue"
+
 import { searchCenter, inputs, mapState, centerChanged, zoomChanged, storeMapState, spots, selectedSpotIds } from "../state"
 import { projection } from "../projection"
 
 import { inject } from "vue";
+
 const selectConditions = inject("ol-selectconditions");
 const selectCondition = selectConditions.click;
 

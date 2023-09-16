@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import SearchInput from './components/SearchInput.vue'
-import SpotList from './components/SpotList.vue'
+import SpotList from './components/Results/SpotList.vue'
 import Map from './components/Map.vue'
 
 import { setupSpotsSubscription } from './searching';

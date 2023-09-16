@@ -25,9 +25,9 @@ export interface Spot {
 }
 
 interface SpotsState {
-    loading: Boolean,
-    spots: Spot[],
-    subscription: UseSubscriptionResponse | undefined,
+    loading: boolean;
+    spots: Spot[];
+    subscription: UseSubscriptionResponse | undefined;
 }
 
 export const spots: SpotsState = reactive({
@@ -41,30 +41,30 @@ export const selectedSpotIds: Set<string> = reactive(new Set());
 // Search input state
 
 interface Inputs {
-    lat: number,
-    lon: number,
-    radius: number,
+    lat: number;
+    lon: number;
+    radius: number;
 }
 
 const defaultInputs: Inputs = {
     lat: 48.81872,
     lon: 9.58781,
     radius: 2000,
-}
+};
 export const inputs: Inputs = reactive(
-    loadObjectFromLocal('search.inputs', defaultInputs),
-)
+    loadObjectFromLocal("search.inputs", defaultInputs),
+);
 export const searchCenter = computed(() => project(inputs.lat, inputs.lon));
 
 watch(inputs, (inputs) => {
-    storeObjectLocal('search.inputs', inputs);
+    storeObjectLocal("search.inputs", inputs);
 });
 
 // Map state
 
 interface MapState {
-    center: number[],
-    zoom: number,
+    center: number[];
+    zoom: number;
 }
 
 const defaultMapState: MapState = {
@@ -72,7 +72,7 @@ const defaultMapState: MapState = {
     zoom: 14,
 };
 export const mapState: MapState = reactive(
-    loadObjectFromLocal('map.state', defaultMapState),
+    loadObjectFromLocal("map.state", defaultMapState),
 );
 
 let mapStateToStore = defaultMapState;
@@ -83,7 +83,7 @@ export function zoomChanged(zoom: number) {
     mapStateToStore.zoom = zoom;
 }
 export function storeMapState() {
-    storeObjectLocal('map.state', mapStateToStore);
+    storeObjectLocal("map.state", mapStateToStore);
 }
 
 // Utils
@@ -100,7 +100,7 @@ function hasSameProps(a: any, b: any) {
 }
 
 function loadObjectFromLocal<T>(name: string, deflt: T): T {
-    const objectString = localStorage.getItem(name) ?? '{}';
+    const objectString = localStorage.getItem(name) ?? "{}";
     const object = JSON.parse(objectString);
     if (hasSameProps(object, deflt)) {
         return object;
