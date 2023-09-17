@@ -34,7 +34,7 @@ fn parse_direction_cardinals(input: &str) -> Result<f64, Error> {
         || in_upper.len() > 3
         || in_upper
             .chars()
-            .any(|cardinal| !vec!['N', 'E', 'S', 'W'].contains(&cardinal))
+            .any(|cardinal| !['N', 'E', 'S', 'W'].contains(&cardinal))
     {
         bail!("invalid cardinals '{input}'");
     }
