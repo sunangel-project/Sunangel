@@ -8,9 +8,16 @@ import App from './App.vue'
 import './assets/main.css'
 import { SubscriptionClient } from 'subscriptions-transport-ws';
 
+let protocol = "ws";
+let apiHost = "localhost";
+if (process.env.NODE_ENV == "production") {
+    protocol = "wss";
+    apiHost = "sunnapi.cloudsftp.de";
+}
+
 // TODO: handle connection fail
 const subscriptionClient = new SubscriptionClient(
-    "ws://localhost:6660/subscriptions",
+    `${protocol}://${apiHost}:6660/subscriptions`,
     { reconnect: false },
 );
 
@@ -27,4 +34,3 @@ app.use(urql, {
     ],
 });
 app.mount('#app')
-

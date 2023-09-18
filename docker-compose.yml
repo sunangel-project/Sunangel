@@ -6,6 +6,7 @@ services:
       - "8222:8222"
       - "4222:4222"
     command: "--name main --jetstream --http_port 8222"
+    profiles: ["api"]
   
   api:
     image: api
@@ -16,35 +17,39 @@ services:
       - "6660:6660"
     depends_on: ["nats"]
     environment:
-     - NATS_HOST=nats
-     - RUST_LOG=info
-     - FAKE=0
+      - NATS_HOST=nats
+      - RUST_LOG=info
+      - FAKE=0
+    profiles: ["api"]
   
   spot-finder:
-   image: spot-finder
-   build:
-     context: .
-     dockerfile: ./Dockerfiles/spot-finder
-   depends_on: ["nats", "api"]
-   environment:
-    - NATS_HOST=nats
-    - RUST_LOG=info
+    image: spot-finder
+    build:
+      context: .
+      dockerfile: ./Dockerfiles/spot-finder
+    depends_on: ["nats", "api"]
+    environment:
+      - NATS_HOST=nats
+      - RUST_LOG=info
+    profiles: ["api"]
 
   horizon-service:
-   image: horizon-service
-   build:
-     context: .
-     dockerfile: ./Dockerfiles/horizon-service
-   depends_on: ["nats", "spot-finder"]
-   environment:
-    - NATS_HOST=nats
+    image: horizon-service
+    build:
+      context: .
+      dockerfile: ./Dockerfiles/horizon-service
+    depends_on: ["nats", "spot-finder"]
+    environment:
+      - NATS_HOST=nats
+    profiles: ["compute"]
   
   sky-service:
-   image: sky-service
-   build:
-     context: .
-     dockerfile: ./Dockerfiles/sky-service
-   depends_on: ["nats", "horizon-service"]
-   environment:
-    - NATS_HOST=nats
-    - RUST_LOG=info
+    image: sky-service
+    build:
+      context: .
+      dockerfile: ./Dockerfiles/sky-service
+    depends_on: ["nats", "horizon-service"]
+    environment:
+      - NATS_HOST=nats
+      - RUST_LOG=info
+    profiles: ["compute"]

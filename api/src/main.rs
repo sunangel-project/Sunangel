@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{env, time::Duration};
 
 use actix_cors::Cors;
 use actix_web::{
@@ -11,6 +11,7 @@ use actix_web::{
 use juniper_actix::{graphql_handler, playground_handler, subscriptions::subscriptions_handler};
 use juniper_graphql_ws::ConnectionConfig;
 use log::info;
+use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 
 use crate::api::{schema, Context, Schema};
 
@@ -53,16 +54,21 @@ async fn subscriptions(
 async fn main() -> Result<(), async_nats::Error> {
     env_logger::init();
 
+    // Create certificates for test purposes:openssl req -x509 -newkey rsa:4096 -nodes -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost'
+    let mut acceptor_builder = SslAcceptor::mozilla_intermediate(SslMethod::tls())?;
+    acceptor_builder.set_private_key_file("key.pem", SslFiletype::PEM)?;
+    acceptor_builder.set_certificate_chain_file("cert.pem")?;
+
     info!("Server running on http://localhost:6660, playground: http://localhost:6660/playground");
 
-    HttpServer::new(move || {
+    let mut server = HttpServer::new(move || {
         App::new()
             .app_data(Data::new(schema()))
             .wrap(Logger::default())
             .wrap(
                 Cors::default()
                     .allow_any_origin()
-                    .allowed_methods(vec!["POST", "GET"])
+                    .allowed_methods(["POST", "GET"])
                     .allow_any_header()
                     //.allowed_headers(vec![header::ACCEPT, header::AUTHORIZATION])
                     //.allowed_header(header::CONTENT_TYPE)
@@ -83,10 +89,15 @@ async fn main() -> Result<(), async_nats::Error> {
                     .append_header((header::LOCATION, "/playground"))
                     .finish()
             }))
-    })
-    .bind("0.0.0.0:6660")?
-    .run()
-    .await?;
+    });
+
+    server = if env::var("PRODUCTION").unwrap_or("0".to_string()) == "1".to_string() {
+        server.bind_openssl("0.0.0.0:6660", acceptor_builder)?
+    } else {
+        server.bind("0.0.0.0:6660")?
+    };
+
+    server.run().await?;
 
     Ok(())
 }

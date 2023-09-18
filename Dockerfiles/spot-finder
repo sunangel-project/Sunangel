@@ -4,7 +4,7 @@ WORKDIR /usr/src
 RUN git clone https://github.com/graphql-rust/juniper.git
 
 WORKDIR /usr/src/sunangel
-COPY .. .
+COPY . .
 RUN cargo install --path spot-finder
 
 CMD ["spot-finder"]
