@@ -6,7 +6,9 @@ services:
       - "8222:8222"
       - "4222:4222"
     command: "--name main --jetstream --http_port 8222"
-    profiles: ["api"]
+    profiles:
+      - api
+      - all
   
   api:
     image: api
@@ -20,7 +22,9 @@ services:
       - NATS_HOST=nats
       - RUST_LOG=info
       - FAKE=0
-    profiles: ["api"]
+    profiles:
+      - api
+      - all
   
   spot-finder:
     image: spot-finder
@@ -31,7 +35,9 @@ services:
     environment:
       - NATS_HOST=nats
       - RUST_LOG=info
-    profiles: ["api"]
+    profiles:
+      - api
+      - all
 
   horizon-service:
     image: horizon-service
@@ -41,7 +47,9 @@ services:
     depends_on: ["nats", "spot-finder"]
     environment:
       - NATS_HOST=nats
-    profiles: ["compute"]
+    profiles:
+      - compute
+      - all
   
   sky-service:
     image: sky-service
@@ -52,4 +60,6 @@ services:
     environment:
       - NATS_HOST=nats
       - RUST_LOG=info
-    profiles: ["compute"]
+    profiles:
+      - compute
+      - all

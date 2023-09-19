@@ -25,6 +25,7 @@ use crate::structs::{
 pub struct Context {
     jetstream: jetstream::Context,
     fake: bool,
+    pub production: bool,
 }
 impl juniper::Context for Context {}
 
@@ -36,8 +37,15 @@ impl Context {
         messaging::create_streams(&jetstream).await;
 
         let fake = std::env::var("FAKE").map(|val| val == "1").unwrap_or(false);
+        let production = std::env::var("PRODUCTION")
+            .map(|val| val == "1")
+            .unwrap_or(false);
 
-        Self { jetstream, fake }
+        Self {
+            jetstream,
+            fake,
+            production,
+        }
     }
 }
 
@@ -157,11 +165,13 @@ async fn translate_response_messages(
                 )),
                 Ok(message) => {
                     if messages_common::get_request_id(&message.payload) != request_id {
+                        message.ack().await?;
                         continue;
                     }
 
-                    let (spot, last) = transform_spot_message(message, &mut received_ids).await?;
+                    let (spot, last) = transform_spot_message(&message, &mut received_ids).await?;
                     yield Ok(spot);
+                    message.ack().await?;
                     if last {
                         break;
                     }
@@ -172,7 +182,7 @@ async fn translate_response_messages(
 }
 
 async fn transform_spot_message(
-    message: Message,
+    message: &Message,
     received_ids: &mut HashSet<u32>,
 ) -> Result<(SpotsSuccess, bool), FieldError> {
     let payload_str = str::from_utf8(&message.payload)?;
@@ -199,7 +209,6 @@ async fn transform_spot_message(
             };
             let spot = APISpot::from(response);
 
-            message.ack().await?;
             Ok((SpotsSuccess { status, spot }, last))
         }
         Err(_) => {

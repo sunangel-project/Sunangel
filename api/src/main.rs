@@ -1,4 +1,4 @@
-use std::{env, time::Duration};
+use std::time::Duration;
 
 use actix_cors::Cors;
 use actix_web::{
@@ -28,10 +28,7 @@ async fn graphql(
     payload: actix_web::web::Payload,
     schema: web::Data<Schema>,
 ) -> Result<HttpResponse, Error> {
-    let context = Context::new().await; // TODO: create context once in main, then create two
-                                        // closures for graphql and subscriptions referencing the
-                                        // same context
-
+    let context = Context::new().await;
     graphql_handler(&schema, &context, req, payload).await
 }
 
@@ -40,8 +37,8 @@ async fn subscriptions(
     stream: web::Payload,
     schema: web::Data<Schema>,
 ) -> Result<HttpResponse, Error> {
-    let context = Context::new().await;
     let schema = schema.into_inner();
+    let context = Context::new().await;
     let config = ConnectionConfig::new(context);
     // set the keep alive interval to 15 secs so that it doesn't timeout in playground
     // playground has a hard-coded timeout set to 20 secs
@@ -53,6 +50,8 @@ async fn subscriptions(
 #[actix_web::main]
 async fn main() -> Result<(), async_nats::Error> {
     env_logger::init();
+
+    let context = Context::new().await;
 
     // Create certificates for test purposes:openssl req -x509 -newkey rsa:4096 -nodes -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost'
     let mut acceptor_builder = SslAcceptor::mozilla_intermediate(SslMethod::tls())?;
@@ -91,9 +90,11 @@ async fn main() -> Result<(), async_nats::Error> {
             }))
     });
 
-    server = if env::var("PRODUCTION").unwrap_or("0".to_string()) == "1".to_string() {
+    server = if context.production {
+        info!("Detected production environment - enabling SSL");
         server.bind_openssl("0.0.0.0:6660", acceptor_builder)?
     } else {
+        info!("Non-production environment - SSL disabled");
         server.bind("0.0.0.0:6660")?
     };
 
