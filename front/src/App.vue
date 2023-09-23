@@ -6,6 +6,14 @@ import Map from './components/Map.vue'
 import { setupSpotsSubscription } from './searching';
 setupSpotsSubscription()
 
+// Modals
+import { ModalsContainer, useModal } from 'vue-final-modal'
+import Disclaimer from './components/Disclaimer.vue'
+const { open } = useModal({
+    component: Disclaimer,
+})
+
+open();
 </script>
 
 <template>
@@ -18,6 +26,8 @@ setupSpotsSubscription()
             <SpotList />
         </div>
     </div>
+
+    <ModalsContainer />
 </template>
 
 <style scoped>

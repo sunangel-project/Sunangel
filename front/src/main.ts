@@ -1,12 +1,14 @@
 import { createApp } from 'vue'
 import OpenLayersMap from 'vue3-openlayers';
 import 'vue3-openlayers/dist/vue3-openlayers.css';
+import 'vue-final-modal/style.css'
 import urql, { cacheExchange, fetchExchange, subscriptionExchange } from '@urql/vue';
 
 
-import App from './App.vue'
-import './assets/main.css'
+import App from './App.vue';
+import './assets/main.css';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
+import { createVfm } from 'vue-final-modal'
 
 let protocol = "ws";
 let apiHost = "localhost";
@@ -16,6 +18,7 @@ if (process.env.NODE_ENV == "production") {
 }
 
 // TODO: handle connection fail
+// TODO: url as extra variable
 const subscriptionClient = new SubscriptionClient(
     `${protocol}://${apiHost}:6660/subscriptions`,
     { reconnect: false },
@@ -33,4 +36,5 @@ app.use(urql, {
         }),
     ],
 });
-app.mount('#app')
+app.use(createVfm());
+app.mount('#app');

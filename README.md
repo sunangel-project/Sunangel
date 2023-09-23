@@ -1,6 +1,5 @@
 # Sunangel Home Edition
 
-
 ## Execution
 
 ### Backend
@@ -8,24 +7,40 @@
 Run with `docker` or `podman`.
 
 ```
-docker compose up
+docker compose --profile all up
 ```
 
 ```
-podman-compose up
+podman-compose --profile all up
 ```
 
 For `podman` remember to install `podman-compose` and the [dnsname plugin](https://github.com/containers/dnsname/tree/maig) (package `cni-plugin-dnsname` on openSuse)
 
+Currently, there are two profiles:
+- api
+    - nats
+    - api
+    - spot-finder
+- compute
+    - horizon-service
+    - sky-service
+
 ### Frontend
 
-Currently, it is not in the `docker-compose` file.
-Run with `npm`.
+Currently, it is not in the `docker-compose.yml` file.
+Run with `npm` or `bun`.
 
 ```
 cd front
 npm install # only needed once
 npm run dev
+```
+
+You can also compile it to `html` and `javascript`.
+
+```
+cd front
+bun run build
 ```
 
 ## Execution
