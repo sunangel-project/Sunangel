@@ -1311,15 +1311,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "julianday"
-version = "1.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "10d785e6dff2ce2071ffb01b1973c35f02b63b6fb91d1bd12bbb4ae79258b003"
-dependencies = [
- "chrono",
-]
-
-[[package]]
 name = "juniper"
 version = "0.16.0-dev"
 source = "git+https://github.com/graphql-rust/juniper?branch=master#984973658217f73d63608283d18723e11ce65161"
@@ -2183,7 +2174,6 @@ dependencies = [
  "chrono",
  "env_logger",
  "futures-util",
- "julianday",
  "log",
  "messages-common",
  "serde",

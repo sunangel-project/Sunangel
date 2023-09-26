@@ -4,7 +4,7 @@ const SECONDS_PER_DAY: f64 = (60 * 60 * 24) as f64;
 
 /// The julian day number of the given date
 ///
-/// Source: https://github.com/soniakeys/meeus/blob/master/v3/julian/julian.go
+/// Source: <https://github.com/soniakeys/meeus/blob/master/v3/julian/julian.go>
 ///
 /// # Example
 ///
