@@ -11,10 +11,10 @@ async-nats = "0.29.0"
 chrono = { version = "0.4.28", features = ["serde"] }
 env_logger = "0.10.0"
 futures-util = "0.3.28"
+julianday = "1.2.0"
 log = "0.4.20"
 messages-common = { path = "../messages-common" }
 serde = "1.0.188"
 serde_json = "1.0.105"
-spa = "0.4.0"
 thiserror = "1.0.47"
 tokio = { version = "1.32.0", features = ["rt-multi-thread"] }

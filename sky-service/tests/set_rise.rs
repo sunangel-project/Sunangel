@@ -2,7 +2,6 @@ use std::f64::consts::PI;
 
 use chrono::{DateTime, Duration, NaiveDate, NaiveDateTime, NaiveTime, Timelike, Utc};
 
-
 use sky_service::Horizon;
 use sky_service::HorizonEvent;
 use sky_service::HorizonEvents;
@@ -24,7 +23,7 @@ impl SkyObject for TestSkyObject {
         Duration::days(1)
     }
 
-    fn position(&self, time: &chrono::DateTime<chrono::Utc>, _location: &Location) -> SkyPosition {
+    fn position(&self, time: &NaiveDateTime, _location: &Location) -> SkyPosition {
         let seconds = time.num_seconds_from_midnight() as f64;
 
         let azimuth = 2. * PI * (seconds / SECONDS_IN_DAY as f64);
@@ -40,12 +39,9 @@ fn set_flat() {
     let horizon = Horizon::new(altitudes);
 
     let test_object = TestSkyObject {};
-    let time: DateTime<Utc> = DateTime::from_naive_utc_and_offset(
-        NaiveDateTime::new(
-            NaiveDate::from_ymd_opt(2006, 8, 6).unwrap(),
-            NaiveTime::from_hms_opt(0, 0, 0).unwrap(),
-        ),
-        Utc,
+    let time = NaiveDateTime::new(
+        NaiveDate::from_ymd_opt(2006, 8, 6).unwrap(),
+        NaiveTime::from_hms_opt(0, 0, 0).unwrap(),
     );
 
     let location = Location {

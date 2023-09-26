@@ -106,7 +106,7 @@ pub async fn handle_message(
     );
 
     let sun = Sun::new();
-    let time = Utc::now(); // TODO: get from message (need to add to message)
+    let time = Utc::now().naive_utc(); // TODO: get from message (need to add to message)
     let sun_events =
         crate::calculate_rise_and_set(sun, &time, &decoded_message.spot.loc, &horizon)?;
 
