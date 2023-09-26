@@ -2,7 +2,7 @@ use std::f64::consts::PI;
 
 use anyhow::{anyhow, Error};
 
-use crate::angle;
+use crate::angle::AngleExtensions;
 
 pub const HORIZON_SAMPLES: usize = 1024;
 pub const HORIZON_ANGLE: f64 = 2. * PI / (HORIZON_SAMPLES as f64);
@@ -20,7 +20,7 @@ impl Horizon {
     }
 
     pub fn altitude_at(&self, pos: f64) -> f64 {
-        let pos = angle::normalize_radians(pos);
+        let pos = pos.normalize_radians();
 
         let left = (pos / HORIZON_ANGLE).floor() as usize;
         let right = if left < HORIZON_SAMPLES - 1 {

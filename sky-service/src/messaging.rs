@@ -12,7 +12,7 @@ use serde_json::{json, Value};
 use std::str::FromStr;
 use std::{pin::Pin, str};
 
-use crate::{sky::sun::Sun, Horizon, HorizonEvents, Location, SkyObject};
+use crate::{sky::sun::Sun, Horizon, HorizonEvents, Location};
 
 const IN_STREAM: &str = "HORIZONS";
 const HORIZON_STORE: &str = "horizons";
@@ -105,10 +105,9 @@ pub async fn handle_message(
         decoded_message.horizon
     );
 
-    let sun = Sun::new();
-    let time = Utc::now(); // TODO: get from message (need to add to message)
+    let time = Utc::now().naive_utc(); // TODO: get from message (need to add to message)
     let sun_events =
-        crate::calculate_rise_and_set(sun, &time, &decoded_message.spot.loc, &horizon)?;
+        crate::calculate_rise_and_set(&Sun, &time, &decoded_message.spot.loc, &horizon)?;
 
     let result = OutEvents { sun: sun_events };
 

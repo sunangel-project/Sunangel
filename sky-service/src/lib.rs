@@ -1,9 +1,12 @@
 use std::error::Error;
 
-use chrono::{DateTime, Duration, Utc};
-use log::{warn};
+use chrono::{Duration, NaiveDateTime};
+use log::warn;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+
+#[cfg(test)]
+mod util;
 
 pub mod angle;
 pub mod horizon;
@@ -19,7 +22,7 @@ pub use sky::{SkyObject, SkyPosition};
 
 #[derive(Serialize, Deserialize)]
 pub struct HorizonEvent {
-    pub time: DateTime<Utc>,
+    pub time: NaiveDateTime,
     pub altitude: f64,
     pub azimuth: f64,
 }
@@ -36,21 +39,21 @@ pub enum HorizonEventError {
     CandidateRange,
 }
 
-type CandidateRange = (DateTime<Utc>, DateTime<Utc>);
+type CandidateRange = (NaiveDateTime, NaiveDateTime);
 
 pub fn calculate_rise_and_set<O>(
-    object: O,
-    time: &DateTime<Utc>,
+    object: &O,
+    time: &NaiveDateTime,
     location: &Location,
     horizon: &Horizon,
 ) -> Result<HorizonEvents, Box<dyn Error + Send + Sync>>
 where
     O: SkyObject,
 {
-    let (rise_range, set_range) = calculate_candidate_ranges(&object, time, location, horizon)?;
+    let (rise_range, set_range) = calculate_candidate_ranges(object, time, location, horizon)?;
 
-    let rise = calculate_horizon_point(&object, rise_range, location, horizon);
-    let set = calculate_horizon_point(&object, set_range, location, horizon);
+    let rise = calculate_horizon_point(object, rise_range, location, horizon);
+    let set = calculate_horizon_point(object, set_range, location, horizon);
 
     Ok(HorizonEvents { rise, set })
 }
@@ -65,7 +68,7 @@ enum CandidateType {
 
 fn calculate_candidate_ranges<O>(
     object: &O,
-    time: &DateTime<Utc>,
+    time: &NaiveDateTime,
     location: &Location,
     horizon: &Horizon,
 ) -> Result<(CandidateRange, CandidateRange), HorizonEventError>
@@ -164,7 +167,7 @@ where
     }
 }
 
-fn is_up<O>(object: &O, time: &DateTime<Utc>, location: &Location, horizon: &Horizon) -> bool
+fn is_up<O>(object: &O, time: &NaiveDateTime, location: &Location, horizon: &Horizon) -> bool
 where
     O: SkyObject,
 {
@@ -181,7 +184,7 @@ where
 mod test {
     use std::f64::consts::PI;
 
-    use chrono::{DateTime, Duration, NaiveDate, NaiveDateTime, NaiveTime, Timelike, Utc};
+    use chrono::{Duration, NaiveDate, NaiveDateTime, NaiveTime, Timelike};
 
     use crate::{
         calculate_candidate_ranges,
@@ -195,17 +198,13 @@ mod test {
     struct TestSkyObject;
 
     impl SkyObject for TestSkyObject {
-        fn new() -> Self {
-            TestSkyObject {}
-        }
-
         fn period(&self) -> Duration {
             Duration::days(1)
         }
 
         fn position(
             &self,
-            time: &chrono::DateTime<chrono::Utc>,
+            time: &NaiveDateTime,
             _location: &crate::location::Location,
         ) -> crate::sky::SkyPosition {
             let seconds = time.num_seconds_from_midnight() as f64;
@@ -222,13 +221,9 @@ mod test {
         let altitudes = [0.; HORIZON_SAMPLES];
         let horizon = Horizon::new(altitudes);
 
-        let test_object = TestSkyObject {};
-        let time: DateTime<Utc> = DateTime::from_naive_utc_and_offset(
-            NaiveDateTime::new(
-                NaiveDate::from_ymd_opt(2006, 8, 6).unwrap(),
-                NaiveTime::from_hms_opt(0, 0, 0).unwrap(),
-            ),
-            Utc,
+        let time = NaiveDateTime::new(
+            NaiveDate::from_ymd_opt(2006, 8, 6).unwrap(),
+            NaiveTime::from_hms_opt(0, 0, 0).unwrap(),
         );
 
         let location = Location {
@@ -237,7 +232,7 @@ mod test {
         };
 
         let (rise_range, set_range) =
-            calculate_candidate_ranges(&test_object, &time, &location, &horizon).unwrap();
+            calculate_candidate_ranges(&TestSkyObject, &time, &location, &horizon).unwrap();
 
         assert_eq!(0, rise_range.0.hour());
         assert_eq!(0, rise_range.0.minute());
