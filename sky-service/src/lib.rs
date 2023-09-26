@@ -5,6 +5,9 @@ use log::warn;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+#[cfg(test)]
+mod util;
+
 pub mod angle;
 pub mod horizon;
 pub mod julian;

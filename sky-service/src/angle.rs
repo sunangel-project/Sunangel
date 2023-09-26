@@ -1,48 +1,54 @@
-use std::f64::consts::PI;
+use std::f64::consts::TAU;
 
-/// Normalize an angle in degrees
-///
-/// d -> d mod 360
-///
-/// # Arguments
-///
-/// * `d` - The angle in degrees
-///
-/// # Examples
-///
-/// ```
-/// use sky_service::angle;
-///
-/// let normalized = angle::normalize_degrees(360. + 12.5);
-///
-/// assert_eq!(normalized, 12.5);
-/// ```
-pub fn normalize_degrees(d: f64) -> f64 {
-    modulo(d, 360.)
+/// Extensions for normalizing angles
+pub trait AngleExtensions {
+    /// Normalize angles given in radians.
+    fn normalize_radians(self) -> Self;
+    /// Normalize angles given in degrees.
+    fn normalize_degrees(self) -> Self;
 }
 
-/// Normalize an angle in radians
-///
-/// r -> r mod 2 pi
-///
-/// # Arguments
-///
-/// * `r` - The angle in radians
-///
-/// # Examples
-///
-/// ```
-/// use std::f64::consts::PI;
-/// use sky_service::angle;
-///
-/// let normalized = angle::normalize_radians(2. * PI + 1.);
-///
-/// assert_eq!(normalized, 1.);
-/// ```
-pub fn normalize_radians(r: f64) -> f64 {
-    modulo(r, 2. * PI)
+impl AngleExtensions for f64 {
+    /// Normalize angles given in radians.
+    ///
+    /// ```
+    /// use std::f64::consts::TAU;
+    /// use sky_service::angle::AngleExtensions;
+    ///
+    /// let angle =  1f64 + 20. * TAU;
+    /// let normalized = angle.normalize_radians();
+    ///
+    /// assert_eq!(1f64, normalized);
+    /// ```
+    fn normalize_radians(self) -> Self {
+        self.rem_euclid(TAU)
+    }
+
+    /// Normalize angles given in degrees.
+    ///
+    /// ```
+    /// use sky_service::angle::AngleExtensions;
+    ///
+    /// let angle =  1f64 + 20. * 360.;
+    /// let normalized = angle.normalize_radians();
+    ///
+    /// assert_eq!(1f64, normalized);
+    /// ```
+    fn normalize_degrees(self) -> Self {
+        self.rem_euclid(360.)
+    }
 }
 
-fn modulo(a: f64, b: f64) -> f64 {
-    a - (a / b).trunc() * b
+#[cfg(test)]
+mod test {
+    use std::f64::consts::TAU;
+
+    use crate::{angle::AngleExtensions, util::assert_precisely_eq};
+
+    #[test]
+    fn normalize_radians() {
+        let want = 2. / 3.;
+        let high = want + 1000. * TAU;
+        assert_precisely_eq(high.normalize_radians(), want);
+    }
 }

@@ -4,7 +4,10 @@ use chrono::{Duration, NaiveDateTime, Timelike};
 use julianday::JulianDay;
 
 use super::{SkyObject, SkyPosition};
-use crate::{angle, location::Location};
+use crate::{
+    angle::{self, AngleExtensions},
+    location::Location,
+};
 
 const JD_SINCE_2000: f64 = 2451545.;
 const HOURS_PER_DAY: f64 = 24.;
@@ -46,8 +49,8 @@ impl SkyObject for Sun {
         let jd = jd0 + time.num_seconds_from_midnight() as f64 / SECONDS_PER_DAY;
         let n = jd - JD_SINCE_2000;
 
-        let l = angle::normalize_radians(MEAN_ECLIPTIC_LENGTH_C0 + MEAN_ECLIPTIC_LENGTH_C1 * n);
-        let g = angle::normalize_radians(MEAN_ECLIPTIC_ANOMALY_C0 + MEAN_ECLIPTIC_ANOMALY_C1 * n);
+        let l = (MEAN_ECLIPTIC_LENGTH_C0 + MEAN_ECLIPTIC_LENGTH_C1 * n).normalize_radians();
+        let g = (MEAN_ECLIPTIC_ANOMALY_C0 + MEAN_ECLIPTIC_ANOMALY_C1 * n).normalize_radians();
         let lambda = l + ECLIPTIC_LENGTH_C0 * g.sin() + ECLIPTIC_LENGTH_C1 * (2. * g).sin();
 
         let epsilon = SKEW_OF_ECLIPTIC_C0 - SKEW_OF_ECLIPTIC_C1 * n;
@@ -58,7 +61,6 @@ impl SkyObject for Sun {
             alpha += PI;
         }
         let alpha = alpha; // make immutable
-        println!("{}", alpha.to_degrees());
         let delta = (epsilon.sin() * lambda.sin()).asin();
 
         // horizontal coordinates
@@ -69,7 +71,7 @@ impl SkyObject for Sun {
         let theta_g = theta_g_h * 15f64.to_radians();
 
         let theta = theta_g + location.lon.to_radians();
-        let tau = angle::normalize_radians(theta - alpha);
+        let tau = (theta - alpha).normalize_radians();
 
         let phi = location.lat.to_radians();
         let azimuth_enumerator = tau.cos() * phi.sin() - delta.tan() * phi.cos();
@@ -97,9 +99,11 @@ impl SkyObject for Sun {
         println!("altitude: {}", altitude.to_degrees());
         println!("altitude (rad): {}", altitude);
 
+        println!("{}", alpha.to_degrees());
+
         // normalize
-        let altitude = angle::normalize_radians(altitude);
-        let azimuth = angle::normalize_radians(azimuth);
+        let altitude = altitude.normalize_radians();
+        let azimuth = azimuth.normalize_radians();
 
         SkyPosition { altitude, azimuth }
     }
@@ -109,9 +113,9 @@ impl SkyObject for Sun {
 mod test {
     use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
-    use super::super::util::assert_approx_eq;
     use super::*;
     use crate::location::Location;
+    use crate::util::assert_approx_eq;
 
     #[test]
     fn sun_position_wiki() {

@@ -4,9 +4,6 @@ use crate::location::Location;
 
 pub mod sun;
 
-#[cfg(test)]
-mod util;
-
 #[derive(Debug)]
 pub struct SkyPosition {
     pub altitude: f64,

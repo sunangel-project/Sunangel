@@ -9,3 +9,7 @@ fn assert_epsilon_eq(is: f64, want: f64, eps: f64) {
 pub fn assert_approx_eq(is: f64, want: f64) {
     assert_epsilon_eq(is, want, 5e-5)
 }
+
+pub fn assert_precisely_eq(is: f64, want: f64) {
+    assert_epsilon_eq(is, want, 1e-12)
+}
