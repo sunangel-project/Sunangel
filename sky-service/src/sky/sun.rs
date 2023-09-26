@@ -4,10 +4,7 @@ use chrono::{Duration, NaiveDateTime, Timelike};
 use julianday::JulianDay;
 
 use super::{SkyObject, SkyPosition};
-use crate::{
-    angle::{self, AngleExtensions},
-    location::Location,
-};
+use crate::{angle::AngleExtensions, location::Location};
 
 const JD_SINCE_2000: f64 = 2451545.;
 const HOURS_PER_DAY: f64 = 24.;
@@ -31,6 +28,7 @@ const STAR_TIME_C2: f64 = 1.002738;
 const REFRACTION_C0: f64 = 1.02;
 const REFRACTION_C1: f64 = 10.3;
 const REFRACTION_C2: f64 = 5.11;
+const REFRACTION_C3: f64 = 60.;
 
 pub struct Sun;
 impl SkyObject for Sun {
@@ -49,25 +47,26 @@ impl SkyObject for Sun {
         let jd = jd0 + time.num_seconds_from_midnight() as f64 / SECONDS_PER_DAY;
         let n = jd - JD_SINCE_2000;
 
-        let l = (MEAN_ECLIPTIC_LENGTH_C0 + MEAN_ECLIPTIC_LENGTH_C1 * n).normalize_radians();
-        let g = (MEAN_ECLIPTIC_ANOMALY_C0 + MEAN_ECLIPTIC_ANOMALY_C1 * n).normalize_radians();
+        let l = MEAN_ECLIPTIC_LENGTH_C0 + (MEAN_ECLIPTIC_LENGTH_C1 * n).normalize_radians();
+        let g = MEAN_ECLIPTIC_ANOMALY_C0 + (MEAN_ECLIPTIC_ANOMALY_C1 * n).normalize_radians();
         let lambda = l + ECLIPTIC_LENGTH_C0 * g.sin() + ECLIPTIC_LENGTH_C1 * (2. * g).sin();
 
-        let epsilon = SKEW_OF_ECLIPTIC_C0 - SKEW_OF_ECLIPTIC_C1 * n;
+        let epsilon = SKEW_OF_ECLIPTIC_C0 + n * SKEW_OF_ECLIPTIC_C1;
 
         // equatorial coordinates
         let mut alpha = (epsilon.cos() * lambda.tan()).atan();
         if lambda.cos() < 0. {
             alpha += PI;
         }
-        let alpha = alpha; // make immutable
         let delta = (epsilon.sin() * lambda.sin()).asin();
 
         // horizontal coordinates
-        let t0 = n / DAYS_PER_CENTURY;
-        let t = time.num_seconds_from_midnight() as f64 / SECONDS_PER_HOUR;
-        //+ time.nanosecond() as f64 / NANOSECONDS_PER_HOUR;
-        let theta_g_h = STAR_TIME_C0 + STAR_TIME_C1 * t0 + STAR_TIME_C2 * t;
+        let t0 = (jd0 - JD_SINCE_2000) / DAYS_PER_CENTURY;
+        let t = time.num_seconds_from_midnight() as f64 / SECONDS_PER_HOUR
+            + time.nanosecond() as f64 / NANOSECONDS_PER_HOUR;
+        let theta_g_h =
+            (STAR_TIME_C0 + (STAR_TIME_C1 * t0).rem_euclid(HOURS_PER_DAY) + STAR_TIME_C2 * t)
+                .rem_euclid(HOURS_PER_DAY);
         let theta_g = theta_g_h * 15f64.to_radians();
 
         let theta = theta_g + location.lon.to_radians();
@@ -79,8 +78,6 @@ impl SkyObject for Sun {
         if azimuth_enumerator >= 0. {
             azimuth += PI;
         }
-        let azimuth = azimuth; // make immutable
-        println!("azimuth: {}", azimuth.to_degrees());
 
         // in degrees!
         let altitude = (delta.cos() * tau.cos() * phi.cos() + delta.sin() * phi.sin())
@@ -89,20 +86,19 @@ impl SkyObject for Sun {
 
         // correction of altitude
         let r = REFRACTION_C0
-            / ((altitude + REFRACTION_C1 / (altitude + REFRACTION_C2))
+            / (altitude + REFRACTION_C1 / (altitude + REFRACTION_C2))
                 .to_radians()
-                .tan()
-                .to_degrees()); // R needs to be in degrees also!
+                .tan();
 
         // finally in radians again:
-        let altitude = (altitude + r / 60.).to_radians();
-        println!("altitude: {}", altitude.to_degrees());
-        println!("altitude (rad): {}", altitude);
-
-        println!("{}", alpha.to_degrees());
+        let altitude = (altitude + r / REFRACTION_C3).to_radians();
 
         // normalize
-        let altitude = altitude.normalize_radians();
+        let mut altitude = altitude.normalize_radians();
+        if altitude > PI {
+            altitude -= PI;
+        }
+
         let azimuth = azimuth.normalize_radians();
 
         SkyPosition { altitude, azimuth }
@@ -132,14 +128,14 @@ mod test {
         let pos = Sun::new().position(&time, &location);
 
         assert_approx_eq(pos.altitude, 19.11f64.to_radians());
-        assert_approx_eq(pos.azimuth, 1.19716);
+        assert_approx_eq(pos.azimuth, 265.938f64.to_radians());
     }
 
     #[test]
     fn sun_position_custom() {
         let time = NaiveDateTime::new(
             NaiveDate::from_ymd_opt(2022, 2, 11).unwrap(),
-            NaiveTime::from_hms_opt(16, 0, 0).unwrap(),
+            NaiveTime::from_hms_opt(16, 30, 0).unwrap(),
         );
 
         let location = Location {
@@ -150,6 +146,6 @@ mod test {
         let pos = Sun::new().position(&time, &location);
 
         assert_approx_eq(pos.altitude, 0.00902);
-        assert_approx_eq(pos.azimuth, 1.19716);
+        assert_approx_eq(pos.azimuth, 1.19716 + PI);
     }
 }

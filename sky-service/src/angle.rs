@@ -30,7 +30,7 @@ impl AngleExtensions for f64 {
     /// use sky_service::angle::AngleExtensions;
     ///
     /// let angle =  1f64 + 20. * 360.;
-    /// let normalized = angle.normalize_radians();
+    /// let normalized = angle.normalize_degrees();
     ///
     /// assert_eq!(1f64, normalized);
     /// ```

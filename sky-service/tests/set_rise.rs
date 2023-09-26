@@ -1,6 +1,6 @@
 use std::f64::consts::PI;
 
-use chrono::{DateTime, Duration, NaiveDate, NaiveDateTime, NaiveTime, Timelike, Utc};
+use chrono::{Duration, NaiveDate, NaiveDateTime, NaiveTime, Timelike};
 
 use sky_service::Horizon;
 use sky_service::HorizonEvent;
