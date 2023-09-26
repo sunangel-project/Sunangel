@@ -11,7 +11,6 @@ async-nats = "0.29.0"
 chrono = { version = "0.4.28", features = ["serde"] }
 env_logger = "0.10.0"
 futures-util = "0.3.28"
-julianday = "1.2.0"
 log = "0.4.20"
 messages-common = { path = "../messages-common" }
 serde = "1.0.188"

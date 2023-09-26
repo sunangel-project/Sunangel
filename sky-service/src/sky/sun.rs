@@ -1,15 +1,12 @@
 use std::f64::consts::{FRAC_PI_2, PI};
 
 use chrono::{Duration, NaiveDateTime, Timelike};
-use julianday::JulianDay;
 
 use super::{SkyObject, SkyPosition};
-use crate::{angle::AngleExtensions, location::Location};
+use crate::{angle::AngleExtensions, julian, location::Location};
 
 const JD_SINCE_2000: f64 = 2451545.;
-const HOURS_PER_DAY: f64 = 24.;
 const SECONDS_PER_HOUR: f64 = 60. * 60.;
-const SECONDS_PER_DAY: f64 = HOURS_PER_DAY * SECONDS_PER_HOUR;
 const NANOSECONDS_PER_HOUR: f64 = SECONDS_PER_HOUR * 1e9;
 const DAYS_PER_CENTURY: f64 = 36525.;
 
@@ -39,12 +36,10 @@ impl SkyObject for Sun {
     // source: https://de.wikipedia.org/wiki/Sonnenstand
     fn position(&self, time: &NaiveDateTime, location: &Location) -> SkyPosition {
         // ecliptic coordinates
-        let jd0 = JulianDay::from(time.date()).inner() as f64 - 0.5; // TODO: custom implementation
-        let jd = jd0 + time.num_seconds_from_midnight() as f64 / SECONDS_PER_DAY;
-        let n = jd - JD_SINCE_2000;
+        let n = julian::day_of(time) - JD_SINCE_2000;
 
-        let l = MEAN_ECLIPTIC_LENGTH_C0 + (MEAN_ECLIPTIC_LENGTH_C1 * n).normalize_radians();
-        let g = MEAN_ECLIPTIC_ANOMALY_C0 + (MEAN_ECLIPTIC_ANOMALY_C1 * n).normalize_radians();
+        let l = MEAN_ECLIPTIC_LENGTH_C0 + MEAN_ECLIPTIC_LENGTH_C1 * n;
+        let g = MEAN_ECLIPTIC_ANOMALY_C0 + MEAN_ECLIPTIC_ANOMALY_C1 * n;
         let lambda = l + ECLIPTIC_LENGTH_C0 * g.sin() + ECLIPTIC_LENGTH_C1 * (2. * g).sin();
 
         let epsilon = SKEW_OF_ECLIPTIC_C0 + n * SKEW_OF_ECLIPTIC_C1;
@@ -57,12 +52,10 @@ impl SkyObject for Sun {
         let delta = (epsilon.sin() * lambda.sin()).asin();
 
         // horizontal coordinates
-        let t0 = (jd0 - JD_SINCE_2000) / DAYS_PER_CENTURY;
+        let t0 = (julian::day_of_midnight(time) - JD_SINCE_2000) / DAYS_PER_CENTURY;
         let t = time.num_seconds_from_midnight() as f64 / SECONDS_PER_HOUR
             + time.nanosecond() as f64 / NANOSECONDS_PER_HOUR;
-        let theta_g_h =
-            (STAR_TIME_C0 + (STAR_TIME_C1 * t0).rem_euclid(HOURS_PER_DAY) + STAR_TIME_C2 * t)
-                .rem_euclid(HOURS_PER_DAY);
+        let theta_g_h = STAR_TIME_C0 + STAR_TIME_C1 * t0 + STAR_TIME_C2 * t;
         let theta_g = theta_g_h * 15f64.to_radians();
 
         let theta = theta_g + location.lon.to_radians();
@@ -73,12 +66,11 @@ impl SkyObject for Sun {
         let mut azimuth = (tau.sin()).atan2(azimuth_enumerator);
         azimuth += PI;
 
-        // in degrees!
         let mut altitude = (delta.cos() * tau.cos() * phi.cos() + delta.sin() * phi.sin()).asin();
         if azimuth_enumerator < 0. {
             altitude += PI;
         }
-        let altitude = altitude.to_degrees();
+        let altitude = altitude.to_degrees(); // needed in degrees for correction
 
         // correction of altitude
         let r = REFRACTION_C0
@@ -86,13 +78,12 @@ impl SkyObject for Sun {
                 .to_radians()
                 .tan();
 
-        // finally in radians again:
-        let altitude = (altitude + r / REFRACTION_C3).to_radians();
+        let altitude = (altitude + r / REFRACTION_C3).to_radians(); // result in radians again
 
         // normalize
         let mut altitude = altitude.normalize_radians();
         if altitude > FRAC_PI_2 {
-            altitude -= PI;
+            altitude -= PI; // => altitude \in [-PI/2, PI/2]
         }
 
         let azimuth = azimuth.normalize_radians();
