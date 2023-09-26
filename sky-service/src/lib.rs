@@ -42,7 +42,7 @@ pub enum HorizonEventError {
 type CandidateRange = (NaiveDateTime, NaiveDateTime);
 
 pub fn calculate_rise_and_set<O>(
-    object: O,
+    object: &O,
     time: &NaiveDateTime,
     location: &Location,
     horizon: &Horizon,
@@ -50,10 +50,10 @@ pub fn calculate_rise_and_set<O>(
 where
     O: SkyObject,
 {
-    let (rise_range, set_range) = calculate_candidate_ranges(&object, time, location, horizon)?;
+    let (rise_range, set_range) = calculate_candidate_ranges(object, time, location, horizon)?;
 
-    let rise = calculate_horizon_point(&object, rise_range, location, horizon);
-    let set = calculate_horizon_point(&object, set_range, location, horizon);
+    let rise = calculate_horizon_point(object, rise_range, location, horizon);
+    let set = calculate_horizon_point(object, set_range, location, horizon);
 
     Ok(HorizonEvents { rise, set })
 }
@@ -198,10 +198,6 @@ mod test {
     struct TestSkyObject;
 
     impl SkyObject for TestSkyObject {
-        fn new() -> Self {
-            TestSkyObject {}
-        }
-
         fn period(&self) -> Duration {
             Duration::days(1)
         }
@@ -225,7 +221,6 @@ mod test {
         let altitudes = [0.; HORIZON_SAMPLES];
         let horizon = Horizon::new(altitudes);
 
-        let test_object = TestSkyObject {};
         let time = NaiveDateTime::new(
             NaiveDate::from_ymd_opt(2006, 8, 6).unwrap(),
             NaiveTime::from_hms_opt(0, 0, 0).unwrap(),
@@ -237,7 +232,7 @@ mod test {
         };
 
         let (rise_range, set_range) =
-            calculate_candidate_ranges(&test_object, &time, &location, &horizon).unwrap();
+            calculate_candidate_ranges(&TestSkyObject, &time, &location, &horizon).unwrap();
 
         assert_eq!(0, rise_range.0.hour());
         assert_eq!(0, rise_range.0.minute());

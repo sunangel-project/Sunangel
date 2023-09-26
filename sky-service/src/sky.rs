@@ -11,7 +11,6 @@ pub struct SkyPosition {
 }
 
 pub trait SkyObject {
-    fn new() -> Self;
     fn period(&self) -> Duration;
     fn position(&self, time: &NaiveDateTime, location: &Location) -> SkyPosition;
 }

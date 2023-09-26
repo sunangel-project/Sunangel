@@ -1,4 +1,4 @@
-use std::f64::consts::PI;
+use std::f64::consts::{FRAC_PI_2, PI};
 
 use chrono::{Duration, NaiveDateTime, Timelike};
 use julianday::JulianDay;
@@ -32,10 +32,6 @@ const REFRACTION_C3: f64 = 60.;
 
 pub struct Sun;
 impl SkyObject for Sun {
-    fn new() -> Self {
-        Sun {}
-    }
-
     fn period(&self) -> Duration {
         Duration::days(1)
     }
@@ -75,14 +71,14 @@ impl SkyObject for Sun {
         let phi = location.lat.to_radians();
         let azimuth_enumerator = tau.cos() * phi.sin() - delta.tan() * phi.cos();
         let mut azimuth = (tau.sin()).atan2(azimuth_enumerator);
-        if azimuth_enumerator >= 0. {
-            azimuth += PI;
-        }
+        azimuth += PI;
 
         // in degrees!
-        let altitude = (delta.cos() * tau.cos() * phi.cos() + delta.sin() * phi.sin())
-            .asin()
-            .to_degrees();
+        let mut altitude = (delta.cos() * tau.cos() * phi.cos() + delta.sin() * phi.sin()).asin();
+        if azimuth_enumerator < 0. {
+            altitude += PI;
+        }
+        let altitude = altitude.to_degrees();
 
         // correction of altitude
         let r = REFRACTION_C0
@@ -95,7 +91,7 @@ impl SkyObject for Sun {
 
         // normalize
         let mut altitude = altitude.normalize_radians();
-        if altitude > PI {
+        if altitude > FRAC_PI_2 {
             altitude -= PI;
         }
 
@@ -125,10 +121,10 @@ mod test {
             lon: 11.6,
         };
 
-        let pos = Sun::new().position(&time, &location);
+        let pos = Sun.position(&time, &location);
 
         assert_approx_eq(pos.altitude, 19.11f64.to_radians());
-        assert_approx_eq(pos.azimuth, 265.938f64.to_radians());
+        assert_approx_eq(pos.azimuth, 265.938f64.to_radians() - PI);
     }
 
     #[test]
@@ -143,7 +139,7 @@ mod test {
             lon: 9.5878127,
         };
 
-        let pos = Sun::new().position(&time, &location);
+        let pos = Sun.position(&time, &location);
 
         assert_approx_eq(pos.altitude, 0.00902);
         assert_approx_eq(pos.azimuth, 1.19716 + PI);
