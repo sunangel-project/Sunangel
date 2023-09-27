@@ -24,7 +24,7 @@ struct Spot {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SearchResponse {
     pub part: Part,
-    request_id: String,
+    pub request_id: String,
     search_query: SearchQuery,
     spot: Spot,
     horizon: String,

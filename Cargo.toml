@@ -1,8 +1,11 @@
 [workspace]
 
+resolver = "2"
+
 members = [
     "messages-common",
     "api",
     "spot-finder",
     "sky-service",
 ]
+

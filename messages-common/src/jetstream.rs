@@ -1,6 +1,6 @@
 use std::{env, error::Error, pin::Pin};
 
-use async_nats::jetstream::{self, kv::Store, Context};
+use async_nats::jetstream::{self, consumer::pull::MessagesError, kv::Store, Context};
 use futures_util::Stream;
 use log::debug;
 
@@ -18,15 +18,15 @@ pub fn connect_jetstream(client: async_nats::Client) -> Context {
 pub async fn try_create_stream(
     jetstream: &Context,
     stream: &str,
-) -> Result<jetstream::stream::Stream, Box<dyn Error + Send + Sync>> {
-    jetstream
+) -> Result<jetstream::stream::Stream, async_nats::Error> {
+    Ok(jetstream
         .get_or_create_stream(async_nats::jetstream::stream::Config {
             name: stream.to_string(),
             max_messages: 10_000,
             subjects: vec![stream.to_string(), format!("{stream}.*")],
             ..Default::default()
         })
-        .await
+        .await?)
 }
 
 pub async fn create_stream(jetstream: &Context, stream: &str) -> jetstream::stream::Stream {
@@ -36,13 +36,13 @@ pub async fn create_stream(jetstream: &Context, stream: &str) -> jetstream::stre
 }
 
 pub type MessageStream =
-    Pin<Box<dyn Stream<Item = Result<jetstream::Message, Box<dyn Error + Send + Sync>>> + Send>>;
+    Pin<Box<dyn Stream<Item = Result<jetstream::Message, MessagesError>> + Send>>;
 
 async fn try_subscribe(
     jetstream: &Context,
     stream: &str,
     group: Option<&str>,
-) -> Result<MessageStream, Box<dyn Error + Send + Sync>> {
+) -> Result<MessageStream, async_nats::Error> {
     try_create_stream(jetstream, stream).await?;
 
     debug!("Trying to connect to {stream}");

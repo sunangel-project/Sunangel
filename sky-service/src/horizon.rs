@@ -1,6 +1,7 @@
 use std::f64::consts::PI;
 
 use anyhow::{anyhow, Error};
+use bytes::Bytes;
 
 use crate::angle::AngleExtensions;
 
@@ -38,10 +39,10 @@ impl Horizon {
     }
 }
 
-impl TryFrom<Vec<u8>> for Horizon {
+impl TryFrom<Bytes> for Horizon {
     type Error = Error;
 
-    fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
+    fn try_from(value: Bytes) -> Result<Self, Self::Error> {
         if value.len() != HORIZON_SAMPLES * BYTES_IN_F64 {
             return Err(anyhow!(
                 "Expected input to have {} bytes, had {}",

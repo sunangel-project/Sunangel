@@ -1,6 +1,6 @@
 use anyhow::anyhow;
 use async_nats::{
-    jetstream::{kv::Store, Context, Message},
+    jetstream::{consumer::pull::MessagesError, kv::Store, Context, Message},
     Error,
 };
 use chrono::Utc;
@@ -40,7 +40,7 @@ pub async fn messages(jetstream: &Context) -> MessageStream {
 }
 
 type HandleMessageFun<'a> =
-    Box<dyn FnMut(Result<Message, Error>) -> Pin<Box<dyn Future<Output = ()> + 'a>> + 'a>;
+    Box<dyn FnMut(Result<Message, MessagesError>) -> Pin<Box<dyn Future<Output = ()> + 'a>> + 'a>;
 
 pub fn generate_handle_message_res<'a>(
     jetstream: &'a Context,
@@ -62,7 +62,7 @@ pub fn generate_handle_message_res<'a>(
                 }
                 Err(err) => {
                     error!("Problem with received message: {err}");
-                    send_error_message(jetstream, None, err)
+                    send_error_message(jetstream, None, err.into())
                         .await
                         .unwrap_or_else(|err| error!("Could not send out error message: {err}"));
                 }

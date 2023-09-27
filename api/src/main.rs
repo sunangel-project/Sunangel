@@ -8,7 +8,7 @@ use actix_web::{
     App, Error, HttpRequest, HttpResponse, HttpServer,
 };
 
-use juniper_actix::{graphql_handler, playground_handler, subscriptions::subscriptions_handler};
+use juniper_actix::{graphql_handler, playground_handler, subscriptions};
 use juniper_graphql_ws::ConnectionConfig;
 use log::info;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
@@ -44,7 +44,7 @@ async fn subscriptions(
     // playground has a hard-coded timeout set to 20 secs
     let config = config.with_keep_alive_interval(Duration::from_secs(15));
 
-    subscriptions_handler(req, stream, schema, config).await
+    subscriptions::ws_handler(req, stream, schema, config).await
 }
 
 #[actix_web::main]

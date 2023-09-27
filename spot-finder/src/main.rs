@@ -78,7 +78,7 @@ async fn run() {
                 }
                 Err(err) => {
                     error!("Problem with received message: {err}");
-                    send_error_message(&jetstream, None, err)
+                    send_error_message(&jetstream, None, err.into())
                         .await
                         .unwrap_or_else(|err| error!("Could not send out error message: {err}"));
                 }

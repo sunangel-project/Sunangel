@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use chrono::{Duration, NaiveDateTime};
+use chrono::{DateTime, Duration, NaiveDateTime, Utc};
 use log::warn;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -22,7 +22,7 @@ pub use sky::{SkyObject, SkyPosition};
 
 #[derive(Serialize, Deserialize)]
 pub struct HorizonEvent {
-    pub time: NaiveDateTime,
+    pub time: DateTime<Utc>,
     pub altitude: f64,
     pub azimuth: f64,
 }
@@ -144,10 +144,8 @@ where
         if (left - right).num_milliseconds().abs() < Duration::seconds(1).num_milliseconds() {
             warn!("Below 1s interval: {middle},");
             warn!("{altitude}, target: {target_altitude}");
-            // Most of the time ok, sometimes horribly wrong
-            // TODO: catch horribly wrong results
             return HorizonEvent {
-                time: middle,
+                time: middle.and_utc(),
                 altitude,
                 azimuth,
             };
@@ -155,7 +153,7 @@ where
 
         if (altitude - target_altitude).abs() < TOLERANCE {
             return HorizonEvent {
-                time: middle,
+                time: middle.and_utc(),
                 altitude,
                 azimuth,
             };

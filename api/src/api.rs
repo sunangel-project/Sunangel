@@ -158,6 +158,7 @@ async fn translate_response_messages(
     Box::pin(stream! {
         let mut received_ids = HashSet::<u32>::new();
         while let Some(message) = messages.next().await {
+            info!("Received message");
             match message {
                 Err(error) => yield Err(FieldError::new(
                     "Error while receiving responses",
@@ -169,7 +170,7 @@ async fn translate_response_messages(
                         continue;
                     }
 
-                    let (spot, last) = transform_spot_message(&message, &mut received_ids).await?;
+                    let (spot, last) = transform_spot_message(&message, &mut received_ids)?;
                     yield Ok(spot);
                     message.ack().await?;
                     if last {
@@ -181,16 +182,20 @@ async fn translate_response_messages(
     })
 }
 
-async fn transform_spot_message(
+fn transform_spot_message(
     message: &Message,
     received_ids: &mut HashSet<u32>,
 ) -> Result<(SpotsSuccess, bool), FieldError> {
     let payload_str = str::from_utf8(&message.payload)?;
     let res_response: Result<SearchResponse, serde_json::Error> = serde_json::from_str(payload_str);
+    let err_response: Result<SearchError, serde_json::Error> = serde_json::from_str(payload_str);
 
-    match res_response {
-        Ok(response) => {
-            info!("Received response from microservices: {response:?}");
+    match (res_response, err_response) {
+        (Ok(response), _) => {
+            info!(
+                "Received response from microservices:\nrequest_id: {}\nnumber {} of {}",
+                response.request_id, response.part.id, response.part.of
+            );
 
             // This implementation using a HashSet is wasteful
             // TODO: Maybe alternative implementation using a vector?
@@ -211,14 +216,27 @@ async fn transform_spot_message(
 
             Ok((SpotsSuccess { status, spot }, last))
         }
-        Err(_) => {
-            let error: SearchError = serde_json::from_str(payload_str)?;
-
-            error!("Received error from microservices: {error:?}");
+        (_, Ok(err_response)) => {
+            error!("Received error from microservices: {:?}", err_response);
 
             Err(FieldError::new(
                 "Internal server error",
-                graphql_value!(serde_json::to_string(&error)?),
+                graphql_value!(serde_json::to_string(&err_response)?),
+            ))
+        }
+        (Err(res_err), Err(err_err)) => {
+            error!("Could decode neither result nor error");
+            error!("result: {res_err}");
+            error!("error: {err_err}");
+
+            Err(FieldError::new(
+                "Decoding error",
+                graphql_value!(format!(
+                    "Decoding error - couldn't decode {}\ndue to {} and {}",
+                    payload_str,
+                    res_err.to_string(),
+                    err_err.to_string()
+                )),
             ))
         }
     }

@@ -1,4 +1,4 @@
-use std::f64::consts::{FRAC_PI_2, PI};
+use std::f64::consts::{FRAC_PI_2, PI, TAU};
 
 use chrono::{Duration, NaiveDateTime, Timelike};
 
@@ -66,10 +66,12 @@ impl SkyObject for Sun {
         let mut azimuth = (tau.sin()).atan2(azimuth_enumerator);
         azimuth += PI;
 
-        let mut altitude = (delta.cos() * tau.cos() * phi.cos() + delta.sin() * phi.sin()).asin();
+        let altitude = (delta.cos() * tau.cos() * phi.cos() + delta.sin() * phi.sin()).asin();
+        /* This is necessary in the source, but in practice produces wrong results...
         if azimuth_enumerator < 0. {
             altitude += PI;
         }
+        */
         let altitude = altitude.to_degrees(); // needed in degrees for correction
 
         // correction of altitude
@@ -83,7 +85,7 @@ impl SkyObject for Sun {
         // normalize
         let mut altitude = altitude.normalize_radians();
         if altitude > FRAC_PI_2 {
-            altitude -= PI; // => altitude \in [-PI/2, PI/2]
+            altitude -= TAU; // => altitude \in [-PI/2, PI/2]
         }
 
         let azimuth = azimuth.normalize_radians();

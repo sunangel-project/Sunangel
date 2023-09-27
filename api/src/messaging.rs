@@ -1,14 +1,12 @@
-use async_nats::{jetstream::Context};
+use async_nats::jetstream::Context;
 use futures_util::stream::select;
-
 
 use log::info;
 use messages_common::MessageStream;
 use serde::{Deserialize, Serialize};
 use std::{error::Error, str};
 
-
-use crate::structs::{SearchQueryMessage};
+use crate::structs::SearchQueryMessage;
 
 const SEARCH_STREAM: &str = "SEARCH";
 const SEARCH_Q: &str = "SEARCH.request";

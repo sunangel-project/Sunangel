@@ -79,9 +79,9 @@ fn sanity_test_sun() {
         set: HorizonEvent { time: set, .. },
     } = sky_service::calculate_rise_and_set(&Sun, &time, &location, &horizon).unwrap();
 
-    assert_eq!(rise.hour(), 4);
-    assert_eq!(rise.minute(), 0);
+    assert_eq!(rise.hour(), 3);
+    assert_eq!(rise.minute(), 57);
 
     assert_eq!(set.hour(), 18);
-    assert_eq!(set.minute(), 37);
+    assert_eq!(set.minute(), 40);
 }
