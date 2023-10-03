@@ -1,14 +1,9 @@
-use std::f64::consts::{FRAC_PI_2, PI, TAU};
+use std::f64::consts::PI;
 
-use chrono::{Duration, NaiveDateTime, Timelike};
+use chrono::{Duration, NaiveDateTime};
 
-use super::{SkyObject, SkyPosition};
-use crate::{angle::AngleExtensions, julian, location::Location};
-
-const JD_SINCE_2000: f64 = 2451545.;
-const SECONDS_PER_HOUR: f64 = 60. * 60.;
-const NANOSECONDS_PER_HOUR: f64 = SECONDS_PER_HOUR * 1e9;
-const DAYS_PER_CENTURY: f64 = 36525.;
+use super::{util, SkyObject, SkyPosition};
+use crate::{julian, location::Location};
 
 const MEAN_ECLIPTIC_LENGTH_C0: f64 = 280.460f64 * PI / 180.;
 const MEAN_ECLIPTIC_LENGTH_C1: f64 = 0.9856474f64 * PI / 180.;
@@ -19,14 +14,6 @@ const ECLIPTIC_LENGTH_C1: f64 = 0.01997 * PI / 180.;
 const SKEW_OF_ECLIPTIC_C0: f64 = 23.439 * PI / 180.;
 const SKEW_OF_ECLIPTIC_C1: f64 = 0.4e-6 * PI / 180.;
 
-const STAR_TIME_C0: f64 = 6.697376;
-const STAR_TIME_C1: f64 = 2400.05134;
-const STAR_TIME_C2: f64 = 1.002738;
-const REFRACTION_C0: f64 = 1.02;
-const REFRACTION_C1: f64 = 10.3;
-const REFRACTION_C2: f64 = 5.11;
-const REFRACTION_C3: f64 = 60.;
-
 pub struct Sun;
 impl SkyObject for Sun {
     fn period(&self) -> Duration {
@@ -36,7 +23,7 @@ impl SkyObject for Sun {
     // source: https://de.wikipedia.org/wiki/Sonnenstand
     fn position(&self, time: &NaiveDateTime, location: &Location) -> SkyPosition {
         // ecliptic coordinates
-        let n = julian::day_of(time) - JD_SINCE_2000;
+        let n = julian::day_of_since_2000(time);
 
         let l = MEAN_ECLIPTIC_LENGTH_C0 + MEAN_ECLIPTIC_LENGTH_C1 * n;
         let g = MEAN_ECLIPTIC_ANOMALY_C0 + MEAN_ECLIPTIC_ANOMALY_C1 * n;
@@ -51,44 +38,8 @@ impl SkyObject for Sun {
         }
         let delta = (epsilon.sin() * lambda.sin()).asin();
 
-        // horizontal coordinates
-        let t0 = (julian::day_of_midnight(time) - JD_SINCE_2000) / DAYS_PER_CENTURY;
-        let t = time.num_seconds_from_midnight() as f64 / SECONDS_PER_HOUR
-            + time.nanosecond() as f64 / NANOSECONDS_PER_HOUR;
-        let theta_g_h = STAR_TIME_C0 + STAR_TIME_C1 * t0 + STAR_TIME_C2 * t;
-        let theta_g = theta_g_h * 15f64.to_radians();
-
-        let theta = theta_g + location.lon.to_radians();
-        let tau = (theta - alpha).normalize_radians();
-
-        let phi = location.lat.to_radians();
-        let azimuth_enumerator = tau.cos() * phi.sin() - delta.tan() * phi.cos();
-        let mut azimuth = (tau.sin()).atan2(azimuth_enumerator);
-        azimuth += PI;
-
-        let altitude = (delta.cos() * tau.cos() * phi.cos() + delta.sin() * phi.sin()).asin();
-        /* This is necessary in the source, but in practice produces wrong results...
-        if azimuth_enumerator < 0. {
-            altitude += PI;
-        }
-        */
-        let altitude = altitude.to_degrees(); // needed in degrees for correction
-
-        // correction of altitude
-        let r = REFRACTION_C0
-            / (altitude + REFRACTION_C1 / (altitude + REFRACTION_C2))
-                .to_radians()
-                .tan();
-
-        let altitude = (altitude + r / REFRACTION_C3).to_radians(); // result in radians again
-
-        // normalize
-        let mut altitude = altitude.normalize_radians();
-        if altitude > FRAC_PI_2 {
-            altitude -= TAU; // => altitude \in [-PI/2, PI/2]
-        }
-
-        let azimuth = azimuth.normalize_radians();
+        let (altitude, azimuth) =
+            util::convert_ecliptic_to_horizontal(time, location, alpha, delta);
 
         SkyPosition { altitude, azimuth }
     }

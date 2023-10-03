@@ -1,5 +1,7 @@
 use chrono::{Datelike, NaiveDateTime, NaiveTime, Timelike};
 
+const JD_SINCE_2000: f64 = 2451545.;
+const DAYS_PER_CENTURY: f64 = 36525.;
 const SECONDS_PER_DAY: f64 = (60 * 60 * 24) as f64;
 
 /// The julian day number of the given date
@@ -42,6 +44,10 @@ pub fn day_of(time: &NaiveDateTime) -> f64 {
     ((36525 * (year + 4716)) / 100) as f64 + ((306 * (month + 1) / 10) + b) as f64 + days - 1524.5
 }
 
+pub fn day_of_since_2000(time: &NaiveDateTime) -> f64 {
+    day_of(time) - JD_SINCE_2000
+}
+
 /// The julian day number at midnight of a given date
 ///
 /// # Example
@@ -67,4 +73,8 @@ pub fn day_of_midnight(time: &NaiveDateTime) -> f64 {
             .expect("Agruments are staic 0, this cannot be None"),
     );
     day_of(&time)
+}
+
+pub fn centuries_of_midnight_since_2000(time: &NaiveDateTime) -> f64 {
+    (day_of_midnight(time) - JD_SINCE_2000) / DAYS_PER_CENTURY
 }
