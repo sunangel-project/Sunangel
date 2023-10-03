@@ -9,6 +9,11 @@ export interface HorizonEvent {
     time: string;
 }
 
+export interface HorizonEventCollection {
+    rise: HorizonEvent;
+    set: HorizonEvent;
+}
+
 export interface Spot {
     id: string;
     kind: string;
@@ -17,10 +22,8 @@ export interface Spot {
         lon: number;
     };
     events: {
-        sun: {
-            rise: HorizonEvent;
-            set: HorizonEvent;
-        };
+        sun: HorizonEventCollection;
+        moon: HorizonEventCollection;
     };
 }
 

@@ -12,7 +12,10 @@ use serde_json::{json, Value};
 use std::str::FromStr;
 use std::{pin::Pin, str};
 
-use crate::{sky::sun::Sun, Horizon, HorizonEvents, Location};
+use crate::{
+    sky::{moon::Moon, sun::Sun},
+    Horizon, HorizonEvents, Location,
+};
 
 const IN_STREAM: &str = "HORIZONS";
 const HORIZON_STORE: &str = "horizons";
@@ -85,6 +88,7 @@ struct InMessage {
 #[derive(Serialize, Deserialize)]
 struct OutEvents {
     sun: HorizonEvents,
+    moon: HorizonEvents,
 }
 
 pub async fn handle_message(
@@ -108,8 +112,13 @@ pub async fn handle_message(
     let time = Utc::now().naive_utc(); // TODO: get from message (need to add to message)
     let sun_events =
         crate::calculate_rise_and_set(&Sun, &time, &decoded_message.spot.loc, &horizon)?;
+    let moon_events =
+        crate::calculate_rise_and_set(&Moon, &time, &decoded_message.spot.loc, &horizon)?;
 
-    let result = OutEvents { sun: sun_events };
+    let result = OutEvents {
+        sun: sun_events,
+        moon: moon_events,
+    };
 
     let in_value = Value::from_str(payload)?;
     jetstream
