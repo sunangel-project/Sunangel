@@ -14,8 +14,8 @@ export interface HorizonEventCollection {
     set: HorizonEvent;
 }
 
-export interface Spot {
-    id: string;
+export interface Result {
+    selected: boolean;
     kind: string;
     location: {
         lat: number;
@@ -25,6 +25,10 @@ export interface Spot {
         sun: HorizonEventCollection;
         moon: HorizonEventCollection;
     };
+}
+
+export interface Spot extends Result {
+    id: string;
 }
 
 interface SpotsState {

@@ -1,21 +1,6 @@
 import { gql, useSubscription } from '@urql/vue';
 import { v4 as uuidv4 } from 'uuid';
-import { inputs, spots, type Spot, type HorizonEvent } from "./state";
-
-interface Result {
-    selected: boolean;
-    kind: string;
-    location: {
-        lat: number;
-        lon: number;
-    };
-    events: {
-        sun: {
-            rise: HorizonEvent;
-            set: HorizonEvent;
-        };
-    };
-}
+import { inputs, spots, type Spot, type Result } from "./state";
 
 export function search() {
     if (spots.loading) { // TODO: set true here and set false when receiving responses
