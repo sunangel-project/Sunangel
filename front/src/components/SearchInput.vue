@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { search } from '../searching'
-import { inputs, spots } from "../state"
+import { inputs } from "../state"
 </script>
 
 <template>

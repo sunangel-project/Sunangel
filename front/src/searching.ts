@@ -27,6 +27,18 @@ export function search() {
 }
 
 export function setupSpotsSubscription() {
+    let horizonEventsCollectionQuery = `
+rise {
+  time
+  altitude
+  azimuth
+}
+set {
+  time
+  altitude
+  azimuth
+}
+`
     let query = gql`
 subscription spot($lat: Float!, $lon: Float!, $radius: Int!) {
   spots(query: { location: { lat: $lat, lon: $lon }, radius: $radius }) {
@@ -39,16 +51,10 @@ subscription spot($lat: Float!, $lon: Float!, $radius: Int!) {
       kind
       events {
         sun {
-          rise {
-            time
-            altitude
-            azimuth
-          }
-          set {
-            time
-            altitude
-            azimuth
-          }
+          ${horizonEventsCollectionQuery}
+        }
+        moon {
+          ${horizonEventsCollectionQuery}
         }
       }
     }

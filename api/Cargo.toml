@@ -6,9 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-juniper = { git = "https://github.com/graphql-rust/juniper", branch="master", features = ["chrono"] }
-juniper_graphql_ws = { git = "https://github.com/graphql-rust/juniper", branch="master" }
-juniper_actix = { git = "https://github.com/graphql-rust/juniper", branch="master",  features = ["subscriptions"] }
+juniper = { git = "https://github.com/graphql-rust/juniper", rev="984973658217f73d63608283d18723e11ce65161", features = ["chrono"] }
+juniper_graphql_ws = { git = "https://github.com/graphql-rust/juniper", rev="984973658217f73d63608283d18723e11ce65161" }
+juniper_actix = { git = "https://github.com/graphql-rust/juniper", rev="984973658217f73d63608283d18723e11ce65161",  features = ["subscriptions"] }
 # TODO: revert juniper back to official version when 0.16 released
 
 actix-web = { version = "4.4.0", features = ["openssl"] }

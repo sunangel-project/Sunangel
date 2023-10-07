@@ -6,14 +6,15 @@ import Map from './components/Map.vue'
 import { setupSpotsSubscription } from './searching';
 setupSpotsSubscription()
 
-// Modals
+/* Modal Pop-up
+// Disclaimer
 import { ModalsContainer, useModal } from 'vue-final-modal'
 import Disclaimer from './components/Disclaimer.vue'
 const { open } = useModal({
     component: Disclaimer,
 })
-
 open();
+*/
 </script>
 
 <template>

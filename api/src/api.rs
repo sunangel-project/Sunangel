@@ -165,7 +165,8 @@ async fn translate_response_messages(
                     graphql_value!(error.to_string()),
                 )),
                 Ok(message) => {
-                    if messages_common::get_request_id(&message.payload) != request_id {
+                    let msg_request_id = messages_common::get_request_id(&message.payload);
+                    if msg_request_id != request_id {
                         message.ack().await?;
                         continue;
                     }

@@ -76,12 +76,25 @@ pub struct HorizonEvents {
 #[derive(Debug, Clone, GraphQLObject, Serialize, Deserialize)]
 pub struct HorizonEventsCollection {
     sun: HorizonEvents,
+    moon: HorizonEvents,
 }
 
 impl HorizonEventsCollection {
     pub fn fake() -> Self {
         Self {
             sun: HorizonEvents {
+                rise: HorizonEvent {
+                    time: Utc::now(),
+                    altitude: 0.,
+                    azimuth: 0.,
+                },
+                set: HorizonEvent {
+                    time: Utc::now(),
+                    altitude: 0.,
+                    azimuth: 0.,
+                },
+            },
+            moon: HorizonEvents {
                 rise: HorizonEvent {
                     time: Utc::now(),
                     altitude: 0.,
