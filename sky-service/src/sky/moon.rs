@@ -66,17 +66,18 @@ impl SkyObject for Moon {
         let r = (x.powi(2) + y.powi(2)).sqrt();
         let v = y.atan2(x);
 
-        // Intermediate ecliptic coordinates
+        // Ecliptic coordinates
         let vwsin = (v + w).sin();
         let xeclip = r * (N.cos() * (v + w).cos() - N.sin() * vwsin * INCLINATION.cos());
         let yeclip = r * (N.sin() * (v + w).cos() + N.cos() * vwsin * INCLINATION.cos());
         let zeclip = r * vwsin * INCLINATION.sin();
 
-        // Ecliptic coordinates
         let mlon = yeclip.atan2(xeclip);
         let xeclip_yeclip_squared = xeclip.powi(2) + yeclip.powi(2);
         let mlat = zeclip.atan2((xeclip_yeclip_squared).sqrt());
         let r = (xeclip_yeclip_squared + zeclip.powi(2)).sqrt();
+
+        // TODO: add pertubations or is it accurate enough?
 
         // Equatorial coordinates
         let oblecl = OBLIQUITY_ECLIPTIC_0 - OBLIQUITY_ECLIPTIC_1 * d;
