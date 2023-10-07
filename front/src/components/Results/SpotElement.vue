@@ -1,6 +1,6 @@
 <template>
     sunrise: {{ renderTime(spot.events.sun.rise.time) }} <br />
-    sunset: {{ renderTime(spot.events.sun.set.time) }}
+    sunset: {{ renderTime(spot.events.sun.set.time) }} <br />
     moonrise: {{ renderTime(spot.events.moon.rise.time) }} <br />
     moonset: {{ renderTime(spot.events.moon.set.time) }}
 </template>
