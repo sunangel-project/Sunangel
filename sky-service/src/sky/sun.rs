@@ -22,7 +22,7 @@ impl SkyObject for Sun {
 
     // source: https://de.wikipedia.org/wiki/Sonnenstand
     fn position(&self, time: &NaiveDateTime, location: &Location) -> SkyPosition {
-        // ecliptic coordinates
+        // Ecliptic coordinates
         let n = julian::day_of_since_2000(time);
 
         let l = MEAN_ECLIPTIC_LENGTH_C0 + MEAN_ECLIPTIC_LENGTH_C1 * n;
@@ -31,7 +31,7 @@ impl SkyObject for Sun {
 
         let epsilon = SKEW_OF_ECLIPTIC_C0 + n * SKEW_OF_ECLIPTIC_C1;
 
-        // equatorial coordinates
+        // Equatorial coordinates
         let mut alpha = (epsilon.cos() * lambda.tan()).atan();
         if lambda.cos() < 0. {
             alpha += PI;
@@ -40,6 +40,7 @@ impl SkyObject for Sun {
 
         let (altitude, azimuth) =
             util::convert_ecliptic_to_horizontal(time, location, alpha, delta);
+        let altitude = util::refraction(altitude);
 
         SkyPosition { altitude, azimuth }
     }

@@ -20,6 +20,14 @@ const ARG_OF_PERIGEE_1: f64 = 0.1643573223 * PI / 180.;
 const MEAN_ANOMALY_0: f64 = 115.3654 * PI / 180.;
 const MEAN_ANOMALY_1: f64 = 13.0649929509 * PI / 180.;
 
+const OBLIQUITY_ECLIPTIC_0: f64 = 23.4393 * PI / 180.;
+const OBLIQUITY_ECLIPTIC_1: f64 = 3.563e-7 * PI / 180.;
+
+// const GLAT_0: f64 = 0.1924 * PI / 180.;
+
+// const DIST_CENTER_0: f64 = 0.99833 * PI / 180.;
+// const DIST_CENTER_1: f64 = 0.00167 * PI / 180.;
+
 pub struct Moon;
 impl SkyObject for Moon {
     fn period(&self) -> Duration {
@@ -65,11 +73,50 @@ impl SkyObject for Moon {
         let zeclip = r * vwsin * INCLINATION.sin();
 
         // Ecliptic coordinates
-        let alpha = yeclip.atan2(xeclip);
-        let delta = zeclip.atan2((xeclip.powi(2) + yeclip.powi(2)).sqrt());
+        let mlon = yeclip.atan2(xeclip);
+        let xeclip_yeclip_squared = xeclip.powi(2) + yeclip.powi(2);
+        let mlat = zeclip.atan2((xeclip_yeclip_squared).sqrt());
+        let r = (xeclip_yeclip_squared + zeclip.powi(2)).sqrt();
+
+        // Equatorial coordinates
+        let oblecl = OBLIQUITY_ECLIPTIC_0 - OBLIQUITY_ECLIPTIC_1 * d;
+
+        let (mlon_sin, mlon_cos) = mlon.sin_cos();
+        let (mlat_sin, mlat_cos) = mlat.sin_cos();
+        let xeclip = mlon_cos * mlat_cos;
+        let yeclip = mlon_sin * mlat_cos;
+        let zeclip = mlat_sin;
+
+        let xequat = xeclip;
+        let (oblecl_sin, oblecl_cos) = oblecl.sin_cos();
+        let yequat = yeclip * oblecl_cos - zeclip * oblecl_sin;
+        let zequat = yeclip * oblecl_sin + zeclip * oblecl_cos;
+
+        let alpha = yequat.atan2(xequat);
+        let delta = zequat.atan2((xequat.powi(2) + yequat.powi(2)).sqrt());
+
+        // Ecliptic coordinates for the observer
+        let mpar = (1. / r).asin();
+
+        // let lat = location.lat.to_radians();
+        // let (two_lat_sin, two_lat_cos) = (2. * lat).sin_cos();
+        // let gclat = lat - GLAT_0 * two_lat_sin;
+
+        // let rho = DIST_CENTER_0 + DIST_CENTER_1 * two_lat_cos;
+
+        // let HA = util::sidereal_time(time, location, alpha);
+        // let g = gclat.tan().atan2(HA.cos());
+
+        // let alpha = alpha - mpar * rho * gclat.cos() * HA.sin() / delta.cos();
+        // let delta = delta - mpar * rho * gclat.sin() * (g - delta).sin() / g.sin();
 
         let (altitude, azimuth) =
             util::convert_ecliptic_to_horizontal(time, location, alpha, delta);
+
+        // Correct for parallax
+        let altitude = altitude - mpar * altitude.cos();
+
+        let altitude = util::refraction(altitude);
 
         SkyPosition { altitude, azimuth }
     }
@@ -97,7 +144,7 @@ mod test {
 
         let pos = Moon.position(&time, &location);
 
-        assert_approx_eq(pos.altitude, 0.004801301260915783);
-        assert_approx_eq(pos.azimuth, 1.5763198897358466);
+        assert_approx_eq(pos.altitude, -0.28403595507008245);
+        assert_approx_eq(pos.azimuth, 1.7608876071448318);
     }
 }

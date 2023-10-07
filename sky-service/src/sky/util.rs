@@ -24,9 +24,7 @@ fn sidereal_time(time: &NaiveDateTime, location: &Location, alpha: f64) -> f64 {
     let theta_g = theta_g_h * 15f64.to_radians();
 
     let theta = theta_g + location.lon.to_radians();
-    let tau = (theta - alpha).normalize_radians();
-
-    tau
+    (theta - alpha).normalize_radians()
 }
 
 pub fn convert_ecliptic_to_horizontal(
@@ -48,15 +46,6 @@ pub fn convert_ecliptic_to_horizontal(
         altitude += PI;
     }
     */
-    let altitude = altitude.to_degrees(); // needed in degrees for correction
-
-    // correction of altitude
-    let r = REFRACTION_C0
-        / (altitude + REFRACTION_C1 / (altitude + REFRACTION_C2))
-            .to_radians()
-            .tan();
-
-    let altitude = (altitude + r / REFRACTION_C3).to_radians(); // result in radians again
 
     // normalize
     let mut altitude = altitude.normalize_radians();
@@ -67,4 +56,14 @@ pub fn convert_ecliptic_to_horizontal(
     let azimuth = azimuth.normalize_radians();
 
     (altitude, azimuth)
+}
+
+pub fn refraction(altitude: f64) -> f64 {
+    let altitude = altitude.to_degrees();
+    let r = REFRACTION_C0
+        / (altitude + REFRACTION_C1 / (altitude + REFRACTION_C2))
+            .to_radians()
+            .tan();
+
+    (altitude + r / REFRACTION_C3).to_radians()
 }
