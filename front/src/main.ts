@@ -13,6 +13,7 @@ import { createVfm } from 'vue-final-modal'
 
 let protocol = "ws";
 let apiHost = "localhost";
+apiHost = "192.168.2.123";
 if (process.env.NODE_ENV == "production") {
     protocol = "wss";
     apiHost = "sunnapi.cloudsftp.de";
@@ -28,7 +29,7 @@ const subscriptionClient = new SubscriptionClient(
 const app = createApp(App);
 app.use(OpenLayersMap);
 app.use(urql, {
-    url: "http://localhost:6660/graphql",
+    url: `http://${apiHost}:6660/graphql`,
     exchanges: [
         cacheExchange,
         fetchExchange,

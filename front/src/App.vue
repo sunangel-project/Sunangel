@@ -18,8 +18,8 @@ open();
 </script>
 
 <template>
-    <div class="bg-gray-900 text-gray-100 h-screen grid grid-rows-3 md:grid-rows-1 md:grid-cols-4">
-        <div class="row-span-1 md:col-span-3">
+    <div class="bg-gray-900 text-gray-100 h-screen grid grid-rows-[45%_1fr] md:grid-rows-1 md:grid-cols-[70%_1fr]">
+        <div>
             <Map />
         </div>
         <div>

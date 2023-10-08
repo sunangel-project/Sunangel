@@ -1,10 +1,13 @@
 <template>
     <div class="bg-gray-800 rounded-md shadow-md">
-        <div class="grid grid-cols-3 gap-1 py-2 px-3">
-            <p>sun:</p>
+        <div class="grid grid-cols-[20%_40%_1fr] gap-1 py-2 px-3 text-center">
+            <div />
+            <p class="font-semibold">rise</p>
+            <p class="font-semibold">set</p>
+            <p class="font-semibold">sun</p>
             <p>{{ renderTime(spot.events.sun.rise.time) }}</p>
             <p>{{ renderTime(spot.events.sun.set.time) }}</p>
-            <p>moon:</p>
+            <p class="font-semibold">moon</p>
             <p>{{ renderTime(spot.events.moon.rise.time) }}</p>
             <p>{{ renderTime(spot.events.moon.set.time) }}</p>
         </div>
