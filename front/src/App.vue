@@ -18,33 +18,15 @@ open();
 </script>
 
 <template>
-    <div class="grid">
-        <div class="map">
+    <div class="bg-gray-900 grid grid-cols-4">
+        <div class="col-span-3">
             <Map />
         </div>
-        <div class="input">
+        <div>
             <SearchInput />
             <SpotList />
         </div>
     </div>
 
-    <ModalsContainer />
+    <!--ModalsContainer /-->
 </template>
-
-<style scoped>
-.grid {
-    display: grid;
-    grid-template-columns: 80% 10%;
-    grid-template-rows: 100%;
-}
-
-.map {
-    grid-column: 1;
-    grid-row: 1;
-}
-
-.input {
-    grid-column: 2;
-    grid-row: 1;
-}
-</style>

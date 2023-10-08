@@ -6,7 +6,8 @@ import urql, { cacheExchange, fetchExchange, subscriptionExchange } from '@urql/
 
 
 import App from './App.vue';
-import './assets/main.css';
+// import './assets/main.css';
+import './index.css';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { createVfm } from 'vue-final-modal'
 

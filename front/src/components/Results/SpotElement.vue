@@ -10,7 +10,7 @@ import type { PropType } from "vue";
 
 import { type Spot } from "../../state";
 
-const props = defineProps({
+defineProps({
     spot: {
         type: Object as PropType<Spot>,
         required: true,
