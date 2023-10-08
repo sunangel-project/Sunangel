@@ -1,9 +1,9 @@
 <template>
-    <ul>
-        <li v-for="spot in selectedSpots">
+    <div class="flex flex-col m-2 gap-2 md:gap-3">
+        <div v-for="spot in selectedSpots">
             <SpotElement :spot="spot" />
-        </li>
-    </ul>
+        </div>
+    </div>
 </template>
 
 <script lang="ts" setup>
