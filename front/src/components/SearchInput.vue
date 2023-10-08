@@ -21,5 +21,5 @@ import { inputs } from "../state"
         <input v-model="inputs.radius" type="number">
     </div>
 
-    <button @click="search">Search</button>
+    <button class="py-2 px-4 font-semibold rounded-lg shadow-md" @click="search">Search</button>
 </template>
