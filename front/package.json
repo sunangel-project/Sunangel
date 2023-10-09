@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@urql/vue": "^1.1.1",
+    "graphql-ws": "^5.14.1",
     "proj4": "^2.9.0",
-    "subscriptions-transport-ws": "^0.11.0",
     "uuid": "^9.0.0",
     "vue": "^3.3.2",
     "vue-final-modal": "^4.4.5",
@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@tsconfig/node18": "^2.0.1",
-    "@types/node": "^18.16.8",
+    "@types/node": "^18.18.4",
     "@types/proj4": "^2.5.2",
     "@types/uuid": "^9.0.2",
     "@vitejs/plugin-vue": "^4.2.3",

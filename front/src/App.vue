@@ -17,10 +17,9 @@ import SearchInput from './components/SearchInput.vue'
 import SpotList from './components/Results/SpotList.vue'
 import Map from './components/Map.vue'
 
+import { cacheExchange, fetchExchange, subscriptionExchange, Client, provideClient } from '@urql/vue';
+import { createClient as createWSClient, type SubscribePayload } from 'graphql-ws';
 import { setupSpotsSubscription } from './searching';
-import { Client, provideClient } from '@urql/vue';
-import { SubscriptionClient } from 'subscriptions-transport-ws';
-import { cacheExchange, fetchExchange, subscriptionExchange } from '@urql/vue';
 
 import { ModalsContainer, useModal } from 'vue-final-modal'
 import Popup from './components/Popup.vue'
@@ -30,7 +29,7 @@ const displayConnectionError = () => {
         component: Popup,
         attrs: {
             title: "Error",
-            message: "Backend is not reachable. Please try again later.",
+            message: "Couldn't connect to the backend... Please try again later.",
         },
     });
     open();
@@ -45,20 +44,35 @@ if (process.env.NODE_ENV == "production") {
     apiHost = "sunnapi.cloudsftp.de";
 }
 
-const subscriptionClient = new SubscriptionClient(
-    `${protocol}://${apiHost}:6660/subscriptions`,
-    { reconnect: false },
-);
-subscriptionClient.client.onerror = displayConnectionError;
+const wsClient = createWSClient({
+    url: `${protocol}://${apiHost}:6660/subscriptions`,
+    on: {
+        error: displayConnectionError,
+    },
+});
+
+const subExchange = subscriptionExchange({
+    forwardSubscription(operation) {
+        return {
+            subscribe: (sink) => {
+                const dispose = wsClient.subscribe(
+                    operation as SubscribePayload,
+                    sink,
+                );
+                return {
+                    unsubscribe: dispose,
+                };
+            },
+        };
+    },
+});
 
 const client = new Client({
     url: `http://${apiHost}:6660/graphql`,
     exchanges: [
         cacheExchange,
         fetchExchange,
-        subscriptionExchange({
-            forwardSubscription: (request) => subscriptionClient.request(request),
-        }),
+        subExchange,
     ],
 });
 
