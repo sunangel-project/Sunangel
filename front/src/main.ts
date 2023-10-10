@@ -7,6 +7,8 @@ import App from './App.vue';
 import './index.css';
 import { createVfm } from 'vue-final-modal'
 
+export const version = "v0.0.3"
+
 const app = createApp(App);
 app.use(OpenLayersMap);
 app.use(createVfm());

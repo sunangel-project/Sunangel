@@ -45,6 +45,18 @@ export const spots: SpotsState = reactive({
 
 export const selectedSpotIds: Set<string> = reactive(new Set());
 
+// Connection state
+
+export interface Connection {
+    connected: boolean,
+    apiVersion?: string,
+    backendVersion?: string,
+}
+
+export const connection: Connection = reactive({
+    connected: false,
+});
+
 // Search input state
 
 interface Inputs {
