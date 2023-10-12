@@ -1,50 +1,31 @@
-<script setup lang="ts">
-import SearchInput from './components/SearchInput.vue'
-import SpotList from './components/Results/SpotList.vue'
-import Map from './components/Map.vue'
-
-import { setupSpotsSubscription } from './searching';
-setupSpotsSubscription()
-
-/* Modal Pop-up
-// Disclaimer
-import { ModalsContainer, useModal } from 'vue-final-modal'
-import Disclaimer from './components/Disclaimer.vue'
-const { open } = useModal({
-    component: Disclaimer,
-})
-open();
-*/
-</script>
-
 <template>
-    <div class="grid">
-        <div class="map">
+    <div class="h-screen grid grid-rows-[35%_1fr] md:grid-rows-1 md:grid-cols-[70%_1fr]">
+        <div>
             <Map />
         </div>
-        <div class="input">
+        <div class="flex flex-col">
             <SearchInput />
-            <SpotList />
+            <SpotList class="grow" />
+            <VersionInfo />
         </div>
     </div>
 
     <ModalsContainer />
 </template>
 
-<style scoped>
-.grid {
-    display: grid;
-    grid-template-columns: 80% 10%;
-    grid-template-rows: 100%;
-}
+<script setup lang="ts">
+import SearchInput from './components/SearchInput.vue'
+import SpotList from './components/Results/SpotList.vue'
+import VersionInfo from './components/VersionInfo.vue'
+import Map from './components/Map.vue'
 
-.map {
-    grid-column: 1;
-    grid-row: 1;
-}
+import { ModalsContainer } from 'vue-final-modal'
 
-.input {
-    grid-column: 2;
-    grid-row: 1;
-}
-</style>
+import { setupGraphQLClient, fetchBackendVersions } from './graphql';
+import { setupSpotsSubscription } from './searching';
+
+setupGraphQLClient();
+
+fetchBackendVersions();
+setupSpotsSubscription();
+</script>

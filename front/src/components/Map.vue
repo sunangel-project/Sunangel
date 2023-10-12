@@ -1,7 +1,5 @@
 <template>
-    <!-- style is fucked up here, otherwise it wont work -->
-    <ol-map :loadTilesWhileAnimating="true" :loadTilesWhileInteracting="true" @moveend="storeMapState"
-        style="height: 1px; min-height: 100vh;">
+    <ol-map :loadTilesWhileAnimating="true" :loadTilesWhileInteracting="true" @moveend="storeMapState" style="height: 100%">
         <ol-view ref="view" :center="mapState.center" @centerChanged="centerChanged" :zoom="mapState.zoom"
             @zoomChanged="zoomChanged" :projection="projection" />
 

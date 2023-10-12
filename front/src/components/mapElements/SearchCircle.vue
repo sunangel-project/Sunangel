@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts" setup>
-const props = defineProps({
+defineProps({
     center: {
         type: Array,
         default: [0, 0],
