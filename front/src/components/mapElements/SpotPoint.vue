@@ -1,24 +1,26 @@
 <template>
     <ol-feature :properties="featureProperties">
         <ol-geom-point :coordinates="coordinates"></ol-geom-point>
-        <SpotPointStyle />
+        <SpotPointStyle :spot_id="spot_id" />
     </ol-feature>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue';
 
-import { project } from "../../projection"
+import { project } from '../../projection'
+import { spots } from '../../state'
 
 import SpotPointStyle from './SpotPointStyle.vue';
 
 const props = defineProps({
-    spot: {
-        type: Object,
+    spot_id: {
+        type: String,
+        required: true,
     },
 });
 
-const spot = props.spot!;
+const spot = spots.spots.get(props.spot_id)!;
 
 const featureProperties = {
     'kind': 'spot',

@@ -33,17 +33,17 @@ export interface Spot extends Result {
 
 interface SpotsState {
     loading: boolean;
-    spots: Spot[];
+    spots: Map<string, Spot>;
     subscription: UseSubscriptionResponse | undefined;
 }
 
 export const spots: SpotsState = reactive({
     loading: false,
-    spots: [],
+    spots: new Map<string, Spot>(),
     subscription: undefined,
 });
 
-export const selectedSpotIds: Set<string> = reactive(new Set());
+export const selectedSpotIds: string[] = reactive([]);
 
 // Connection state
 

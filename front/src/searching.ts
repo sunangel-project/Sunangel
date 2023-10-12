@@ -7,8 +7,8 @@ export function search() {
         return // TODO: warning
     }
 
-    spots.spots = []
-    spots.subscription?.executeSubscription()
+    spots.spots.clear();
+    spots.subscription?.executeSubscription();
 }
 
 export function setupSpotsSubscription() {
@@ -53,9 +53,10 @@ subscription spot($lat: Float!, $lon: Float!, $radius: Int!) {
             variables: inputs,
             pause: true,
         },
-        (_, s) => {
-            if (typeof s === "object") { // TODO: type safety!
-                spots.spots.push(spotFromResult(s.spots.spot));
+        (_, result) => {
+            if (typeof result === "object") { // TODO: type safety!
+                const spot = spotFromResult(result.spots.spot);
+                spots.spots.set(spot.id, spot);
             } else {
                 console.log('was not correct type');
             }
