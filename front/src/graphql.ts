@@ -18,10 +18,12 @@ function displayConnectionError() {
 
 export function setupGraphQLClient(): void {
     let protocol = "ws";
+    let httpProtocol = "http";
     let apiHost = "localhost";
     apiHost = "192.168.2.123";
     if (process.env.NODE_ENV == "production") {
-        protocol = "wss";
+        protocol = "wss"
+        httpProtocol = "https"
         apiHost = "sunnapi.cloudsftp.de";
     }
 
@@ -49,7 +51,7 @@ export function setupGraphQLClient(): void {
     });
 
     const client = new Client({
-        url: `http://${apiHost}:6660/graphql`,
+        url: `${httpProtocol}://${apiHost}:6660/graphql`,
         exchanges: [
             mapExchange({
                 onError: (error) => {

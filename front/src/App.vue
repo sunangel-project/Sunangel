@@ -5,7 +5,7 @@
         </div>
         <div class="flex flex-col">
             <SearchInput />
-            <SpotList class="grow" />
+            <SpotList class="grow overflow-auto" />
             <VersionInfo />
         </div>
     </div>

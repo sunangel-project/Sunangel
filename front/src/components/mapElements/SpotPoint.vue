@@ -1,28 +1,40 @@
 <template>
     <ol-feature :properties="featureProperties">
         <ol-geom-point :coordinates="coordinates"></ol-geom-point>
-        <SpotPointStyle />
+        <ol-style>
+            <ol-style-circle :radius="radius">
+                <ol-style-fill :color="fillColor" />
+            </ol-style-circle>
+            <ol-style-text v-if="selected" :text="index.toString()" />
+        </ol-style>
     </ol-feature>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, type PropType } from 'vue';
 
-import { project } from "../../projection"
+import { project } from '../../projection'
+import { type Spot } from '../../state'
 
-import SpotPointStyle from './SpotPointStyle.vue';
+const radius = ref(10);
 
 const props = defineProps({
     spot: {
-        type: Object,
+        type: Object as PropType<Spot>,
+        required: true,
     },
 });
 
-const spot = props.spot!;
-
 const featureProperties = {
-    'kind': 'spot',
-    'id': spot.id,
+    'spot': props.spot,
 };
-const coordinates = ref(project(spot.location.lat, spot.location.lon));
+const coordinates = ref(project(props.spot.location.lat, props.spot.location.lon));
+
+const fillColor = ref('green');
+let index = -1;
+const selected = props.spot.selectedId != undefined;
+if (selected) {
+    fillColor.value = '#FB923C';
+    index = props.spot.selectedId!;
+}
 </script>

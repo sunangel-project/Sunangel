@@ -1,18 +1,20 @@
 <template>
     <div class="flex flex-col m-2 gap-2 md:gap-3">
-        <div v-for="spot in selectedSpots">
-            <SpotElement :spot="spot" />
-        </div>
+        <SpotElement v-for="spot of selectedSpots" :spot="spot" />
     </div>
 </template>
 
 <script lang="ts" setup>
+import { spots } from "@/state";
 import SpotElement from "./SpotElement.vue"
 
-import { computed } from "vue"
-import { spots, selectedSpotIds } from "../../state"
+import { computed } from "vue";
 
 const selectedSpots = computed(
-    () => spots.spots.filter((spot) => selectedSpotIds.has(spot.id))
-)
+    () => spots.spots.filter(
+        spot => spot.selectedId != null
+    ).sort(
+        (a, b) => a.selectedId! - b.selectedId!
+    )
+);
 </script>
