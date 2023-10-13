@@ -3,9 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { inputs, spots, type Spot, type Result } from "./state";
 
 export function search() {
-    if (spots.loading) { // TODO: set true here and set false when receiving responses
-        return // TODO: warning
-    }
+    if (spots.loading) { return; }
+    spots.loading = true;
 
     spots.spots = [];
     spots.subscription?.executeSubscription();
@@ -57,6 +56,10 @@ subscription spot($lat: Float!, $lon: Float!, $radius: Int!) {
             if (typeof result === "object") { // TODO: type safety!
                 const spot = spotFromResult(result.spots.spot);
                 spots.spots.push(spot);
+
+                if (result.spots.status === "FINISHED") {
+                    spots.loading = false;
+                }
             } else {
                 console.log('was not correct type');
             }
