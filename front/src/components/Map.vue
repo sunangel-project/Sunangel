@@ -8,10 +8,10 @@
             <ol-source-osm />
         </ol-tile-layer>
 
-        <ol-vector-layer>
+        <ol-vector-layer :key="vectorLayerKey">
             <ol-source-vector>
                 <SearchCircle :center="searchCenter" :radius="inputs.radius" />
-                <SpotPoint v-for="spot_id in spots.spots.keys()" :spot_id="spot_id" />
+                <SpotPoint v-for="spot in spots.spots" :spot="spot" />
             </ol-source-vector>
         </ol-vector-layer>
     </ol-map>
@@ -25,34 +25,34 @@ import SearchCircle from "./mapElements/SearchCircle.vue"
 import SpotPoint from "./mapElements/SpotPoint.vue"
 
 import {
-    searchCenter, inputs, mapState, centerChanged, zoomChanged,
-    storeMapState, spots, selectedSpotIds
+    searchCenter, inputs, mapState,
+    centerChanged, zoomChanged, storeMapState, spots, type Spot
 } from "../state"
 import { projection } from "../projection"
+import { ref } from "vue";
+
+const vectorLayerKey = ref(0);
 
 /*
 Not using the built-in selection mechanism as it does not provide the desired behavior
 */
 function handleClick(event: MapBrowserEvent<PointerEvent>) {
-    const map = event.map;
-    map.forEachFeatureAtPixel(
+    event.map.forEachFeatureAtPixel(
         event.pixel,
         featureSelected,
     );
-    map.changed();
-    map.renderSync();
+    vectorLayerKey.value++;
 }
 
 function featureSelected(feature: FeatureLike) {
-    const kind = feature.get('kind');
-    if (kind !== 'spot') { return; }
+    const spot = feature.get('spot') as Spot;
+    if (!spot) { return; }
 
-    const id = feature.get('id');
-    if (selectedSpotIds.includes(id)) {
-        let idx = selectedSpotIds.indexOf(id);
-        selectedSpotIds[idx] = 'deselected';
+    if (!spot.selectedId) {
+        spot.selectedId = spots.nextSelectedId;
+        spots.nextSelectedId++;
     } else {
-        selectedSpotIds.unshift(id);
+        spot.selectedId = undefined;
     }
 }
 </script>

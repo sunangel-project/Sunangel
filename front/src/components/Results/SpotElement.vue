@@ -1,7 +1,7 @@
 <template>
     <div class="bg-gray-800 rounded-md shadow-md">
         <div class="grid grid-cols-[20%_40%_1fr] gap-1 py-2 px-3 text-center">
-            <p>{{ index + 1 }}</p>
+            <p>#{{ spot.selectedId }}</p>
             <p class="font-semibold">rise</p>
             <p class="font-semibold">set</p>
             <p class="font-semibold">sun</p>
@@ -15,21 +15,15 @@
 </template>
 
 <script lang="ts" setup>
+import type { Spot } from '@/state';
+import type { PropType } from 'vue';
 
-import { spots } from "../../state";
-
-const props = defineProps({
-    spot_id: {
-        type: String,
+defineProps({
+    spot: {
+        type: Object as PropType<Spot>,
         required: true,
     },
-    index: {
-        type: Number,
-        required: true
-    },
 });
-
-const spot = spots.spots.get(props.spot_id)!;
 
 function renderTime(t: string): string {
     const date = new Date(t);

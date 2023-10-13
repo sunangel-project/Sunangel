@@ -7,7 +7,7 @@ export function search() {
         return // TODO: warning
     }
 
-    spots.spots.clear();
+    spots.spots = [];
     spots.subscription?.executeSubscription();
 }
 
@@ -56,7 +56,7 @@ subscription spot($lat: Float!, $lon: Float!, $radius: Int!) {
         (_, result) => {
             if (typeof result === "object") { // TODO: type safety!
                 const spot = spotFromResult(result.spots.spot);
-                spots.spots.set(spot.id, spot);
+                spots.spots.push(spot);
             } else {
                 console.log('was not correct type');
             }

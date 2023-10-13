@@ -15,7 +15,6 @@ export interface HorizonEventCollection {
 }
 
 export interface Result {
-    selected: boolean;
     kind: string;
     location: {
         lat: number;
@@ -29,21 +28,22 @@ export interface Result {
 
 export interface Spot extends Result {
     id: string;
+    selectedId?: number;
 }
 
 interface SpotsState {
     loading: boolean;
-    spots: Map<string, Spot>;
+    spots: Spot[];
     subscription: UseSubscriptionResponse | undefined;
+    nextSelectedId: number,
 }
 
 export const spots: SpotsState = reactive({
     loading: false,
-    spots: new Map<string, Spot>(),
+    spots: [],
     subscription: undefined,
+    nextSelectedId: 1,
 });
-
-export const selectedSpotIds: string[] = reactive([]);
 
 // Connection state
 
