@@ -79,6 +79,18 @@ watch(inputs, (inputs) => {
     storeObjectLocal("search.inputs", inputs);
 });
 
+// Additional state for the query
+
+export interface Time {
+    time: string,
+    timezone: string,
+}
+
+export const time: Time = reactive({
+    time: (new Date()).toISOString(),
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+})
+
 // Map state
 
 interface MapState {

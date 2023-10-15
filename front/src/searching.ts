@@ -1,11 +1,13 @@
 import { gql, useSubscription } from '@urql/vue';
 import { v4 as uuidv4 } from 'uuid';
-import { inputs, spots, type Spot, type Result } from "./state";
-import { computed } from 'vue';
+import { inputs, time, spots, type Spot, type Result } from "./state";
+import { toRef, toRefs } from 'vue';
 
 export function search() {
     if (spots.loading) { return; }
     spots.loading = true;
+
+    time.time = (new Date()).toISOString();
 
     spots.spots = [];
     spots.subscription?.executeSubscription();
@@ -51,9 +53,8 @@ subscription spot($time: DateTime!, $timezone: TimeZone!, $lat: Float!, $lon: Fl
         {
             query: query,
             variables: {
-                ...inputs,
-                time: (new Date()).toISOString(), // TODO: provide current date for every subscription
-                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                ...toRefs(inputs),
+                ...toRefs(time),
             },
             pause: true,
         },
