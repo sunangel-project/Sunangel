@@ -3,7 +3,8 @@ use async_nats::{
     jetstream::{consumer::pull::MessagesError, kv::Store, Context, Message},
     Error,
 };
-use chrono::Utc;
+use chrono::{DateTime, NaiveDateTime, Timelike, Utc};
+use chrono_tz::Tz;
 use futures_util::Future;
 use log::{error, info};
 use messages_common::MessageStream;
@@ -75,12 +76,19 @@ pub fn generate_handle_message_res<'a>(
 }
 
 #[derive(Serialize, Deserialize)]
+struct SearchQuery {
+    time: DateTime<Utc>,
+    timezone: Tz,
+}
+
+#[derive(Serialize, Deserialize)]
 struct Spot {
     loc: Location,
 }
 
 #[derive(Serialize, Deserialize)]
 struct InMessage {
+    search_query: SearchQuery,
     horizon: String,
     spot: Spot,
 }
@@ -109,7 +117,7 @@ pub async fn handle_message(
         decoded_message.horizon
     );
 
-    let time = Utc::now().naive_utc(); // TODO: get from message (need to add to message)
+    let time = get_time(&decoded_message);
     let sun_events =
         crate::calculate_rise_and_set(&Sun, &time, &decoded_message.spot.loc, &horizon)?;
     let moon_events =
@@ -131,6 +139,19 @@ pub async fn handle_message(
     message.ack().await?;
 
     Ok(())
+}
+
+fn get_time(message: &InMessage) -> NaiveDateTime {
+    let time = message.search_query.time;
+    let time = time.with_timezone(&message.search_query.timezone);
+
+    let hour = if time.hour() < 12 { 0 } else { 12 };
+    let time = time.with_hour(hour).unwrap();
+    let time = time.with_minute(0).unwrap();
+    let time = time.with_second(0).unwrap();
+    let time = time.with_nanosecond(0).unwrap();
+
+    time.naive_utc()
 }
 
 fn build_output(in_value: Value, result: OutEvents) -> Result<Value, Error> {

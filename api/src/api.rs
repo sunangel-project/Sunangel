@@ -58,11 +58,11 @@ pub struct Query;
 #[graphql_object(context = Context)]
 impl Query {
     fn api_version() -> &'static str {
-        "v0.1.0"
+        "v0.1.1"
     }
 
     fn backend_version() -> &'static str {
-        "v0.1.1"
+        "v0.1.2"
     }
 }
 

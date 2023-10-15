@@ -56,6 +56,7 @@ export function setupGraphQLClient(): void {
             mapExchange({
                 onError: (error) => {
                     // TODO: Check whether network error
+                    console.log(error);
                     connection.connected = false;
                     displayConnectionError();
                 },

@@ -1,6 +1,7 @@
 import { gql, useSubscription } from '@urql/vue';
 import { v4 as uuidv4 } from 'uuid';
 import { inputs, spots, type Spot, type Result } from "./state";
+import { computed } from 'vue';
 
 export function search() {
     if (spots.loading) { return; }
@@ -24,8 +25,8 @@ set {
 }
 `
     let query = gql`
-subscription spot($lat: Float!, $lon: Float!, $radius: Int!) {
-  spots(query: { location: { lat: $lat, lon: $lon }, radius: $radius }) {
+subscription spot($time: DateTime!, $timezone: TimeZone!, $lat: Float!, $lon: Float!, $radius: Int!) {
+  spots(query: { time: $time, timezone: $timezone, location: { lat: $lat, lon: $lon }, radius: $radius }) {
     status
     spot {
       location {
@@ -49,7 +50,11 @@ subscription spot($lat: Float!, $lon: Float!, $radius: Int!) {
     spots.subscription = useSubscription(
         {
             query: query,
-            variables: inputs,
+            variables: {
+                ...inputs,
+                time: (new Date()).toISOString(), // TODO: provide current date for every subscription
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            },
             pause: true,
         },
         (_, result) => {

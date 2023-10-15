@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+use chrono_tz::Tz;
 use juniper::{GraphQLEnum, GraphQLInputObject, GraphQLObject};
 use serde::{Deserialize, Serialize};
 
@@ -152,6 +153,8 @@ pub struct LocationIn {
 
 #[derive(GraphQLInputObject)]
 pub struct APISearchQuery {
+    pub time: DateTime<Utc>,
+    pub timezone: Tz,
     pub location: LocationIn,
     pub radius: i32,
 }
@@ -163,6 +166,8 @@ pub struct APISearchQuery {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SearchQuery {
+    time: DateTime<Utc>,
+    timezone: Tz,
     loc: Location,
     rad: i32,
 }
@@ -170,6 +175,8 @@ pub struct SearchQuery {
 impl From<APISearchQuery> for SearchQuery {
     fn from(value: APISearchQuery) -> Self {
         SearchQuery {
+            time: value.time,
+            timezone: value.timezone,
             loc: value.location.into(),
             rad: value.radius,
         }

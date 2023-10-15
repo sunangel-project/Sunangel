@@ -1,7 +1,6 @@
 # API ![version](https://img.shields.io/badge/v0.0.0-blue.svg)
 
 TODO: replace `juniper` with crates when new version of `juniper_actix` is released.
-Also remember to remove `git clone juniper` from `Dockerfile`.
 
 ## Testing Queries
 
@@ -21,7 +20,7 @@ Do a `POST` request with the query as data to http://localhost:6660/graphql.
 
 ```
 subscription spots {
-  spots(query: { location: { lat: 48.81909, lon: 9.59523 }, radius: 2000 }) {
+  spots(query: { time: "2023-10-15T12:53:56Z", timezone: "Europe/Berlin", location: { lat: 48.81909, lon: 9.59523 }, radius: 2000 }) {
     status
     spot {
       location {
