@@ -60,7 +60,7 @@ where
 
 const MAX_RESOLUTION_EXP: usize = 5;
 
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 enum CandidateType {
     Rise,
     Set,
@@ -76,8 +76,9 @@ where
     O: SkyObject,
 {
     for r in 1..MAX_RESOLUTION_EXP {
-        let duration = object.period() / r as i32;
-        let candidates: Vec<(CandidateRange, CandidateType)> = (0..(2i32.pow(r as u32)))
+        let resolution = 2i32.pow(r as u32);
+        let duration = object.period() / resolution as i32;
+        let candidates: Vec<(CandidateRange, CandidateType)> = (0..resolution)
             .filter_map(|i| {
                 let left = time.checked_add_signed(duration * i)?;
                 let right = left.checked_add_signed(duration)?;

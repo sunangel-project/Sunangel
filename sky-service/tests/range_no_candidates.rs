@@ -20,7 +20,7 @@ fn test_no_range_found() {
 
     let time = NaiveDateTime::new(
         NaiveDate::from_ymd_opt(2023, 10, 16).unwrap(),
-        NaiveTime::from_hms_opt(16, 24, 0).unwrap(),
+        NaiveTime::from_hms_opt(16, 0, 0).unwrap(),
     );
 
     let location = Location {
@@ -33,6 +33,6 @@ fn test_no_range_found() {
         set: HorizonEvent { time: set, .. },
     } = sky_service::calculate_rise_and_set(&Moon, &time, &location, &horizon).unwrap();
 
-    assert_eq!(set.hour(), 16);
-    assert_eq!(set.minute(), 31);
+    assert_eq!(set.hour(), 15);
+    assert_eq!(set.minute(), 59);
 }

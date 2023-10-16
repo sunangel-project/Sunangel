@@ -31,7 +31,7 @@ const OBLIQUITY_ECLIPTIC_1: f64 = 3.563e-7 * PI / 180.;
 pub struct Moon;
 impl SkyObject for Moon {
     fn period(&self) -> Duration {
-        Duration::days(1)
+        Duration::hours(26)
     }
 
     // source: http://www.stjarnhimlen.se/comp/tutorial.html#7
