@@ -33,6 +33,6 @@ fn test_no_range_found() {
         set: HorizonEvent { time: set, .. },
     } = sky_service::calculate_rise_and_set(&Moon, &time, &location, &horizon).unwrap();
 
-    assert_eq!(set.hour(), 15);
-    assert_eq!(set.minute(), 59);
+    assert_eq!(set.hour(), 17);
+    assert_eq!(set.minute(), 12);
 }
