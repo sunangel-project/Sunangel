@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-row place-content-evenly text-green-700 text-sm m-2 md:m-3">
+    <div class="flex flex-row place-content-evenly text-green-700 text-sm m-1 md:m-2">
         <p> frontend {{ version }} </p>
         <p :class="(connection.apiVersion) ? '' : 'text-red-700'">
             API {{ connection.apiVersion ?? 'unreachable' }}

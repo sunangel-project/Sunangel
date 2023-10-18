@@ -6,7 +6,9 @@
         <div class="flex flex-col">
             <SearchInput />
             <SpotList class="grow overflow-auto" />
-            <RouterLink to="/privacy">Privacy</RouterLink>
+            <div class="flex flex-row place-content-evenly text-neutral-400 text-sm">
+                <RouterLink to="/privacy">Privacy</RouterLink>
+            </div>
             <VersionInfo />
         </div>
     </div>

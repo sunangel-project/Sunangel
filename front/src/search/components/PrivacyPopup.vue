@@ -1,10 +1,5 @@
 <script setup lang="ts">
 import { VueFinalModal } from 'vue-final-modal'
-
-defineProps({
-    title: String,
-    message: String,
-});
 </script>
 
 <template>
