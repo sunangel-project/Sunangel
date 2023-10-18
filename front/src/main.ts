@@ -11,7 +11,7 @@ import { createVfm } from 'vue-final-modal'
 
 const app = createApp(App);
 
-import Search from './Search.vue';
+import Search from './search/Search.vue';
 const About = app.component('about', { template: '<div>About</div>' });
 
 const routes = [

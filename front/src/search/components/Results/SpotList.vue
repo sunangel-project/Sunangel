@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts" setup>
-import { spots } from "@/state";
+import { spots } from "../../state";
 import SpotElement from "./SpotElement.vue"
 
 import { computed } from "vue";

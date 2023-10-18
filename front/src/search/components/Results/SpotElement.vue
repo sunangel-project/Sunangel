@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Spot } from '@/state';
+import type { Spot } from '../state';
 import type { PropType } from 'vue';
 
 defineProps({

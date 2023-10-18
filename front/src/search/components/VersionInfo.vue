@@ -11,6 +11,6 @@
 </template>
 
 <script setup lang="ts">
-import { version } from '../main';
+import { version } from '../../main';
 import { connection } from '../state';
 </script>
