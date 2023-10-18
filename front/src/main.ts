@@ -10,6 +10,7 @@ import { createVfm } from 'vue-final-modal'
 
 export const version = "v0.0.6"
 
+import App from './App.vue';
 import Search from './search/Search.vue';
 import Privacy from './privacy/Privacy.vue';
 
@@ -23,7 +24,6 @@ const router = createRouter({
     routes,
 })
 
-import App from './App.vue';
 const app = createApp(App);
 app.use(router);
 app.use(OpenLayersMap);
