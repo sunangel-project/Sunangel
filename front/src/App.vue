@@ -1,8 +1,9 @@
 <template>
     <div class="">
-        <router-view></router-view>
+        <RouterView></RouterView>
     </div>
 </template>
 
 <script setp lang="ts">
+import { RouterView } from 'vue-router';
 </script>

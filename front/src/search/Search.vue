@@ -6,7 +6,7 @@
         <div class="flex flex-col">
             <SearchInput />
             <SpotList class="grow overflow-auto" />
-            <router-link to="/about">Privacy</router-link>
+            <RouterLink to="/privacy">Privacy</RouterLink>
             <VersionInfo />
         </div>
     </div>
@@ -15,12 +15,13 @@
 </template>
 
 <script setup lang="ts">
+import { ModalsContainer } from 'vue-final-modal'
+import { RouterLink } from 'vue-router'
+
 import SearchInput from './components/SearchInput.vue'
 import SpotList from './components/Results/SpotList.vue'
 import VersionInfo from './components/VersionInfo.vue'
 import Map from './components/Map.vue'
-
-import { ModalsContainer } from 'vue-final-modal'
 
 import { setupGraphQLClient, fetchBackendVersions } from './graphql';
 import { setupSpotsSubscription } from './searching';
