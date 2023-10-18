@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { ModalsContainer } from 'vue-final-modal'
+import { ModalsContainer, useModal } from 'vue-final-modal'
 import { RouterLink } from 'vue-router'
 
 import SearchInput from './components/SearchInput.vue'
@@ -25,9 +25,24 @@ import Map from './components/Map.vue'
 
 import { setupGraphQLClient, fetchBackendVersions } from './graphql';
 import { setupSpotsSubscription } from './searching';
+import { dontShowPrivacyPopupAgain, showPrivacyPopup } from './state'
 
 setupGraphQLClient();
 
 fetchBackendVersions();
 setupSpotsSubscription();
+
+import PrivacyPopup from './components/PrivacyPopup.vue';
+if (showPrivacyPopup) {
+    const { open, close } = useModal({
+        component: PrivacyPopup,
+        attrs: {
+            onConfirm() {
+                dontShowPrivacyPopupAgain();
+                close();
+            },
+        }
+    });
+    open();
+}
 </script>

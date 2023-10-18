@@ -117,11 +117,25 @@ export function storeMapState() {
     storeObjectLocal("map.state", mapStateToStore);
 }
 
+// Privacy popup state
+
+const defaultShowPrivacyPopup = true;
+export const showPrivacyPopup = loadBoolFromLocal(
+    'popup.privacy.show',
+    defaultShowPrivacyPopup,
+);
+export function dontShowPrivacyPopupAgain() {
+    storeBoolLocal('popup.privacy.show', false);
+}
+
 // Utils
 
 function storeObjectLocal(name: string, object: any) {
     const objectString = JSON.stringify(object);
     localStorage.setItem(name, objectString);
+}
+function storeBoolLocal(name: string, object: boolean) {
+    storeObjectLocal(name, object);
 }
 
 function hasSameProps(a: any, b: any) {
@@ -138,4 +152,9 @@ function loadObjectFromLocal<T>(name: string, deflt: T): T {
     } else {
         return deflt;
     }
+}
+
+function loadBoolFromLocal(name: string, deflt: boolean): boolean {
+    const boolString = localStorage.getItem(name) ?? JSON.stringify(deflt);
+    return JSON.parse(boolString);
 }
