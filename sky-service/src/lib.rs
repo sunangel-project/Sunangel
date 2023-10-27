@@ -86,6 +86,8 @@ where
                 let left_up = is_up(object, &left, location, horizon);
                 let right_up = is_up(object, &right, location, horizon);
 
+                println!("{:?} {} {:?} {}", left, left_up, right, right_up);
+
                 if left_up != right_up {
                     let candidate_type = if left_up {
                         CandidateType::Set
@@ -175,6 +177,8 @@ where
         azimuth,
     } = object.position(time, location);
     let hor_altitude = horizon.altitude_at(azimuth.to_radians());
+
+    println!("{} > {}", obj_altitude, hor_altitude);
 
     obj_altitude > hor_altitude
 }
