@@ -62,7 +62,7 @@ impl Query {
     }
 
     fn backend_version() -> &'static str {
-        "v0.1.2"
+        "v0.1.3"
     }
 }
 

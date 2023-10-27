@@ -60,7 +60,7 @@ where
 
 const MAX_RESOLUTION_EXP: usize = 5;
 
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 enum CandidateType {
     Rise,
     Set,
@@ -76,14 +76,17 @@ where
     O: SkyObject,
 {
     for r in 1..MAX_RESOLUTION_EXP {
-        let duration = object.period() / r as i32;
-        let candidates: Vec<(CandidateRange, CandidateType)> = (0..(2i32.pow(r as u32)))
+        let resolution = 2i32.pow(r as u32);
+        let duration = object.period() / resolution as i32;
+        let candidates: Vec<(CandidateRange, CandidateType)> = (0..resolution)
             .filter_map(|i| {
                 let left = time.checked_add_signed(duration * i)?;
                 let right = left.checked_add_signed(duration)?;
 
                 let left_up = is_up(object, &left, location, horizon);
                 let right_up = is_up(object, &right, location, horizon);
+
+                println!("{:?} {} {:?} {}", left, left_up, right, right_up);
 
                 if left_up != right_up {
                     let candidate_type = if left_up {
@@ -174,6 +177,8 @@ where
         azimuth,
     } = object.position(time, location);
     let hor_altitude = horizon.altitude_at(azimuth.to_radians());
+
+    println!("{} > {}", obj_altitude, hor_altitude);
 
     obj_altitude > hor_altitude
 }
