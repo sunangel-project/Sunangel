@@ -1,7 +1,7 @@
 import { gql, useSubscription } from '@urql/vue';
 import { v4 as uuidv4 } from 'uuid';
 import { inputs, time, spots, type Spot, type Result } from "./state";
-import { toRef, toRefs } from 'vue';
+import { toRefs } from 'vue';
 
 export function search() {
     if (spots.loading) { return; }
