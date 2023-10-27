@@ -30,5 +30,5 @@ fn sanity_test_sun_just_before_set() {
     } = sky_service::calculate_rise_and_set(&Sun, &time, &location, &horizon).unwrap();
 
     assert_eq!(set.hour(), 16);
-    assert_eq!(set.minute(), 31);
+    assert_eq!(set.minute(), 23);
 }

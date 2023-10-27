@@ -95,8 +95,8 @@ struct InMessage {
 
 #[derive(Serialize, Deserialize)]
 struct OutEvents {
-    sun: HorizonEvents,
-    moon: HorizonEvents,
+    sun: Option<HorizonEvents>,
+    moon: Option<HorizonEvents>,
 }
 
 pub async fn handle_message(
@@ -119,9 +119,9 @@ pub async fn handle_message(
 
     let time = get_time(&decoded_message);
     let sun_events =
-        crate::calculate_rise_and_set(&Sun, &time, &decoded_message.spot.loc, &horizon)?;
+        crate::calculate_rise_and_set(&Sun, &time, &decoded_message.spot.loc, &horizon).ok();
     let moon_events =
-        crate::calculate_rise_and_set(&Moon, &time, &decoded_message.spot.loc, &horizon)?;
+        crate::calculate_rise_and_set(&Moon, &time, &decoded_message.spot.loc, &horizon).ok();
 
     let result = OutEvents {
         sun: sun_events,
