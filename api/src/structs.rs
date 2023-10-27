@@ -95,18 +95,7 @@ impl HorizonEventsCollection {
                     azimuth: 0.,
                 },
             }),
-            moon: Some(HorizonEvents {
-                rise: HorizonEvent {
-                    time: Utc::now(),
-                    altitude: 0.,
-                    azimuth: 0.,
-                },
-                set: HorizonEvent {
-                    time: Utc::now(),
-                    altitude: 0.,
-                    azimuth: 0.,
-                },
-            }),
+            moon: None,
         }
     }
 }

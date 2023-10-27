@@ -1,4 +1,4 @@
-use std::error::Error;
+
 
 use chrono::{DateTime, Duration, NaiveDateTime, Utc};
 use log::warn;
@@ -77,7 +77,7 @@ where
 {
     for r in 1..MAX_RESOLUTION_EXP {
         let resolution = 2i32.pow(r as u32);
-        let duration = object.period() / resolution as i32;
+        let duration = object.period() / resolution;
         let candidates: Vec<(CandidateRange, CandidateType)> = (0..resolution)
             .filter_map(|i| {
                 let left = time.checked_add_signed(duration * i)?;

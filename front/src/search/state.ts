@@ -21,8 +21,8 @@ export interface Result {
         lon: number;
     };
     events: {
-        sun: HorizonEventCollection;
-        moon: HorizonEventCollection;
+        sun?: HorizonEventCollection;
+        moon?: HorizonEventCollection;
     };
 }
 

@@ -11,7 +11,7 @@ fn find_range(
     let mut horizon = Vec::new();
     let altitudes_data =
         fs::read_to_string(format!("tests/Data/horizon-v1.0.0-{}.dat", uuid)).unwrap();
-    for line in altitudes_data.split("\n").filter(|l| l.len() > 0) {
+    for line in altitudes_data.split('\n').filter(|l| !l.is_empty()) {
         let val = line.parse::<f64>().unwrap();
         horizon.push(val);
     }

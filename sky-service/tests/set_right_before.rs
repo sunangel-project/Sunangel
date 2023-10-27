@@ -7,7 +7,7 @@ use sky_service::{sky::sun::Sun, Horizon, HorizonEvent, HorizonEvents, Location,
 fn sanity_test_sun_just_before_set() {
     let mut horizon = Vec::new();
     let altitudes_data = fs::read_to_string("tests/Data/aussicht_horizon.dat").unwrap();
-    for line in altitudes_data.split("\n").filter(|l| l.len() > 0) {
+    for line in altitudes_data.split('\n').filter(|l| !l.is_empty()) {
         let val = line.parse::<f64>().unwrap();
         horizon.push(val);
     }

@@ -5,11 +5,11 @@
             <p class="font-semibold">rise</p>
             <p class="font-semibold">set</p>
             <p class="font-semibold">sun</p>
-            <p>{{ renderTime(spot.events.sun.rise.time) }}</p>
-            <p>{{ renderTime(spot.events.sun.set.time) }}</p>
+            <p>{{ renderTime(spot.events.sun?.rise.time) }}</p>
+            <p>{{ renderTime(spot.events.sun?.set.time) }}</p>
             <p class="font-semibold">moon</p>
-            <p>{{ renderTime(spot.events.moon.rise.time) }}</p>
-            <p>{{ renderTime(spot.events.moon.set.time) }}</p>
+            <p>{{ renderTime(spot.events.moon?.rise.time) }}</p>
+            <p>{{ renderTime(spot.events.moon?.set.time) }}</p>
         </div>
     </div>
 </template>
@@ -25,8 +25,14 @@ defineProps({
     },
 });
 
-function renderTime(t: string): string {
+function renderTime(t?: string): string {
+    if (t == undefined) {
+        return "-"
+    }
+
     const date = new Date(t);
     return date.toLocaleTimeString()
+
 }
 </script>
+
