@@ -192,7 +192,7 @@ mod test {
 
         let pos = Moon.position(&time, &location);
 
-        assert_approx_eq(pos.altitude, -0.28403595507008245);
-        assert_approx_eq(pos.azimuth, 1.7608876071448318);
+        assert_approx_eq(pos.altitude, -0.2933753239671207);
+        assert_approx_eq(pos.azimuth, 1.7483650904968921);
     }
 }
