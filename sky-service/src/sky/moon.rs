@@ -9,6 +9,9 @@ use super::util;
 const LONG_ASC_NODE_0: f64 = 125.1228f64 * PI / 180.;
 const LONG_ASC_NODE_1: f64 = 0.0529538083 * PI / 180.;
 
+const SUN_LONG_ASC_NODE_0: f64 = 282.9404 * PI / 180.;
+const SUN_LONG_ASC_NODE_1: f64 = 4.70935e-5 * PI / 180.;
+
 const INCLINATION: f64 = 5.1454 * PI / 180.;
 const MEAN_DISTANCE: f64 = 60.2666;
 const ECCENTRICITY: f64 = 0.0549;
@@ -20,13 +23,33 @@ const ARG_OF_PERIGEE_1: f64 = 0.1643573223 * PI / 180.;
 const MEAN_ANOMALY_0: f64 = 115.3654 * PI / 180.;
 const MEAN_ANOMALY_1: f64 = 13.0649929509 * PI / 180.;
 
+const SUN_MEAN_ANOMALY_0: f64 = 356.0470 * PI / 180.;
+const SUN_MEAN_ANOMALY_1: f64 = 0.9856002585 * PI / 180.;
+
 const OBLIQUITY_ECLIPTIC_0: f64 = 23.4393 * PI / 180.;
 const OBLIQUITY_ECLIPTIC_1: f64 = 3.563e-7 * PI / 180.;
 
-// const GLAT_0: f64 = 0.1924 * PI / 180.;
+const PERT_LON_0: f64 = -1.274 * PI / 180.;
+const PERT_LON_1: f64 = 0.658 * PI / 180.;
+const PERT_LON_2: f64 = 0.186 * PI / 180.;
+const PERT_LON_3: f64 = 0.059 * PI / 180.;
+const PERT_LON_4: f64 = 0.057 * PI / 180.;
+const PERT_LON_5: f64 = 0.053 * PI / 180.;
+const PERT_LON_6: f64 = 0.046 * PI / 180.;
+const PERT_LON_7: f64 = 0.041 * PI / 180.;
+const PERT_LON_8: f64 = 0.035 * PI / 180.;
+const PERT_LON_9: f64 = 0.031 * PI / 180.;
+const PERT_LON_10: f64 = 0.015 * PI / 180.;
+const PERT_LON_11: f64 = 0.011 * PI / 180.;
 
-// const DIST_CENTER_0: f64 = 0.99833 * PI / 180.;
-// const DIST_CENTER_1: f64 = 0.00167 * PI / 180.;
+const PERT_LAT_0: f64 = 0.173 * PI / 180.;
+const PERT_LAT_1: f64 = 0.055 * PI / 180.;
+const PERT_LAT_2: f64 = 0.046 * PI / 180.;
+const PERT_LAT_3: f64 = 0.033 * PI / 180.;
+const PERT_LAT_4: f64 = 0.017 * PI / 180.;
+
+const PERT_R_0: f64 = 0.58 * PI / 180.;
+const PERT_R_1: f64 = 0.46 * PI / 180.;
 
 pub struct Moon;
 impl SkyObject for Moon {
@@ -72,12 +95,40 @@ impl SkyObject for Moon {
         let yeclip = r * (N.sin() * (v + w).cos() + N.cos() * vwsin * INCLINATION.cos());
         let zeclip = r * vwsin * INCLINATION.sin();
 
-        let mlon = yeclip.atan2(xeclip);
+        let mut mlon = yeclip.atan2(xeclip);
         let xeclip_yeclip_squared = xeclip.powi(2) + yeclip.powi(2);
-        let mlat = zeclip.atan2((xeclip_yeclip_squared).sqrt());
-        let r = (xeclip_yeclip_squared + zeclip.powi(2)).sqrt();
+        let mut mlat = zeclip.atan2((xeclip_yeclip_squared).sqrt());
+        let mut r = (xeclip_yeclip_squared + zeclip.powi(2)).sqrt();
 
-        // TODO: add pertubations or is it accurate enough?
+        // Pertubations
+
+        let (Ls, Ms) = sun_mean_length_and_anomaly(d);
+        let Lm = N + w + M;
+        let Mm = M;
+        let D = Lm - Ls;
+        let F = Lm - N;
+
+        let d2 = 2. * d;
+        mlon += PERT_LON_0 * (M - d2).sin()
+            + PERT_LON_1 * d2.sin()
+            + PERT_LON_2 * Ms.sin()
+            + PERT_LON_3 * (2. * Mm - d2).sin()
+            + PERT_LON_4 * (Mm - d2 + Ms).sin()
+            + PERT_LON_5 * (Mm + d2).sin()
+            + PERT_LON_6 * (d2 - Ms).sin()
+            + PERT_LON_7 * (Mm - Ms).sin()
+            + PERT_LON_8 * D.sin()
+            + PERT_LON_9 * (Mm + Ms).sin()
+            + PERT_LON_10 * (2. * F - d2).sin()
+            + PERT_LON_11 * (Mm - 4. * D).sin();
+
+        mlat += PERT_LAT_0 * (F - d2).sin()
+            + PERT_LAT_1 * (Mm - F - d2).sin()
+            + PERT_LAT_2 * (Mm + F - d2).sin()
+            + PERT_LAT_3 * (F + d2).sin()
+            + PERT_LAT_4 * (2. * Mm + F).sin();
+
+        r += PERT_R_0 * (Mm - d2).cos() + PERT_R_1 * d2.cos();
 
         // Equatorial coordinates
         let oblecl = OBLIQUITY_ECLIPTIC_0 - OBLIQUITY_ECLIPTIC_1 * d;
@@ -99,18 +150,6 @@ impl SkyObject for Moon {
         // Ecliptic coordinates for the observer
         let mpar = (1. / r).asin();
 
-        // let lat = location.lat.to_radians();
-        // let (two_lat_sin, two_lat_cos) = (2. * lat).sin_cos();
-        // let gclat = lat - GLAT_0 * two_lat_sin;
-
-        // let rho = DIST_CENTER_0 + DIST_CENTER_1 * two_lat_cos;
-
-        // let HA = util::sidereal_time(time, location, alpha);
-        // let g = gclat.tan().atan2(HA.cos());
-
-        // let alpha = alpha - mpar * rho * gclat.cos() * HA.sin() / delta.cos();
-        // let delta = delta - mpar * rho * gclat.sin() * (g - delta).sin() / g.sin();
-
         let (altitude, azimuth) =
             util::convert_ecliptic_to_horizontal(time, location, alpha, delta);
 
@@ -121,6 +160,14 @@ impl SkyObject for Moon {
 
         SkyPosition { altitude, azimuth }
     }
+}
+
+#[allow(non_snake_case)]
+fn sun_mean_length_and_anomaly(d: f64) -> (f64, f64) {
+    let w = SUN_LONG_ASC_NODE_0 + SUN_LONG_ASC_NODE_1 * d;
+    let M = SUN_MEAN_ANOMALY_0 + SUN_MEAN_ANOMALY_1 * d;
+    let L = w + M;
+    (L.normalize_radians(), M.normalize_radians())
 }
 
 #[cfg(test)]

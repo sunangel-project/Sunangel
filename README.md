@@ -1,9 +1,9 @@
 # Sunangel Home Edition
 
-![Frontend Version](https://img.shields.io/badge/backend-v0.0.6-blue)
+![Frontend Version](https://img.shields.io/badge/frontend-v0.0.6-blue)
 ![Backend Version](https://img.shields.io/badge/backend-v0.1.3-blue)
 [![Build and Test](https://github.com/sunangel-project/Sunangel/actions/workflows/test.yml/badge.svg?branch=develop)](https://github.com/sunangel-project/Sunangel/actions/workflows/test.yml)
-[![Website](https://img.shields.io/badge/website-green)](https://sunn.cloudsftp.de)
+[![Website](https://img.shields.io/badge/website-limegreen)](https://sunn.cloudsftp.de)
 
 ## Execution
 
