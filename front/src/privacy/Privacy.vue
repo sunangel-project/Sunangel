@@ -91,12 +91,66 @@
 
             <h2 class="font-bold text-2xl">3. Data collected by third parties</h2>
 
+            <h3 class="font-bold text-xl">3.1 GitHub</h3>
+
             <div>
-                This section is still being worked on
+                The frontend of this website is hosted on <a href="https://pages.github.com/">GitHub Pages</a>.
+                Therefore, GitHub has access to the pieces of data listed above
+                related to your computer and internet connection.
+                We list them here again for your convenience:
             </div>
 
             <ul class="list-disc list-inside">
-                <li>GitHub, ip etc</li>
+                <li>Browser type and version</li>
+                <li>Operating system used</li>
+                <li>Website from which you visit this website (referrer URL)</li>
+                <li>Website that you visit or request that you make</li>
+                <li>Date and time of access</li>
+                <li>Your Internet Protocol (IP) address</li>
+                <li>Input data of the search form if the search button is pressed</li>
+            </ul>
+
+            <div>
+                The data is transmitted to GitHub as soon as you visit this website.
+                The legal basis for using this hosting servive is in accordance with Art. 6 Para. 1 lit. f GDPR.
+                The legitimate interest being that we do not want to run a server to host the frontend of the website
+                on a server in our facilities.
+            </div>
+
+            <div>
+                The servers of this hosting service are located in the USA.
+                Also note that GitHub is owned by Microsoft.
+                The address of GitHub is:
+            </div>
+
+            <div>
+                GitHub Inc. <br>
+                88 Colin P Kelly Jr St <br>
+                San Francisco, CA 94107 <br>
+                United States
+            </div>
+
+            <div>
+                The data will be deleted as soon as the purpose of processing no longer applies.
+                GitHub's purpose for processing the data is the following:
+            </div>
+
+            <ul class="list-disc list-inside">
+                <li>Guarantee functionality of their IT systems and the technology of their hosting service</li>
+            </ul>
+
+            <div>
+                GitHub implemented compliance measures for cross-border data transfers.
+                Therefore, they act in accordance to the GDPR.
+                You can learn more about this
+                <a
+                    href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement#cross-border-data-transfers">
+                    here
+                </a>.
+                You can also read about how to dispute the processing of your data by GitHub on that page.
+            </div>
+
+            <ul class="list-disc list-inside">
                 <li>Linode, ip etc</li>
                 <li>Openstreetmaps, search input minus ip etc</li>
             </ul>
