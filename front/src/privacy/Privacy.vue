@@ -214,11 +214,75 @@
                 Further processing of this data is not done by Akamai.
             </div>
 
-            <h3 class="font-bold text-xl">3.3 Openstreesmaps</h3>
+            <h3 class="font-bold text-xl">3.3 FOSSIGS e.V.</h3>
+
+            <div>
+                We use the <a href="https://wiki.openstreetmap.org/wiki/Overpass_API">Overpass API</a>
+                provided by <a href="https://www.fossgis.de/">FOSSIGS.</a>
+                It provides access to data maintained by the
+                <a href="https://osmfoundation.org/">OpenStreetMap Foundation</a>.
+                This service is used to query locations of interest in the search area you specified in the input fields.
+                The data does not contain information about your browser or internet connection
+                other than the date and time of access.
+            </div>
+
+            <div>
+                The data is transmitted to FOSSIGS while your request is processed by our backend
+                after clicking the "search" button.
+                The legal basis for using this API service is in accordance with Art. 6 Para. 1 lit. f GDPR.
+                The legitimate interest being that we do not want to run a server to host this API
+                on a server in our facilities.
+            </div>
+
+            <div>
+                FOSSIGS' servers are located in Germany.
+                And their headquarters are located at:
+            </div>
+
+            <div>
+                FOSSGIS e.V. <br>
+                Bundesallee 23 <br>
+                10717 Berlin <br>
+                Germany
+            </div>
+
+            <div>
+                The data will be deleted as soon as the purpose of processing no longer applies.
+                FOSSIGS' purpose for processing the data is the following:
+            </div>
 
             <ul class="list-disc list-inside">
-                <li>Openstreetmaps, search input minus ip etc</li>
+                <li>Guarantee functionality of their IT systems and the technology of their hosting service</li>
             </ul>
+
+            <div>
+                You can learn more about their privacy policy
+                <a href="https://www.fossgis.de/datenschutzerkl%C3%A4rung/">here.</a>
+            </div>
+
+            <div>
+                The content of the request is also encrypted on our backend and can therefore not be accessed
+                by third parties other than FOSSIGS.
+                More information about the encryption can be found in section 4 of this declaration.
+            </div>
+
+            <h2 class="font-bold text-2xl">4. SSL Encryption</h2>
+
+            <div>
+                All requests to the website, frontend and backend, are encrypted using SSL.
+                This includes the requests made by our backend on your behalf.
+                Third parties other than those listed in section 3 of this declaration therefore
+                do not have access to your personal data.
+            </div>
+
+            <h2 class="font-bold text-2xl">5. Changes to the Data Protection Declaration</h2>
+
+            <div>
+                We reserve the right to modify this data protection declaration
+                so that it always adheres to the current legal requirements.
+                We recommend that you read our data protection declaration regularly in order to stay up to
+                date regarding the protection of the personal data that we collect.
+            </div>
         </div>
     </div>
 </template>
