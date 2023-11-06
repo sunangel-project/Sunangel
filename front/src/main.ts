@@ -13,10 +13,12 @@ export const version = "v0.0.7"
 import App from './App.vue';
 import Search from './search/Search.vue';
 import Privacy from './privacy/Privacy.vue';
+import Datenschutz from './privacy/Datenschutz.vue';
 
 const routes = [
     { path: '/', component: Search },
     { path: '/privacy', component: Privacy },
+    { path: '/datenschutz', component: Datenschutz },
 ]
 
 const router = createRouter({
