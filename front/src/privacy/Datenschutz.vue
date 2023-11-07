@@ -119,13 +119,13 @@
 
             <div>
                 Die Daten werden an GitHub übermittelt, sobald Sie diese Website besuchen.
-                Die Rechtsgrundlage für die Nutzung dieses Hosting-Dienstes ist Art. 6 Abs. 1 lit. f der GDPR.
+                Die Rechtsgrundlage für die Nutzung dieses Hostingdienstes ist Art. 6 Abs. 1 lit. f der GDPR.
                 Das berechtigte Interesse liegt darin, dass wir selbst keinen Server für das Hosting des Frontends
                 der Website in unseren Räumlichkeiten vorhalten müssen.
             </div>
 
             <div>
-                Die Server des Histingservice befinden sich in den USA.
+                Die Server des Histingdienst befinden sich in den USA.
                 Beachten Sie zusätzlich, dass GitHub zu Microsoft gehört.
                 Der Hauptsitz von GitHub befindet sich an der folgenden Adresse:
             </div>
@@ -143,7 +143,7 @@
             </div>
 
             <ul class="list-disc list-inside">
-                <li>Gewährleistung der Funktionsfähigkeit ihrer IT-Systeme und der Technik ihres Hostingservices</li>
+                <li>Gewährleistung der Funktionsfähigkeit ihrer IT-Systeme und der Technik ihres Hostingdienstes</li>
             </ul>
 
             <div>
@@ -162,7 +162,7 @@
 
             <div>
                 Wir hosten das Backend dieser Website auf <a href="https://www.linode.com/">Linode-Servern</a>.
-                Dies ist ein Hosting-Dienst, der <a href="https://www.akamai.com">Akamai</a> gehört.
+                Dies ist ein Hostingdienst, der <a href="https://www.akamai.com">Akamai</a> gehört.
                 Daher hat GitHub Zugriff auf die oben aufgeführten Daten,
                 die sich auf Ihren Computer und Ihre Internetverbindung beziehen.
                 Diese sind hier noch einmal aufgeführt:
@@ -179,7 +179,7 @@
 
             <div>
                 Die Daten werden an Akamai übermittelt, sobald Sie den "search" Knopf klicken.
-                Die Rechtsgrundlage für die Nutzung dieses Hosting-Dienstes ist Art. 6 Abs. 1 lit. f der DSGVO.
+                Die Rechtsgrundlage für die Nutzung dieses Hostingdienstes ist Art. 6 Abs. 1 lit. f der DSGVO.
                 Das berechtigte Interesse liegt darin, dass wir selbst keinen Server für das Hosting des Backends
                 der Website in unseren Räumlichkeiten vorhalten müssen.
             </div>
@@ -203,7 +203,7 @@
             </div>
 
             <ul class="list-disc list-inside">
-                <li>Gewährleistung der Funktionsfähigkeit ihrer IT-Systeme und der Technik ihres Hostingservices</li>
+                <li>Gewährleistung der Funktionsfähigkeit ihrer IT-Systeme und der Technik ihres Hostingdienstes</li>
             </ul>
 
             <div>
@@ -278,22 +278,22 @@
                 Weitere Informationen über die Verschlüsselung finden Sie in Abschnitt 4 dieser Erklärung.
             </div>
 
-            <h2 class="font-bold text-2xl">4. SSL Encryption</h2>
+            <h2 class="font-bold text-2xl">4. SSL Verschlüsselung</h2>
 
             <div>
-                All requests to the website, frontend and backend, are encrypted using SSL.
-                This includes the requests made by our backend on your behalf.
-                Third parties other than those listed in section 3 of this declaration therefore
-                do not have access to your personal data.
+                Alle Anfragen an die Website, Frontend und Backend, werden mit SSL verschlüsselt.
+                Dies gilt auch für die von unserem Backend durchgeführten Anfragen bei Diensten dritter.
+                Dritte, die nicht in Abschnitt 3 dieser Erklärung aufgeführt sind,
+                haben daher keinen Zugang zu Ihren personenbezogenen Daten.
             </div>
 
-            <h2 class="font-bold text-2xl">5. Changes to the Data Protection Declaration</h2>
+            <h2 class="font-bold text-2xl">5. Änderungen der Datenschutzerklärung</h2>
 
             <div>
-                We reserve the right to modify this data protection declaration
-                so that it always adheres to the current legal requirements.
-                We recommend that you read our data protection declaration regularly in order to stay up to
-                date regarding the protection of the personal data that we collect.
+                Wir behalten uns das Recht vor, diese Datenschutzerklärung zu ändern,
+                damit sie stets den aktuellen rechtlichen Anforderungen entspricht.
+                Wir empfehlen Ihnen, unsere Datenschutzerklärung regelmäßig zu lesen,
+                um sich über den Schutz der von uns erhobenen personenbezogenen Daten auf dem Laufenden zu halten.
             </div>
         </div>
     </div>
