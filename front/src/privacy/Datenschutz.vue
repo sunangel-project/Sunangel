@@ -102,10 +102,10 @@
             <h3 class="font-bold text-xl">3.1 GitHub</h3>
 
             <div>
-                The frontend of this website is hosted on <a href="https://pages.github.com/">GitHub Pages</a>.
-                Therefore, GitHub has access to the pieces of data listed above
-                related to your computer and internet connection.
-                We list them here again for your convenience:
+                Das Frontend dieser Website wird auf <a href="https://pages.github.com/">GitHub Pages</a> gehostet.
+                Daher hat GitHub Zugriff auf die oben aufgeführten Daten,
+                die sich auf Ihren Computer und Ihre Internetverbindung beziehen.
+                Diese sind hier noch einmal aufgeführt:
             </div>
 
             <ul class="list-disc list-inside">
@@ -118,16 +118,16 @@
             </ul>
 
             <div>
-                The data is transmitted to GitHub as soon as you visit this website.
-                The legal basis for using this hosting servive is in accordance with Art. 6 Para. 1 lit. f der DSGVO.
-                The legitimate interest being that we do not want to run a server to host the frontend of the website
-                on a server in our facilities.
+                Die Daten werden an GitHub übermittelt, sobald Sie diese Website besuchen.
+                Die Rechtsgrundlage für die Nutzung dieses Hosting-Dienstes ist Art. 6 Abs. 1 lit. f der GDPR.
+                Das berechtigte Interesse liegt darin, dass wir selbst keinen Server für das Hosting des Frontends
+                der Website in unseren Räumlichkeiten vorhalten müssen.
             </div>
 
             <div>
-                The servers of this hosting service are located in the USA.
-                Also note that GitHub is owned by Microsoft.
-                The address of GitHub is:
+                Die Server des Histingservice befinden sich in den USA.
+                Beachten Sie zusätzlich, dass GitHub zu Microsoft gehört.
+                Der Hauptsitz von GitHub befindet sich an der folgenden Adresse:
             </div>
 
             <div>
@@ -138,33 +138,34 @@
             </div>
 
             <div>
-                The data will be deleted as soon as the purpose of processing no longer applies.
-                GitHub's purpose for processing the data is the following:
+                Die Daten werden gelöscht, sobald der Zweck der Verarbeitung nicht mehr gegeben ist.
+                Der Zweck der Verarbeitung der Daten durch GitHub ist der folgende:
             </div>
 
             <ul class="list-disc list-inside">
-                <li>Guarantee functionality of their IT systems and the technology of their hosting service</li>
+                <li>Gewährleistung der Funktionsfähigkeit ihrer IT-Systeme und der Technik ihres Hostingservices</li>
             </ul>
 
             <div>
-                GitHub implemented compliance measures for cross-border data transfers.
-                Therefore, they act in accordance to the der DSGVO.
-                You can learn more about this
+                GitHub hat Compliance-Maßnahmen für grenzüberschreitende Datenübertragungen eingeführt.
+                Daher handeln sie in Übereinstimmung mit der DSGVO.
+                Sie können
                 <a
                     href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement#cross-border-data-transfers">
-                    here.
-                </a>
-                You can also read about how to dispute the processing of your data by GitHub on that page.
+                    hier
+                </a> mehr darüber erfahren.
+                Auf dieser Seite können Sie auch nachlesen, wie Sie der Verarbeitung Ihrer Daten durch GitHub
+                wiedersprechen können.
             </div>
 
             <h3 class="font-bold text-xl">3.2 Akamai</h3>
 
             <div>
-                We host the backend of this website on <a href="https://www.linode.com/">Linode</a> servers.
-                It is a hosting service owned by <a href="https://www.akamai.com">Akamai</a>.
-                Therefore, Akamai has access to the pieces of data listed above
-                related to your computer and internet connection.
-                We list them here again for your convenience:
+                Wir hosten das Backend dieser Website auf <a href="https://www.linode.com/">Linode-Servern</a>.
+                Dies ist ein Hosting-Dienst, der <a href="https://www.akamai.com">Akamai</a> gehört.
+                Daher hat GitHub Zugriff auf die oben aufgeführten Daten,
+                die sich auf Ihren Computer und Ihre Internetverbindung beziehen.
+                Diese sind hier noch einmal aufgeführt:
             </div>
 
             <ul class="list-disc list-inside">
@@ -177,16 +178,16 @@
             </ul>
 
             <div>
-                The data is transmitted to Akamai as soon as you click the "search" button.
-                The legal basis for using this hosting servive is in accordance with Art. 6 Para. 1 lit. f der DSGVO.
-                The legitimate interest being that we do not want to run a server to host the backend of the website
-                on a server in our facilities.
+                Die Daten werden an Akamai übermittelt, sobald Sie den "search" Knopf klicken.
+                Die Rechtsgrundlage für die Nutzung dieses Hosting-Dienstes ist Art. 6 Abs. 1 lit. f der DSGVO.
+                Das berechtigte Interesse liegt darin, dass wir selbst keinen Server für das Hosting des Backends
+                der Website in unseren Räumlichkeiten vorhalten müssen.
             </div>
 
             <div>
-                The servers we rent from this service are located in Frankfurt, Germany.
-                Although we only use servers located in Europe, Akamai is an american company
-                and its headquarters are located at:
+                Die Server, die wir von diesem Dienst mieten, befinden sich in Frankfurt, Deutschland.
+                Obwohl wir nur Server in Europa nutzen, ist Akamai ein amerikanisches Unternehmen,
+                dessen Hauptsitz sich in an der folgenden Adresse befindet:
             </div>
 
             <div>
@@ -197,56 +198,55 @@
             </div>
 
             <div>
-                The data will be deleted as soon as the purpose of processing no longer applies.
-                Akamais's purpose for processing the data is the following:
+                Die Daten werden gelöscht, sobald der Zweck der Verarbeitung nicht mehr gegeben ist.
+                Der Zweck der Verarbeitung der Daten durch Akamai ist der folgende:
             </div>
 
             <ul class="list-disc list-inside">
-                <li>Guarantee functionality of their IT systems and the technology of their hosting service</li>
+                <li>Gewährleistung der Funktionsfähigkeit ihrer IT-Systeme und der Technik ihres Hostingservices</li>
             </ul>
 
             <div>
-                Akamai implemented compliance measures for cross-border data transfers.
-                Therefore, they act in accordance to the der DSGVO.
-                You can learn more about this
+                Akamai hat Compliance-Maßnahmen für grenzüberschreitende Datenübertragungen eingeführt.
+                Daher handeln sie in Übereinstimmung mit der DSGVO.
+                Sie können
                 <a href="https://www.akamai.com/legal/compliance/privacy-trust-center/cross-border-data-transfer-statement">
-                    here.
-                </a>
+                    hier
+                </a> mehr darüber erfahren.
             </div>
 
             <div>
-                The input to your search query is encrypted by your browser when making the request
-                and only decrypted on the server.
-                Therefore, Akamai does not have access to this data directly.
-                But it is stores on the servers in log files and therefore processed by Akamai
-                by storing the data on their infrastructure.
-                Further processing of this data is not done by Akamai.
+                Die Eingaben zu Ihrer Suchanfrage werden von Ihrem Browser bei der Anfrage verschlüsselt
+                und erst auf dem Server entschlüsselt.
+                Daher hat Akamai keinen direkten Zugriff auf diese Daten.
+                Sie werden jedoch auf den Servern in Protokolldateien gespeichert und daher von Akamai verarbeitet,
+                indem die Daten auf deren Infrastruktur gespeichert werden.
+                Eine weitere Verarbeitung dieser Daten durch Akamai findet nicht statt.
+                Mehr Informationen über die Verschlüsselung finden Sie in Abschnitt 4 dieser Erklärung.
             </div>
 
             <h3 class="font-bold text-xl">3.3 FOSSIGS e.V.</h3>
 
             <div>
-                We use the <a href="https://wiki.openstreetmap.org/wiki/Overpass_API">Overpass API</a>
-                provided by <a href="https://www.fossgis.de/">FOSSIGS.</a>
-                It provides access to data maintained by the
-                <a href="https://osmfoundation.org/">OpenStreetMap Foundation</a>.
-                This service is used to query locations of interest in the search area you specified in the input
-                fields.
-                The data does not contain information about your browser or internet connection
-                other than the date and time of access.
+                Wir nutzen die <a href="https://wiki.openstreetmap.org/wiki/Overpass_API">Overpass API,</a>
+                welche von <a href="https://www.fossgis.de/">FOSSIGS</a> bereitgestellt wird.
+                Diese stellt Daten bereit, die von der
+                <a href="https://osmfoundation.org/">OpenStreetMap Foundation</a> verwaltet werden.
+                Dieser Dienst dient der Abfrage von relevanten Orten
+                in dem von Ihnen in den Eingabefeldern angegebenen Suchgebiet.
+                Die Daten enthalten außer dem Datum und der Uhrzeit des Zugriffs
+                keine Informationen über Ihren Browser oder Ihre Internetverbindung.
             </div>
 
             <div>
-                The data is transmitted to FOSSIGS while your request is processed by our backend
-                after clicking the "search" button.
-                The legal basis for using this API service is in accordance with Art. 6 Para. 1 lit. f der DSGVO.
-                The legitimate interest being that we do not want to run a server to host this API
-                on a server in our facilities.
+                Die Daten werden an FOSSIGS übermittelt, sobald Sie den "search" Knopf klicken.
+                Die Rechtsgrundlage für die Nutzung dieses Dienstes ist Art. 6 Abs. 1 lit. f der DSGVO.
+                Das berechtigte Interesse liegt darin, dass wir selbst keinen Server für das Hosting dieses Services
+                in unseren Räumlichkeiten vorhalten müssen.
             </div>
 
             <div>
-                FOSSIGS' servers are located in Germany.
-                And their headquarters are located at:
+                Die Server von FOSSIGS befinden sich in Deutschland und ihr Hauptsitz an der folgenden Addresse:
             </div>
 
             <div>
@@ -257,23 +257,25 @@
             </div>
 
             <div>
-                The data will be deleted as soon as the purpose of processing no longer applies.
-                FOSSIGS' purpose for processing the data is the following:
+                Die Daten werden gelöscht, sobald der Zweck der Verarbeitung nicht mehr gegeben ist.
+                Der Zweck der Verarbeitung der Daten durch FOSSIGS ist der folgende:
             </div>
 
             <ul class="list-disc list-inside">
-                <li>Guarantee functionality of their IT systems and the technology of their hosting service</li>
+                <li>Gewährleistung der Funktionsfähigkeit ihrer IT-Systeme und der Technik ihres Dienstes</li>
             </ul>
 
             <div>
-                You can learn more about their privacy policy
-                <a href="https://www.fossgis.de/datenschutzerkl%C3%A4rung/">here.</a>
+                Sie können
+                <a href="https://www.fossgis.de/datenschutzerkl%C3%A4rung/">
+                    hier
+                </a> mehr über FOSSIGS' Datenschutzerklärung erfahren.
             </div>
 
             <div>
-                The content of the request is also encrypted on our backend and can therefore not be accessed
-                by third parties other than FOSSIGS.
-                More information about the encryption can be found in section 4 of this declaration.
+                Der Inhalt der Anfrage wird in unserem Backend ebenfalls verschlüsselt und kann daher von Dritten,
+                neben FOSSIGS, nicht eingesehen werden.
+                Weitere Informationen über die Verschlüsselung finden Sie in Abschnitt 4 dieser Erklärung.
             </div>
 
             <h2 class="font-bold text-2xl">4. SSL Encryption</h2>
