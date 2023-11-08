@@ -8,7 +8,7 @@ import 'vue-final-modal/style.css'
 import './index.css';
 import { createVfm } from 'vue-final-modal'
 
-export const version = "v0.0.7"
+export const version = "v0.1.0"
 
 import App from './App.vue';
 import Search from './search/Search.vue';

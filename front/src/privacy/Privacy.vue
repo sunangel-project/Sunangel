@@ -20,8 +20,6 @@
 
             <div>
                 Fabian Weik <br>
-                Unterer Espach 18 <br>
-                D-73660 Urbach <br>
                 E-mail: fabian.weik@protonmail.com
             </div>
 
