@@ -1,9 +1,0 @@
-FROM golang:1.21
-
-WORKDIR /usr/src
-
-WORKDIR /use/src/sunangel
-COPY ./horizon-service .
-RUN go install src/cmd/horizon-service.go
-
-CMD ["horizon-service"]

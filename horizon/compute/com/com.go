@@ -1,18 +1,22 @@
-package messaging
+package com
 
 import (
-	"github.com/nats-io/nats.go"
+	"fmt"
 	"sunangel/messaging"
+
+	"github.com/nats-io/nats.go"
+	uuid "github.com/satori/go.uuid"
+	"github.com/sunangel-project/horizon/location"
 )
 
 const STORE_NAME = "horizons"
 const IN_COMPUTATION_STORE_NAME = "computing-horizons"
 
-const IN_Q = "SPOTS.get-horizon"
+const IN_Q = "SPOTS.compute-horizon"
 const GROUP = "horizon-service"
 
-const OUT_STREAM = "SPOTS"
-const OUT_SUB_SUNSETS = OUT_STREAM + ".compute-horizon"
+const OUT_STREAM = "HORIZONS"
+const OUT_SUB_SUNSETS = OUT_STREAM + ".sunsets"
 
 const ERR_STREAM = "ERRORS"
 const ERR_SUB = ERR_STREAM + "." + GROUP
@@ -56,4 +60,13 @@ func SetupStreams(js nats.JetStreamContext) error {
 	}
 
 	return nil
+}
+
+func HorizonKey(loc location.Location, radius int) string {
+	id := uuid.NewV5(uuid.UUID{}, fmt.Sprintf(
+		// One deg ~ 111 000 m
+		"lat: %.5f, lon: %5f, rad: %d",
+		loc.Latitude, loc.Longitude, radius,
+	))
+	return fmt.Sprint("horizon-v1.0.0-", id)
 }
