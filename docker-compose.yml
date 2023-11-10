@@ -39,11 +39,11 @@ services:
       - api
       - all
 
-  horizon-service:
-    image: horizon-service
+  horizon-compute:
+    image: horizon-compute
     build:
       context: .
-      dockerfile: ./Dockerfiles/horizon-service
+      dockerfile: ./Dockerfiles/horizon-compute
     depends_on: ["nats", "spot-finder"]
     environment:
       - NATS_HOST=nats
@@ -56,7 +56,7 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfiles/sky-service
-    depends_on: ["nats", "horizon-service"]
+    depends_on: ["nats", "horizon-compute"]
     environment:
       - NATS_HOST=nats
       - RUST_LOG=info

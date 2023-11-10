@@ -11,8 +11,8 @@ import (
 
 const STORE_NAME = "horizons"
 
-const IN_Q = "SPOTS.horizon"
-const GROUP = "horizon-service"
+const IN_Q = "SPOTS.compute-horizon"
+const GROUP = "horizon-compute"
 
 const OUT_STREAM = "HORIZONS"
 const OUT_SUB_SUNSETS = OUT_STREAM + ".sunset"
