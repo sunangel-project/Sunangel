@@ -12,6 +12,7 @@ import (
 	"github.com/sunangel-project/horizon/location"
 
 	"fmt"
+	"sunangel/horizon/messages"
 	"sunangel/messaging"
 )
 
@@ -63,7 +64,7 @@ func handleMessage(
 		return err
 	}
 
-	var spot_msgspotMsg SpotMessage
+	var spot_msgspotMsg messages.SpotMessage
 	err = json.Unmarshal(msg.Data, &spot_msgspotMsg)
 	if err != nil {
 		return err
@@ -88,7 +89,7 @@ func handleMessage(
 }
 
 func handleSpotMessage(
-	spot_msg *SpotMessage,
+	spot_msg *messages.SpotMessage,
 	kv nats.KeyValue,
 ) (string, error) {
 	loc := location.Location{
@@ -127,35 +128,6 @@ const OUT_SUB_SUNSETS = OUT_STREAM + ".sunsets"
 
 const ERR_STREAM = "ERRORS"
 const ERR_SUB = ERR_STREAM + "." + GROUP
-
-type PartSubMessage struct {
-	Id uint `json:"id"`
-	Of uint `json:"of"`
-}
-
-type Location struct {
-	Lat float64 `json:"lat"`
-	Lon float64 `json:"lon"`
-}
-
-type SpotSubMessage struct {
-	Dir  float64  `json:"dir"`
-	Kind string   `json:"kind"`
-	Loc  Location `json:"loc"`
-}
-
-type SpotMessage struct {
-	Part      PartSubMessage `json:"part"`
-	Spot      SpotSubMessage `json:"spot"`
-	RequestId string         `json:"request_id"`
-}
-
-type OutMessage struct {
-	Part      PartSubMessage `json:"part"`
-	Spot      SpotSubMessage `json:"spot"`
-	RequestId string         `json:"request_id"`
-	Horizon   string         `json:"horizon"`
-}
 
 func SetupStreams(js nats.JetStreamContext) error {
 	if err := messaging.CreateStream(js, OUT_STREAM); err != nil {

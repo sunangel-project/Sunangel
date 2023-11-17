@@ -39,12 +39,24 @@ services:
       - api
       - all
 
+  horizon-get:
+    image: horizon-get
+    build:
+      context: .
+      dockerfile: ./Dockerfiles/horizon-get
+    depends_on: ["nats", "spot-finder"]
+    environment:
+      - NATS_HOST=nats
+    profiles:
+      - compute
+      - all
+
   horizon-compute:
     image: horizon-compute
     build:
       context: .
       dockerfile: ./Dockerfiles/horizon-compute
-    depends_on: ["nats", "spot-finder"]
+    depends_on: ["nats", "horizon-get"]
     environment:
       - NATS_HOST=nats
     profiles:
