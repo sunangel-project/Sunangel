@@ -58,6 +58,16 @@ func CreateStream(js nats.JetStreamContext, name string) error {
 	return nil
 }
 
+func SetupStreams(js nats.JetStreamContext, names []string) error {
+	for _, name := range names {
+		if err := CreateStream(js, name); err != nil {
+			return fmt.Errorf("could not initialize stream '%s': %s", name, err)
+		}
+	}
+
+	return nil
+}
+
 func ConnectOrCreateKV(js nats.JetStreamContext, name string) nats.KeyValue {
 	kv, err := js.KeyValue(name)
 	if err != nil {

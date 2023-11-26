@@ -20,6 +20,7 @@ func main() {
 	nc := messaging.Connect()
 	defer nc.Close()
 	js := messaging.JetStream(nc)
+
 	kv := messaging.ConnectOrCreateKV(js, STORE_NAME)
 
 	log.Println("Setting up all streams")
@@ -89,15 +90,11 @@ func handleMessage(
 }
 
 func handleSpotMessage(
-	spot_msg *messages.SpotMessage,
+	spotMsg *messages.Spot,
 	kv nats.KeyValue,
 ) (string, error) {
-	loc := location.Location{
-		Latitude:  spot_msg.Spot.Loc.Lat,
-		Longitude: spot_msg.Spot.Loc.Lon,
-	}
 	radius := 500
-	key := HorizonKey(loc, radius)
+	key := messages.HorizonKey(spotMsg.Loc, radius)
 	log.Printf("Horizon Key: %s", key)
 
 	_, err := kv.Get(key)
@@ -107,6 +104,10 @@ func handleSpotMessage(
 		}
 
 		log.Print("Didn't find horizon")
+		loc := location.Location{
+			Latitude:  spotMsg.Loc.Lat,
+			Longitude: spotMsg.Loc.Lon,
+		}
 		hor := horizon.NewHorizon(&loc, radius)
 
 		kv.Create(key, hor.AltitudeToBytes())
@@ -118,7 +119,7 @@ func handleSpotMessage(
 }
 
 const STORE_NAME = "horizons"
-const IN_COMPUTATION_STORE_NAME = "computing-horizons"
+const IN_COMPUTATION_STORE_NAME = "horizons-in-computation"
 
 const IN_Q = "SPOTS.compute-horizon"
 const GROUP = "horizon-service"
@@ -139,13 +140,4 @@ func SetupStreams(js nats.JetStreamContext) error {
 	}
 
 	return nil
-}
-
-func HorizonKey(loc location.Location, radius int) string {
-	id := uuid.NewV5(uuid.UUID{}, fmt.Sprintf(
-		// One deg ~ 111 000 m
-		"lat: %.5f, lon: %5f, rad: %d",
-		loc.Latitude, loc.Longitude, radius,
-	))
-	return fmt.Sprint("horizon-v1.0.0-", id)
 }
