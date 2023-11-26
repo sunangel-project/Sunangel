@@ -74,6 +74,7 @@ func handleMessage(
 	log.Printf("Decoded message: %+v", spot_msgspotMsg)
 
 	horKey, err := handleSpotMessage(&spot_msgspotMsg, kv)
+	// TODO: set horizonincompute
 	if err != nil {
 		return err
 	}
@@ -87,6 +88,15 @@ func handleMessage(
 	js.Publish(OUT_SUB_SUNSETS, outPayload)
 
 	return nil
+}
+
+// needed later
+func setHorizonInCompute(
+	key string,
+	val bool,
+	coms *Communications,
+) {
+	coms.kvComp.Put(key, []byte(strconv.FormatBool(val)))
 }
 
 func handleSpotMessage(
