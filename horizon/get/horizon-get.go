@@ -141,22 +141,21 @@ func requeueGetRequest(
 		return err
 	}
 
-	select {
-	case <-timer.C:
-		err = requeue()
-	case update := <-watch.Updates():
-		isInCompute, err := decodeIsIncomputeEntry(update)
-		if err != nil {
-			return err
-		}
+	for {
+		select {
+		case <-timer.C:
+			return requeue()
+		case update := <-watch.Updates():
+			isInCompute, err := decodeIsIncomputeEntry(update)
+			if err != nil {
+				return err
+			}
 
-		if isInCompute {
-			err = requeue()
-		} else {
-			err = forwardHorizonKey(msg, key, coms)
+			if !isInCompute {
+				return forwardHorizonKey(msg, key, coms)
+			}
 		}
 	}
-	return err
 }
 
 func forwardHorizonKey(
