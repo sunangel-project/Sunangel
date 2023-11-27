@@ -72,6 +72,8 @@ func handleMessage(msg *nats.Msg, coms *common.Communications) error {
 		return err
 	}
 
+	log.Print("decoded request")
+
 	var err error
 	key := common.HorizonKey(req.Spot.Loc, 500)
 	if _, err := coms.KvHor.Get(key); err != nil {
@@ -96,14 +98,20 @@ func handleMissingHorizon(
 	key string,
 	coms *common.Communications,
 ) error {
+	log.Print("handle missing hor")
 	isInCompute, err := common.IsHorizonInCompute(key, coms)
 	if err != nil {
 		return err
 	}
+	log.Printf("is in compute: %t", isInCompute)
 
 	if isInCompute {
 		err = requeueGetRequest(msg, key, coms)
 	} else {
+		if err := common.SetHorizonInCompute(key, true, coms); err != nil {
+			return err
+		}
+
 		_, err = coms.Js.Publish(REQ_OUT_Q, msg.Data)
 	}
 	return err
@@ -128,8 +136,12 @@ func requeueGetRequest(
 	for {
 		select {
 		case <-timer.C:
+
+			log.Print("times up")
 			return requeue()
 		case update := <-watch.Updates():
+			log.Printf("update received: %v", update)
+
 			isInCompute, err := common.DecodeIsIncomputeEntry(update)
 			if err != nil {
 				return err

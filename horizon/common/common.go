@@ -76,6 +76,10 @@ func IsHorizonInCompute(
 func DecodeIsIncomputeEntry(
 	entry nats.KeyValueEntry,
 ) (bool, error) {
+	if entry.Operation() == nats.KeyValueDelete {
+		return false, nil
+	}
+
 	isInCompute, err := strconv.ParseBool(
 		string(entry.Value()),
 	)
@@ -91,6 +95,12 @@ func SetHorizonInCompute(
 	key string,
 	val bool,
 	coms *Communications,
-) {
-	coms.KvComp.Put(key, []byte(strconv.FormatBool(val)))
+) error {
+	var err error
+	if val {
+		_, err = coms.KvComp.Put(key, []byte(strconv.FormatBool(val)))
+	} else {
+		err = coms.KvComp.Delete(key)
+	}
+	return err
 }

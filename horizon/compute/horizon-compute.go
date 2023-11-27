@@ -78,8 +78,6 @@ func handleMessage(
 	radius := 500
 	key := common.HorizonKey(req.Spot.Loc, radius)
 
-	common.SetHorizonInCompute(key, true, coms)
-
 	loc := location.Location{
 		Latitude:  req.Spot.Loc.Lat,
 		Longitude: req.Spot.Loc.Lon,
@@ -94,7 +92,9 @@ func handleMessage(
 		return err
 	}
 
-	common.SetHorizonInCompute(key, false, coms)
+	if err := common.SetHorizonInCompute(key, false, coms); err != nil {
+		return err
+	}
 
 	if err := common.ForwardHorizonKey(msg, key, coms); err != nil {
 		return err
