@@ -2,18 +2,27 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
-	"sync"
+	"time"
 
 	"github.com/nats-io/nats.go"
-	uuid "github.com/satori/go.uuid"
 	"github.com/sunangel-project/horizon"
 	"github.com/sunangel-project/horizon/location"
 
-	"fmt"
+	"sunangel/horizon/common"
 	"sunangel/horizon/messages"
 	"sunangel/messaging"
+)
+
+const (
+	HOR_STORE_NAME  = "horizons"
+	COMP_STORE_NAME = "horizons-in-computation"
+
+	IN_Q  = "SPOTS.compute-horizon"
+	GROUP = "horizon-compute-service"
+
+	ERR_STREAM = "ERRORS"
+	ERR_Q      = ERR_STREAM + "." + GROUP
 )
 
 func main() {
@@ -21,133 +30,76 @@ func main() {
 	defer nc.Close()
 	js := messaging.JetStream(nc)
 
-	kv := messaging.ConnectOrCreateKV(js, STORE_NAME)
+	kvHor := messaging.ConnectOrCreateKV(js, HOR_STORE_NAME)
+	kvComp := messaging.ConnectOrCreateKV(js, COMP_STORE_NAME)
 
-	log.Println("Setting up all streams")
-	err := SetupStreams(js)
-	if err != nil {
+	coms := &common.Communications{
+		Js:     js,
+		KvHor:  kvHor,
+		KvComp: kvComp,
+	}
+
+	if err := messaging.SetupStreams(js, []string{
+		common.RES_OUT_STREAM,
+		ERR_STREAM,
+	}); err != nil {
 		panic(err)
 	}
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-
-	log.Printf("Subscribing to queue %v\n", IN_Q)
-	sub, err := js.QueueSubscribe(IN_Q, GROUP, func(msg *nats.Msg) {
-		log.Println("Received message")
-		err := handleMessage(msg, kv, js)
+	_, err := js.QueueSubscribe(IN_Q, GROUP, func(msg *nats.Msg) {
+		err := handleMessage(msg, coms)
 		if err != nil {
-			log.Printf("Error %v occured when reading message %v\n", err, msg)
+			log.Printf(
+				"error while handling message: %s\nmessage: %v",
+				err, string(msg.Data),
+			)
 		}
 	})
 	if err != nil {
 		panic(err)
 	}
 
-	// Wait for messages to come in
-	wg.Wait()
-
-	sub.Unsubscribe()
-
-	// Drain connection (Preferred for responders)
-	nc.Drain()
+	for { // avoid shutdown
+		time.Sleep(time.Hour)
+	}
 }
 
 func handleMessage(
 	msg *nats.Msg,
-	kv nats.KeyValue,
-	js nats.JetStreamContext,
+	coms *common.Communications,
 ) error {
-	var unstructuredMsg map[string]any
+	log.Printf("received message: %s", string(msg.Data))
 
-	err := json.Unmarshal(msg.Data, &unstructuredMsg)
-	if err != nil {
+	var req messages.HorizonRequest
+	if err := json.Unmarshal(msg.Data, &req); err != nil {
 		return err
 	}
 
-	var spot_msgspotMsg messages.SpotMessage
-	err = json.Unmarshal(msg.Data, &spot_msgspotMsg)
-	if err != nil {
-		return err
-	}
-
-	log.Printf("Decoded message: %+v", spot_msgspotMsg)
-
-	horKey, err := handleSpotMessage(&spot_msgspotMsg, kv)
-	// TODO: set horizonincompute
-	if err != nil {
-		return err
-	}
-
-	unstructuredMsg["horizon"] = horKey
-
-	outPayload, err := json.Marshal(unstructuredMsg)
-	if err != nil {
-		return err
-	}
-	js.Publish(OUT_SUB_SUNSETS, outPayload)
-
-	return nil
-}
-
-// needed later
-func setHorizonInCompute(
-	key string,
-	val bool,
-	coms *Communications,
-) {
-	coms.kvComp.Put(key, []byte(strconv.FormatBool(val)))
-}
-
-func handleSpotMessage(
-	spotMsg *messages.Spot,
-	kv nats.KeyValue,
-) (string, error) {
 	radius := 500
-	key := messages.HorizonKey(spotMsg.Loc, radius)
-	log.Printf("Horizon Key: %s", key)
+	key := common.HorizonKey(req.Spot.Loc, radius)
 
-	_, err := kv.Get(key)
-	if err != nil {
-		if !errors.Is(err, nats.ErrKeyNotFound) {
-			return "", err
-		}
+	common.SetHorizonInCompute(key, true, coms)
 
-		log.Print("Didn't find horizon")
-		loc := location.Location{
-			Latitude:  spotMsg.Loc.Lat,
-			Longitude: spotMsg.Loc.Lon,
-		}
-		hor := horizon.NewHorizon(&loc, radius)
-
-		kv.Create(key, hor.AltitudeToBytes())
-	} else {
-		log.Print("Found horizon")
+	loc := location.Location{
+		Latitude:  req.Spot.Loc.Lat,
+		Longitude: req.Spot.Loc.Lon,
 	}
+	log.Printf(
+		"Computing horizon for spot %s\ncoordinates: %v\nradius: %d",
+		key, loc, radius,
+	)
+	hor := horizon.NewHorizon(&loc, radius)
 
-	return key, nil
-}
-
-const STORE_NAME = "horizons"
-const IN_COMPUTATION_STORE_NAME = "horizons-in-computation"
-
-const IN_Q = "SPOTS.compute-horizon"
-const GROUP = "horizon-service"
-
-const OUT_STREAM = "HORIZONS"
-const OUT_SUB_SUNSETS = OUT_STREAM + ".sunsets"
-
-const ERR_STREAM = "ERRORS"
-const ERR_SUB = ERR_STREAM + "." + GROUP
-
-func SetupStreams(js nats.JetStreamContext) error {
-	if err := messaging.CreateStream(js, OUT_STREAM); err != nil {
+	if _, err := coms.KvHor.Put(key, hor.AltitudeToBytes()); err != nil {
 		return err
 	}
 
-	if err := messaging.CreateStream(js, ERR_STREAM); err != nil {
+	common.SetHorizonInCompute(key, false, coms)
+
+	if err := common.ForwardHorizonKey(msg, key, coms); err != nil {
 		return err
 	}
 
+	//return msg.Ack()
 	return nil
 }

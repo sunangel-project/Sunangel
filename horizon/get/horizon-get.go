@@ -3,12 +3,13 @@ package main
 import (
 	"encoding/json"
 	"log"
-	"strconv"
-	"sunangel/horizon/messages"
-	"sunangel/messaging"
 	"time"
 
 	"github.com/nats-io/nats.go"
+
+	"sunangel/horizon/common"
+	"sunangel/horizon/messages"
+	"sunangel/messaging"
 )
 
 const (
@@ -18,19 +19,13 @@ const (
 	IN_Q  = "SPOTS.get-horizon"
 	GROUP = "horizon-get-service"
 
-	REQ_OUT_Q      = "SPOTS.compute-horizon"
-	RES_OUT_STREAM = "HORIZONS"
-	RES_OUT_Q      = RES_OUT_STREAM + ".sunsets"
-	ERR_STREAM     = "ERRORS"
+	REQ_OUT_Q = "SPOTS.compute-horizon"
+
+	ERR_STREAM = "ERRORS"
+	ERR_Q      = ERR_STREAM + "." + GROUP
 
 	REQUEUE_SECONDS = 10
 )
-
-type Communications struct {
-	js     nats.JetStreamContext
-	kvHor  nats.KeyValue
-	kvComp nats.KeyValue
-}
 
 func main() {
 	nc := messaging.Connect()
@@ -40,54 +35,68 @@ func main() {
 	kvHor := messaging.ConnectOrCreateKV(js, HOR_STORE_NAME)
 	kvComp := messaging.ConnectOrCreateKV(js, COMP_STORE_NAME)
 
-	coms := &Communications{js, kvHor, kvComp}
+	coms := &common.Communications{
+		Js:     js,
+		KvHor:  kvHor,
+		KvComp: kvComp,
+	}
 
-	err := messaging.SetupStreams(js, []string{RES_OUT_STREAM, ERR_STREAM})
-	if err != nil {
+	if err := messaging.SetupStreams(js, []string{
+		common.RES_OUT_STREAM,
+		ERR_STREAM,
+	}); err != nil {
 		panic(err)
 	}
 
-	_, err = js.QueueSubscribe(IN_Q, GROUP, func(msg *nats.Msg) {
+	_, err := js.QueueSubscribe(IN_Q, GROUP, func(msg *nats.Msg) {
 		err := handleMessage(msg, coms)
 		if err != nil {
-			log.Printf("error while handling message: %s\nmessage: %v", err, msg)
+			log.Printf(
+				"error while handling message: %s\nmessage: %v",
+				err, string(msg.Data),
+			)
 		}
 	})
 	if err != nil {
 		panic(err)
 	}
+
+	for { // avoid shutdown
+		time.Sleep(time.Hour)
+	}
 }
 
-func handleMessage(msg *nats.Msg, coms *Communications) error {
+func handleMessage(msg *nats.Msg, coms *common.Communications) error {
 	var req messages.HorizonRequest
 	if err := json.Unmarshal(msg.Data, &req); err != nil {
 		return err
 	}
 
-	key := messages.HorizonKey(req.Spot.Loc, 500)
-	if _, err := coms.kvHor.Get(key); err != nil {
-		if !messages.IsKeyDoesntExistsError(err) {
+	var err error
+	key := common.HorizonKey(req.Spot.Loc, 500)
+	if _, err := coms.KvHor.Get(key); err != nil {
+		if !common.IsKeyDoesntExistsError(err) {
 			return err
 		}
 
-		handleMissingHorizon(msg, key, coms)
+		err = handleMissingHorizon(msg, key, coms)
 	} else {
-		forwardHorizonKey(msg, key, coms)
+		err = common.ForwardHorizonKey(msg, key, coms)
 	}
-
-	if err := msg.Ack(); err != nil {
+	if err != nil {
 		return err
 	}
 
+	// return msg.Ack()
 	return nil
 }
 
 func handleMissingHorizon(
 	msg *nats.Msg,
 	key string,
-	coms *Communications,
+	coms *common.Communications,
 ) error {
-	isInCompute, err := isHorizonInCompute(key, coms)
+	isInCompute, err := common.IsHorizonInCompute(key, coms)
 	if err != nil {
 		return err
 	}
@@ -95,49 +104,24 @@ func handleMissingHorizon(
 	if isInCompute {
 		err = requeueGetRequest(msg, key, coms)
 	} else {
-		_, err = coms.js.Publish(REQ_OUT_Q, msg.Data)
+		_, err = coms.Js.Publish(REQ_OUT_Q, msg.Data)
 	}
 	return err
-}
-
-func isHorizonInCompute(
-	key string,
-	coms *Communications,
-) (bool, error) {
-	isInComputeEntry, err := coms.kvComp.Get(key)
-	if err != nil {
-		if messages.IsKeyDoesntExistsError(err) {
-			return false, nil
-		}
-
-		return false, err
-	}
-
-	return decodeIsIncomputeEntry(isInComputeEntry)
-}
-
-func decodeIsIncomputeEntry(
-	entry nats.KeyValueEntry,
-) (bool, error) {
-	isInCompute, err := strconv.ParseBool(
-		string(entry.Value()),
-	)
-	return isInCompute, err
 }
 
 func requeueGetRequest(
 	msg *nats.Msg,
 	key string,
-	coms *Communications,
+	coms *common.Communications,
 ) error {
-	watch, err := coms.kvComp.Watch(key)
+	watch, err := coms.KvComp.Watch(key)
 	if err != nil {
 		return err
 	}
 	timer := time.NewTimer(REQUEUE_SECONDS * time.Second)
 
 	requeue := func() error {
-		_, err := coms.js.Publish(IN_Q, msg.Data)
+		_, err := coms.Js.Publish(IN_Q, msg.Data)
 		return err
 	}
 
@@ -146,39 +130,14 @@ func requeueGetRequest(
 		case <-timer.C:
 			return requeue()
 		case update := <-watch.Updates():
-			isInCompute, err := decodeIsIncomputeEntry(update)
+			isInCompute, err := common.DecodeIsIncomputeEntry(update)
 			if err != nil {
 				return err
 			}
 
 			if !isInCompute {
-				return forwardHorizonKey(msg, key, coms)
+				return common.ForwardHorizonKey(msg, key, coms)
 			}
 		}
 	}
-}
-
-func forwardHorizonKey(
-	msg *nats.Msg,
-	key string,
-	coms *Communications,
-) error {
-	var msgData messages.HorizonResult
-	if err := json.Unmarshal(msg.Data, &msgData); err != nil {
-		return err
-	}
-
-	msgData.Horizon = key
-
-	msgPayload, err := json.Marshal(msgData)
-	if err != nil {
-		return err
-	}
-
-	if _, err := coms.js.Publish(RES_OUT_Q, msgPayload); err != nil {
-		return err
-	}
-
-	err = msg.Ack()
-	return err
 }
