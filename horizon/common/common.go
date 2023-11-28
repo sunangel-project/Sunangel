@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -8,6 +9,7 @@ import (
 	"sunangel/horizon/messages"
 
 	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -17,18 +19,19 @@ const (
 )
 
 type Communications struct {
-	Js     nats.JetStreamContext
-	KvHor  nats.KeyValue
-	KvComp nats.KeyValue
+	Ctx    context.Context
+	Js     jetstream.JetStream
+	KvHor  jetstream.KeyValue
+	KvComp jetstream.KeyValue
 }
 
 func ForwardHorizonKey(
-	msg *nats.Msg,
+	msg jetstream.Msg,
 	key string,
 	coms *Communications,
 ) error {
 	var msgData map[string]any
-	if err := json.Unmarshal(msg.Data, &msgData); err != nil {
+	if err := json.Unmarshal(msg.Data(), &msgData); err != nil {
 		return err
 	}
 
@@ -39,7 +42,7 @@ func ForwardHorizonKey(
 		return err
 	}
 
-	if _, err := coms.Js.Publish(RES_OUT_Q, msgPayload); err != nil {
+	if _, err := coms.Js.Publish(coms.Ctx, RES_OUT_Q, msgPayload); err != nil {
 		return err
 	}
 
@@ -61,7 +64,7 @@ func IsHorizonInCompute(
 	key string,
 	coms *Communications,
 ) (bool, error) {
-	isInComputeEntry, err := coms.KvComp.Get(key)
+	isInComputeEntry, err := coms.KvComp.Get(coms.Ctx, key)
 	if err != nil {
 		if IsKeyDoesntExistsError(err) {
 			return false, nil
@@ -74,9 +77,9 @@ func IsHorizonInCompute(
 }
 
 func DecodeIsIncomputeEntry(
-	entry nats.KeyValueEntry,
+	entry jetstream.KeyValueEntry,
 ) (bool, error) {
-	if entry.Operation() == nats.KeyValueDelete {
+	if entry.Operation() == jetstream.KeyValueDelete {
 		return false, nil
 	}
 
@@ -98,9 +101,9 @@ func SetHorizonInCompute(
 ) error {
 	var err error
 	if val {
-		_, err = coms.KvComp.Put(key, []byte(strconv.FormatBool(val)))
+		_, err = coms.KvComp.Put(coms.Ctx, key, []byte(strconv.FormatBool(val)))
 	} else {
-		err = coms.KvComp.Delete(key)
+		err = coms.KvComp.Delete(coms.Ctx, key)
 	}
 	return err
 }

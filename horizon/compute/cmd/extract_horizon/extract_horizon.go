@@ -5,8 +5,6 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/sunangel-project/go-horizon-service/src/messaging"
-	"github.com/sunangel-project/go-horizon-service/src/storage"
 	"github.com/sunangel-project/horizon"
 	"github.com/sunangel-project/horizon/location"
 )
