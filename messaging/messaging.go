@@ -79,7 +79,6 @@ func ConnectOrCreateConsumer(
 	cons, err := stream.Consumer(ctx, name)
 	if err != nil {
 		if err == jetstream.ErrConsumerDoesNotExist {
-			log.Printf("%T", err)
 			return nil, err
 		}
 

@@ -86,11 +86,21 @@ pub async fn queue_subscribe(jetstream: &Context, stream: &str, group: &str) -> 
 }
 
 pub async fn connect_kv_store(jetstream: &Context, name: &str) -> Store {
-    jetstream
-        .create_key_value(async_nats::jetstream::kv::Config {
-            bucket: name.to_string(),
-            ..Default::default()
-        })
-        .await
-        .expect("Could not connect to key value store")
+    let created = jetstream.get_key_value(name).await;
+
+    match created {
+        Ok(store) => store,
+        Err(_) => {
+            // TODO: distinguish errors
+            let conf = async_nats::jetstream::kv::Config {
+                bucket: name.to_string(),
+                ..Default::default()
+            };
+
+            jetstream
+                .create_key_value(conf)
+                .await
+                .expect("could not create key value store")
+        }
+    }
 }
