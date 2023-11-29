@@ -72,7 +72,7 @@ func main() {
 		panic(err)
 	}
 
-	cons.Consume(func(msg jetstream.Msg) {
+	_, err = cons.Consume(func(msg jetstream.Msg) {
 		err := handleMessage(msg, coms)
 		if err != nil {
 			log.Printf(
@@ -81,6 +81,9 @@ func main() {
 			)
 		}
 	})
+	if err != nil {
+		panic(err)
+	}
 
 	for { // avoid shutdown
 		time.Sleep(time.Hour)

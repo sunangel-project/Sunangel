@@ -1,11 +1,12 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"time"
 
-	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
 	"github.com/sunangel-project/horizon"
 	"github.com/sunangel-project/horizon/location"
 
@@ -18,8 +19,11 @@ const (
 	HOR_STORE_NAME  = "horizons"
 	COMP_STORE_NAME = "horizons-in-computation"
 
-	IN_Q  = "SPOTS.compute-horizon"
 	GROUP = "horizon-compute-service"
+
+	IN_STREAM  = "SPOTS"
+	IN_SUBJECT = "compute-horizon"
+	IN_Q       = IN_STREAM + "." + IN_SUBJECT
 
 	ERR_STREAM = "ERRORS"
 	ERR_Q      = ERR_STREAM + "." + GROUP
@@ -28,30 +32,49 @@ const (
 func main() {
 	nc := messaging.Connect()
 	defer nc.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
 	js := messaging.JetStream(nc)
 
-	kvHor := messaging.ConnectOrCreateKV(js, HOR_STORE_NAME)
-	kvComp := messaging.ConnectOrCreateKV(js, COMP_STORE_NAME)
+	kvHor := messaging.ConnectOrCreateKV(ctx, js, HOR_STORE_NAME)
+	kvComp := messaging.ConnectOrCreateKV(ctx, js, COMP_STORE_NAME)
 
 	coms := &common.Communications{
+		Ctx:    ctx,
 		Js:     js,
 		KvHor:  kvHor,
 		KvComp: kvComp,
 	}
 
-	if err := messaging.SetupStreams(js, []string{
+	if err := messaging.SetupStreams(ctx, js, []string{
 		common.RES_OUT_STREAM,
 		ERR_STREAM,
 	}); err != nil {
 		panic(err)
 	}
 
-	_, err := js.QueueSubscribe(IN_Q, GROUP, func(msg *nats.Msg) {
+	stream, err := js.Stream(ctx, IN_STREAM)
+	if err != nil {
+		panic(err)
+	}
+
+	consConfig := jetstream.ConsumerConfig{
+		Name:           GROUP,
+		FilterSubjects: []string{IN_SUBJECT},
+	}
+	cons, err := messaging.ConnectOrCreateConsumer(ctx, stream, GROUP, consConfig)
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = cons.Consume(func(msg jetstream.Msg) {
 		err := handleMessage(msg, coms)
 		if err != nil {
 			log.Printf(
 				"error while handling message: %s\nmessage: %v",
-				err, string(msg.Data),
+				err, string(msg.Data()),
 			)
 		}
 	})
@@ -65,13 +88,13 @@ func main() {
 }
 
 func handleMessage(
-	msg *nats.Msg,
+	msg jetstream.Msg,
 	coms *common.Communications,
 ) error {
-	log.Printf("received message: %s", string(msg.Data))
+	log.Printf("received message: %s", string(msg.Data()))
 
 	var req messages.HorizonRequest
-	if err := json.Unmarshal(msg.Data, &req); err != nil {
+	if err := json.Unmarshal(msg.Data(), &req); err != nil {
 		return err
 	}
 
@@ -88,7 +111,7 @@ func handleMessage(
 	)
 	hor := horizon.NewHorizon(&loc, radius)
 
-	if _, err := coms.KvHor.Put(key, hor.AltitudeToBytes()); err != nil {
+	if _, err := coms.KvHor.Put(coms.Ctx, key, hor.AltitudeToBytes()); err != nil {
 		return err
 	}
 
