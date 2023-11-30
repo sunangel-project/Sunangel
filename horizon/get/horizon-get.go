@@ -19,9 +19,8 @@ const (
 
 	GROUP = "horizon-get-service"
 
-	IN_STREAM  = "SPOTS"
-	IN_SUBJECT = "get-horizon"
-	IN_Q       = IN_STREAM + "." + IN_SUBJECT
+	IN_STREAM = "SPOTS"
+	IN_Q      = IN_STREAM + ".get-horizon"
 
 	REQ_OUT_Q = "SPOTS.compute-horizon"
 
@@ -35,7 +34,7 @@ func main() {
 	nc := messaging.Connect()
 	defer nc.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	js := messaging.JetStream(nc)
@@ -65,20 +64,21 @@ func main() {
 	consConfig := jetstream.ConsumerConfig{
 		Name:           GROUP,
 		AckWait:        (REQUEUE_SECONDS + 10) * time.Second,
-		FilterSubjects: []string{IN_SUBJECT},
+		FilterSubjects: []string{IN_Q},
 	}
 	cons, err := messaging.ConnectOrCreateConsumer(ctx, stream, GROUP, consConfig)
 	if err != nil {
 		panic(err)
 	}
+	log.Print("Setup complete, listening to " + IN_Q)
 
 	_, err = cons.Consume(func(msg jetstream.Msg) {
-		err := handleMessage(msg, coms)
-		if err != nil {
+		if err := handleMessage(msg, coms); err != nil {
 			log.Printf(
 				"error while handling message: %s\nmessage: %v",
 				err, string(msg.Data()),
 			)
+			msg.Nak()
 		}
 	})
 	if err != nil {
@@ -96,8 +96,6 @@ func handleMessage(msg jetstream.Msg, coms *common.Communications) error {
 		return err
 	}
 
-	log.Print("decoded request")
-
 	var err error
 	key := common.HorizonKey(req.Spot.Loc, 500)
 	if _, err := coms.KvHor.Get(coms.Ctx, key); err != nil {
@@ -107,14 +105,13 @@ func handleMessage(msg jetstream.Msg, coms *common.Communications) error {
 
 		err = handleMissingHorizon(msg, key, coms)
 	} else {
-		err = common.ForwardHorizonKey(msg, key, coms)
-	}
-	if err != nil {
-		return err
-	}
+		if err := common.ForwardHorizonKey(msg, key, coms); err != nil {
+			return err
+		}
 
-	// return msg.Ack()
-	return nil
+		err = msg.Ack()
+	}
+	return err
 }
 
 func handleMissingHorizon(
@@ -122,23 +119,41 @@ func handleMissingHorizon(
 	key string,
 	coms *common.Communications,
 ) error {
-	log.Print("handle missing hor")
 	isInCompute, err := common.IsHorizonInCompute(key, coms)
 	if err != nil {
 		return err
 	}
-	log.Printf("is in compute: %t", isInCompute)
 
 	if isInCompute {
-		err = requeueGetRequest(msg, key, coms)
+		go requeueGetRequestAndLog(msg, key, coms)
 	} else {
 		if err := common.SetHorizonInCompute(key, true, coms); err != nil {
 			return err
 		}
 
-		_, err = coms.Js.Publish(coms.Ctx, REQ_OUT_Q, msg.Data())
+		if _, err := coms.Js.Publish(coms.Ctx, REQ_OUT_Q, msg.Data()); err != nil {
+			return err
+		}
+
+		if err := msg.Ack(); err != nil {
+			return err
+		}
 	}
-	return err
+	return nil
+}
+
+func requeueGetRequestAndLog(
+	msg jetstream.Msg,
+	key string,
+	coms *common.Communications,
+) {
+	if err := requeueGetRequest(msg, key, coms); err != nil {
+		log.Printf(
+			"error while handling message: %s\nmessage: %v",
+			err, string(msg.Data()),
+		)
+		_ = msg.Nak() // Ignoring error
+	}
 }
 
 func requeueGetRequest(
@@ -146,6 +161,7 @@ func requeueGetRequest(
 	key string,
 	coms *common.Communications,
 ) error {
+	log.Printf("horizon %s is in compute", key)
 	watch, err := coms.KvComp.Watch(coms.Ctx, key)
 	if err != nil {
 		return err
@@ -156,32 +172,33 @@ func requeueGetRequest(
 
 	timer := time.NewTimer(REQUEUE_SECONDS * time.Second)
 
-	requeue := func() error {
-		_, err := coms.Js.Publish(
-			coms.Ctx,
-			IN_Q,
-			msg.Data(),
-		)
-		return err
-	}
-
+loop:
 	for {
 		select {
 		case <-timer.C:
-
-			log.Print("times up")
-			return requeue()
+			log.Printf("horizon %s: timer", key)
+			if _, err := coms.Js.Publish(
+				coms.Ctx,
+				IN_Q,
+				msg.Data(),
+			); err != nil {
+				return err
+			}
+			break loop
 		case update := <-updates:
-			log.Printf("update received: %v", update)
-
+			log.Printf("horizon %s: update %v", key, update)
 			isInCompute, err := common.DecodeIsIncomputeEntry(update)
 			if err != nil {
 				return err
 			}
 
 			if !isInCompute {
-				return common.ForwardHorizonKey(msg, key, coms)
+				if err := common.ForwardHorizonKey(msg, key, coms); err != nil {
+					return err
+				}
+				break loop
 			}
 		}
 	}
+	return msg.Ack()
 }

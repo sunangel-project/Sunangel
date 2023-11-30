@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"sunangel/horizon/messages"
 
-	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 	uuid "github.com/satori/go.uuid"
 )
@@ -90,8 +89,8 @@ func DecodeIsIncomputeEntry(
 }
 
 func IsKeyDoesntExistsError(err error) bool {
-	return errors.Is(err, nats.ErrKeyNotFound) ||
-		errors.Is(err, nats.ErrKeyDeleted)
+	return errors.Is(err, jetstream.ErrKeyNotFound) ||
+		errors.Is(err, jetstream.ErrKeyDeleted)
 }
 
 func SetHorizonInCompute(

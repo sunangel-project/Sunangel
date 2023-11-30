@@ -78,9 +78,7 @@ func ConnectOrCreateConsumer(
 ) (jetstream.Consumer, error) {
 	cons, err := stream.Consumer(ctx, name)
 	if err != nil {
-		if err == jetstream.ErrConsumerDoesNotExist {
-			return nil, err
-		}
+		// TODO: check err type
 
 		cons, err = stream.CreateConsumer(ctx, conf)
 		if err != nil {

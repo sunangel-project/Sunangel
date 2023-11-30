@@ -23,7 +23,7 @@ const (
 
 	IN_STREAM  = "SPOTS"
 	IN_SUBJECT = "compute-horizon"
-	IN_Q       = IN_STREAM + "." + IN_SUBJECT
+	IN_Q       = IN_STREAM + ".compute-horizon"
 
 	ERR_STREAM = "ERRORS"
 	ERR_Q      = ERR_STREAM + "." + GROUP
@@ -33,7 +33,7 @@ func main() {
 	nc := messaging.Connect()
 	defer nc.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	js := messaging.JetStream(nc)
@@ -62,16 +62,16 @@ func main() {
 
 	consConfig := jetstream.ConsumerConfig{
 		Name:           GROUP,
-		FilterSubjects: []string{IN_SUBJECT},
+		FilterSubjects: []string{IN_Q},
 	}
 	cons, err := messaging.ConnectOrCreateConsumer(ctx, stream, GROUP, consConfig)
 	if err != nil {
 		panic(err)
 	}
+	log.Print("Setup complete, listening to " + IN_Q)
 
 	_, err = cons.Consume(func(msg jetstream.Msg) {
-		err := handleMessage(msg, coms)
-		if err != nil {
+		if err := handleMessage(msg, coms); err != nil {
 			log.Printf(
 				"error while handling message: %s\nmessage: %v",
 				err, string(msg.Data()),
