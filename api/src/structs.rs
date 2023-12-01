@@ -147,6 +147,7 @@ pub struct APISearchQuery {
     pub location: LocationIn,
     pub radius: i32,
 }
+
 ////////////
 /// NATS ///
 ////////////
