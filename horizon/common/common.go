@@ -13,8 +13,18 @@ import (
 )
 
 const (
+	HOR_STORE_NAME  = "horizons"
+	COMP_STORE_NAME = "horizons-in-computation"
+
+	SPOT_STREAM = "SPOTS"
+	REQ_GET_Q   = SPOT_STREAM + ".get-horizon"
+
+	REQ_COMP_Q = SPOT_STREAM + ".compute-horizon"
+
 	RES_OUT_STREAM = "HORIZONS"
 	RES_OUT_Q      = RES_OUT_STREAM + ".sunsets"
+
+	ERR_STREAM = "ERROR"
 )
 
 type Communications struct {
@@ -46,6 +56,33 @@ func ForwardHorizonKey(
 	}
 
 	return nil
+}
+
+func SendError(
+	input string,
+	err error,
+	requestId string,
+	sender string,
+	coms *Communications,
+) error {
+	errorMsg := messages.Error{
+		Input:     input,
+		Reason:    err.Error(),
+		RequestId: requestId,
+		Sender:    sender,
+	}
+
+	payload, err := json.Marshal(errorMsg)
+	if err != nil {
+		return err
+	}
+
+	_, err = coms.Js.Publish(
+		coms.Ctx,
+		fmt.Sprintf("%s.%s", ERR_STREAM, sender),
+		payload,
+	)
+	return err
 }
 
 // Horizon key and in compute

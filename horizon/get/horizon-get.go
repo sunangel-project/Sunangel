@@ -14,18 +14,9 @@ import (
 )
 
 const (
-	HOR_STORE_NAME  = "horizons"
-	COMP_STORE_NAME = "horizons-in-computation"
-
 	GROUP = "horizon-get-service"
 
-	IN_STREAM = "SPOTS"
-	IN_Q      = IN_STREAM + ".get-horizon"
-
-	REQ_OUT_Q = "SPOTS.compute-horizon"
-
-	ERR_STREAM = "ERRORS"
-	ERR_Q      = ERR_STREAM + "." + GROUP
+	IN_Q = common.REQ_GET_Q
 
 	REQUEUE_SECONDS = 10
 )
@@ -39,8 +30,8 @@ func main() {
 
 	js := messaging.JetStream(nc)
 
-	kvHor := messaging.ConnectOrCreateKV(ctx, js, HOR_STORE_NAME)
-	kvComp := messaging.ConnectOrCreateKV(ctx, js, COMP_STORE_NAME)
+	kvHor := messaging.ConnectOrCreateKV(ctx, js, common.HOR_STORE_NAME)
+	kvComp := messaging.ConnectOrCreateKV(ctx, js, common.COMP_STORE_NAME)
 
 	coms := &common.Communications{
 		Ctx:    ctx,
@@ -51,12 +42,12 @@ func main() {
 
 	if err := messaging.SetupStreams(ctx, js, []string{
 		common.RES_OUT_STREAM,
-		ERR_STREAM,
+		common.ERR_STREAM,
 	}); err != nil {
 		panic(err)
 	}
 
-	stream, err := js.Stream(ctx, IN_STREAM)
+	stream, err := js.Stream(ctx, common.SPOT_STREAM)
 	if err != nil {
 		panic(err)
 	}
@@ -96,6 +87,23 @@ func handleMessage(msg jetstream.Msg, coms *common.Communications) error {
 		return err
 	}
 
+	err := handleRequest(msg, req, coms)
+
+	if err != nil {
+		err := common.SendError(string(msg.Data()), err, req.RequestId, GROUP, coms)
+		if err != nil {
+			log.Printf("could not send out error: %s", err)
+		}
+	}
+
+	return err
+}
+
+func handleRequest(
+	msg jetstream.Msg,
+	req messages.HorizonRequest,
+	coms *common.Communications,
+) error {
 	var err error
 	key := common.HorizonKey(req.Spot.Loc, 500)
 	if _, err := coms.KvHor.Get(coms.Ctx, key); err != nil {
@@ -103,7 +111,7 @@ func handleMessage(msg jetstream.Msg, coms *common.Communications) error {
 			return err
 		}
 
-		err = handleMissingHorizon(msg, key, coms)
+		err = handleMissingHorizon(msg, req.RequestId, key, coms)
 	} else {
 		if err := common.ForwardHorizonKey(msg, key, coms); err != nil {
 			return err
@@ -116,6 +124,7 @@ func handleMessage(msg jetstream.Msg, coms *common.Communications) error {
 
 func handleMissingHorizon(
 	msg jetstream.Msg,
+	requestId string,
 	key string,
 	coms *common.Communications,
 ) error {
@@ -125,13 +134,17 @@ func handleMissingHorizon(
 	}
 
 	if isInCompute {
-		go requeueGetRequestAndLog(msg, key, coms)
+		go requeueGetRequestAndLog(msg, requestId, key, coms)
 	} else {
 		if err := common.SetHorizonInCompute(key, true, coms); err != nil {
 			return err
 		}
 
-		if _, err := coms.Js.Publish(coms.Ctx, REQ_OUT_Q, msg.Data()); err != nil {
+		if _, err := coms.Js.Publish(
+			coms.Ctx,
+			common.REQ_COMP_Q,
+			msg.Data(),
+		); err != nil {
 			return err
 		}
 
@@ -144,6 +157,7 @@ func handleMissingHorizon(
 
 func requeueGetRequestAndLog(
 	msg jetstream.Msg,
+	requestId string,
 	key string,
 	coms *common.Communications,
 ) {
@@ -152,6 +166,17 @@ func requeueGetRequestAndLog(
 			"error while handling message: %s\nmessage: %v",
 			err, string(msg.Data()),
 		)
+
+		if err := common.SendError(
+			string(msg.Data()),
+			err,
+			requestId,
+			GROUP,
+			coms,
+		); err != nil {
+			log.Printf("could not send out error: %s", err)
+		}
+
 		_ = msg.Nak() // Ignoring error
 	}
 }
