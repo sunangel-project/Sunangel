@@ -98,6 +98,23 @@ func handleMessage(
 		return err
 	}
 
+	err := handleRequest(msg, req, coms)
+
+	if err != nil {
+		err := common.SendError(string(msg.Data()), err, req.RequestId, GROUP, coms)
+		if err != nil {
+			log.Printf("could not send out error: %s", err)
+		}
+	}
+
+	return err
+}
+
+func handleRequest(
+	msg jetstream.Msg,
+	req messages.HorizonRequest,
+	coms *common.Communications,
+) error {
 	radius := 500
 	key := common.HorizonKey(req.Spot.Loc, radius)
 
@@ -123,6 +140,5 @@ func handleMessage(
 		return err
 	}
 
-	//return msg.Ack()
-	return nil
+	return msg.Ack()
 }
