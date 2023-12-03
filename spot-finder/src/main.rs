@@ -46,7 +46,7 @@ const IN_STREAM: &str = "SEARCH";
 const GROUP: &str = "spot-finder";
 
 const OUT_STREAM: &str = "SPOTS";
-const OUT_SUBJECT: &str = "horizon";
+const OUT_SUBJECT: &str = "get-horizon";
 const ERR_STREAM: &str = "ERRORS";
 
 async fn run() {

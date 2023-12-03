@@ -1,0 +1,7 @@
+FROM golang:1.21
+
+WORKDIR /use/src/sunangel
+COPY . .
+RUN go install horizon/get/horizon-get.go
+
+CMD ["horizon-get"]

@@ -1,0 +1,7 @@
+FROM golang:1.21
+
+WORKDIR /use/src/sunangel
+COPY . .
+RUN go install horizon/compute/horizon-compute.go
+
+CMD ["horizon-compute"]

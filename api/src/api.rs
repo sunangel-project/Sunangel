@@ -62,7 +62,7 @@ impl Query {
     }
 
     fn backend_version() -> &'static str {
-        "v0.1.4"
+        "v0.1.5"
     }
 }
 
@@ -209,7 +209,11 @@ fn transform_spot_message(
                     received_ids.insert(id);
                 }
             }
-            received_ids.remove(&response.part.id);
+            let duplicate = received_ids.remove(&response.part.id);
+            if duplicate {
+                // TODO: send out error that duplicate value was received
+            }
+
             let last = received_ids.is_empty();
 
             let status = if last {

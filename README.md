@@ -1,7 +1,7 @@
 # Sunangel Home Edition
 
 ![Frontend Version](https://img.shields.io/badge/frontend-v0.0.7-blue)
-![Backend Version](https://img.shields.io/badge/backend-v0.1.4-blue)
+![Backend Version](https://img.shields.io/badge/backend-v0.1.5-blue)
 [![Build and Test](https://github.com/sunangel-project/Sunangel/actions/workflows/test.yml/badge.svg?branch=develop)](https://github.com/sunangel-project/Sunangel/actions/workflows/test.yml)
 [![Website](https://img.shields.io/badge/website-limegreen)](https://sunn.cloudsftp.de)
 
@@ -48,11 +48,11 @@ cd front
 bun run build
 ```
 
-## Execution
+## Architecture
 
-## Planned Architecture
+![arch](Diagrams/architecture-all.png)
 
-![arch](architecture.png)
+For details regarding the horizon group, check [horizon](horizon).
 
 ### Rationale
 
@@ -63,5 +63,3 @@ bun run build
 Only API component has state.
 All other components can scale horizontally w/o restrictions.
 [Queues](https://en.wikipedia.org/wiki/Message_queue) used for communication for free load balancing ([competing consumer](https://learn.microsoft.com/en-us/azure/architecture/patterns/competing-consumers)).
-
-In order to allow `API` component to scale, use [publish-subscribe](https://learn.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber) for relaying responses to the `API` components.
