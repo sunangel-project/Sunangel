@@ -17,11 +17,19 @@ jobs:
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
 
-      - name: Update dependencies
+      - name: Update Rust dependencies
         run: |
           cargo install cargo-edit
           cargo update
           cargo upgrade
+
+      - name: Update Go dependencies
+        run: go get -u ./...
+
+      - name: Update node dependencies
+        run: |
+          cd front
+          npm update
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
