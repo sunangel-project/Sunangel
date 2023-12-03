@@ -15,7 +15,7 @@ The pattern used here is the [Claim-Check pattern](https://www.enterpriseintegra
 
 A more detailed view of the inner workings is displayed in the following diagram.
 
-![flow](../Diagrams/horizon-flow.png)
+![flow](../Diagrams/flow-horizon.png)
 
 In case the horizon is already being computed, and the timer finishes before the horizon is ready, the request is requeued again.
 This avoids requests getting lost when the component horizon-get crashes during the timer period.

@@ -186,32 +186,22 @@ func requeueGetRequest(
 	key string,
 	coms *common.Communications,
 ) error {
-	log.Printf("horizon %s is in compute", key)
 	watch, err := coms.KvComp.Watch(coms.Ctx, key)
 	if err != nil {
 		return err
 	}
+
 	updates := watch.Updates()
 	for <-updates != nil {
 	}
 
 	timer := time.NewTimer(REQUEUE_SECONDS * time.Second)
 
-loop:
 	for {
 		select {
 		case <-timer.C:
-			log.Printf("horizon %s: timer", key)
-			if _, err := coms.Js.Publish(
-				coms.Ctx,
-				IN_Q,
-				msg.Data(),
-			); err != nil {
-				return err
-			}
-			break loop
+			return msg.Nak()
 		case update := <-updates:
-			log.Printf("horizon %s: update %v", key, update)
 			isInCompute, err := common.DecodeIsIncomputeEntry(update)
 			if err != nil {
 				return err
@@ -221,9 +211,8 @@ loop:
 				if err := common.ForwardHorizonKey(msg, key, coms); err != nil {
 					return err
 				}
-				break loop
+				return msg.Ack()
 			}
 		}
 	}
-	return msg.Ack()
 }
