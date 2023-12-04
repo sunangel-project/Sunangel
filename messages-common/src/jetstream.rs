@@ -40,20 +40,27 @@ pub type MessageStream =
 
 async fn try_subscribe(
     jetstream: &Context,
-    stream: &str,
+    stream_name: &str,
+    subject: Option<&str>,
     group: Option<&str>,
 ) -> Result<MessageStream, async_nats::Error> {
-    try_create_stream(jetstream, stream).await?;
+    try_create_stream(jetstream, stream_name).await?;
 
-    debug!("Trying to connect to {stream}");
-    let stream = jetstream.get_stream(stream).await?;
+    debug!("Trying to connect to {}", stream_name);
+    let stream = jetstream.get_stream(stream_name).await?;
 
-    debug!("Trying to create consumer for {stream:?}");
+    let mut subjects = vec![];
+    if let Some(subject) = subject {
+        subjects.push(format!("{}.{}", stream_name, subject));
+    }
+
+    debug!("Trying to create consumer for {:?}", stream_name);
     let consumer = stream
         .get_or_create_consumer(
             group.unwrap_or("sole_consumer"),
             async_nats::jetstream::consumer::pull::Config {
                 durable_name: group.map(str::to_string),
+                filter_subjects: subjects,
                 ..Default::default()
             },
         )
@@ -68,19 +75,34 @@ pub async fn try_pub_sub_subscribe(
     jetstream: &Context,
     stream: &str,
 ) -> Result<MessageStream, Box<dyn Error + Send + Sync>> {
-    try_subscribe(jetstream, stream, None).await
+    try_subscribe(jetstream, stream, None, None).await
 }
 
-pub async fn try_queue_subscibe(
+pub async fn try_queue_subscribe(
     jetstream: &Context,
     stream: &str,
     group: &str,
 ) -> Result<MessageStream, Box<dyn Error + Send + Sync>> {
-    try_subscribe(jetstream, stream, Some(group)).await
+    try_subscribe(jetstream, stream, None, Some(group)).await
+}
+
+pub async fn try_queue_subscribe_subject(
+    jetstream: &Context,
+    stream: &str,
+    subject: &str,
+    group: &str,
+) -> Result<MessageStream, Box<dyn Error + Send + Sync>> {
+    try_subscribe(
+        jetstream,
+        stream,
+        Some(subject),
+        Some(&format!("{}-{}", group, subject)),
+    )
+    .await
 }
 
 pub async fn queue_subscribe(jetstream: &Context, stream: &str, group: &str) -> MessageStream {
-    try_queue_subscibe(jetstream, stream, group)
+    try_queue_subscribe(jetstream, stream, group)
         .await
         .expect("Could not connect to stream")
 }

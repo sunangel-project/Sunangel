@@ -137,7 +137,7 @@ async fn real_result_stream(context: &Context, search_query: APISearchQuery) -> 
 }
 
 async fn connect_to_response_messages(context: &Context, request_id: String) -> SpotStreamPin {
-    let messages = messaging::get_messages_stream(&context.jetstream)
+    let messages = messaging::get_messages_stream(&context.jetstream, &request_id)
         .await
         .map_err(|err| {
             error!("Couldn't subscribe to NATS: {err}");
@@ -151,14 +151,11 @@ async fn connect_to_response_messages(context: &Context, request_id: String) -> 
 
     match messages {
         Err(error_stream) => error_stream,
-        Ok(messages) => translate_response_messages(messages, request_id).await,
+        Ok(messages) => translate_response_messages(messages).await,
     }
 }
 
-async fn translate_response_messages(
-    mut messages: MessageStream,
-    request_id: String,
-) -> SpotStreamPin {
+async fn translate_response_messages(mut messages: MessageStream) -> SpotStreamPin {
     Box::pin(stream! {
         let mut received_ids = HashSet::<u32>::new();
         while let Some(message) = messages.next().await {
@@ -169,12 +166,6 @@ async fn translate_response_messages(
                     graphql_value!(error.to_string()),
                 )),
                 Ok(message) => {
-                    let msg_request_id = messages_common::get_request_id(&message.payload);
-                    if msg_request_id != request_id {
-                        message.ack().await?;
-                        continue;
-                    }
-
                     let (spot, last) = transform_spot_message(&message, &mut received_ids)?;
                     yield Ok(spot);
                     message.ack().await?;

@@ -88,6 +88,7 @@ struct Spot {
 
 #[derive(Serialize, Deserialize)]
 struct InMessage {
+    request_id: String,
     search_query: SearchQuery,
     horizon: String,
     spot: Spot,
@@ -131,10 +132,11 @@ pub async fn handle_message(
     let in_value = Value::from_str(payload)?;
     jetstream
         .publish(
-            OUT_STREAM.to_string(),
+            format!("{}.{}", OUT_STREAM, decoded_message.request_id),
             build_output(in_value, result)?.to_string().into(),
         )
         .await?;
+    info!("sent out results");
 
     message.ack().await?;
 
