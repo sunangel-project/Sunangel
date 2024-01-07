@@ -14,16 +14,16 @@ juniper_actix = { git = "https://github.com/graphql-rust/juniper", rev = "984973
 actix-web = { version = "4.4.1", features = ["openssl"] }
 actix-cors = "0.6.5"
 chrono = { version = "0.4.31", features = ["serde"] }
-chrono-tz = { version = "0.8.4", features = ["serde"] }
+chrono-tz = { version = "0.8.5", features = ["serde"] }
 async-nats = "0.32.1"
 futures-util = "0.3.30"
-serde = "1.0.193"
-serde_json = "1.0.108"
+serde = "1.0.195"
+serde_json = "1.0.111"
 uuid = { version = "1.6.1", features = ["v4"] }
 messages-common = { path = "../messages-common" }
 futures = "0.3.30"
 log = "0.4.20"
-anyhow = "1.0.77"
+anyhow = "1.0.79"
 bytes = "1.5.0"
 env_logger = "0.10.1"
 async-stream = "0.3.5"
