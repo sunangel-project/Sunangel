@@ -3,31 +3,6 @@
 version = 3
 
 [[package]]
-name = "actix"
-version = "0.13.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb72882332b6d6282f428b77ba0358cb2687e61a6f6df6a6d3871e8a177c2d4f"
-dependencies = [
- "actix-macros",
- "actix-rt",
- "actix_derive",
- "bitflags 2.4.2",
- "bytes",
- "crossbeam-channel",
- "futures-core",
- "futures-sink",
- "futures-task",
- "futures-util",
- "log",
- "once_cell",
- "parking_lot",
- "pin-project-lite",
- "smallvec",
- "tokio",
- "tokio-util",
-]
-
-[[package]]
 name = "actix-codec"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -231,24 +206,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "actix-web-actors"
-version = "4.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "420b001bb709d8510c3e2659dae046e54509ff9528018d09c78381e765a1f9fa"
-dependencies = [
- "actix",
- "actix-codec",
- "actix-http",
- "actix-web",
- "bytes",
- "bytestring",
- "futures-core",
- "pin-project-lite",
- "tokio",
- "tokio-util",
-]
-
-[[package]]
 name = "actix-web-codegen"
 version = "4.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -261,14 +218,16 @@ dependencies = [
 ]
 
 [[package]]
-name = "actix_derive"
-version = "0.6.1"
+name = "actix-ws"
+version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7c7db3d5a9718568e4cf4a537cfd7070e6e6ff7481510d0237fb529ac850f6d3"
+checksum = "535aec173810be3ca6f25dd5b4d431ae7125d62000aa3cbae1ec739921b02cf3"
 dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.52",
+ "actix-codec",
+ "actix-http",
+ "actix-web",
+ "futures-core",
+ "tokio",
 ]
 
 [[package]]
@@ -438,6 +397,18 @@ version = "0.1.77"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c980ee35e870bd1a4d2c8294d4c04d0499e67bca1e4b5cefcc693c2fa00caea9"
 dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.52",
+]
+
+[[package]]
+name = "auto_enums"
+version = "0.8.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1899bfcfd9340ceea3533ea157360ba8fa864354eccbceab58e1006ecab35393"
+dependencies = [
+ "derive_utils",
  "proc-macro2",
  "quote",
  "syn 2.0.52",
@@ -712,21 +683,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "crossbeam-channel"
-version = "0.5.12"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ab3db02a9c5b5121e1e42fbdb1aeb65f5e02624cc58c43f2884c6ccac0b82f95"
-dependencies = [
- "crossbeam-utils",
-]
-
-[[package]]
-name = "crossbeam-utils"
-version = "0.8.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "248e3bacc7dc6baa3b21e405ee045c3047101a49145e7e9eca583ab4c2ca5345"
-
-[[package]]
 name = "crypto-common"
 version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -805,13 +761,13 @@ dependencies = [
 
 [[package]]
 name = "derive_utils"
-version = "0.11.2"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "532b4c15dccee12c7044f1fcad956e98410860b22231e44a3b827464797ca7bf"
+checksum = "61bb5a1014ce6dfc2a378578509abe775a5aa06bff584a547555d9efdb81b926"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 1.0.109",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -978,17 +934,6 @@ name = "futures-core"
 version = "0.3.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dfc6580bb841c5a68e9ef15c77ccc837b40a7504914d52e47b8b0e9bbda25a1d"
-
-[[package]]
-name = "futures-enum"
-version = "0.1.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3422d14de7903a52e9dbc10ae05a7e14445ec61890100e098754e120b2bd7b1e"
-dependencies = [
- "derive_utils",
- "quote",
- "syn 1.0.109",
-]
 
 [[package]]
 name = "futures-executor"
@@ -1284,15 +1229,15 @@ dependencies = [
 [[package]]
 name = "juniper"
 version = "0.16.0-dev"
-source = "git+https://github.com/graphql-rust/juniper?rev=984973658217f73d63608283d18723e11ce65161#984973658217f73d63608283d18723e11ce65161"
+source = "git+https://github.com/graphql-rust/juniper?rev=ac6e60987f5c20ed2c0046fe08245215231f56b7#ac6e60987f5c20ed2c0046fe08245215231f56b7"
 dependencies = [
  "async-trait",
+ "auto_enums",
  "bson",
  "chrono",
  "chrono-tz",
  "fnv",
  "futures",
- "futures-enum",
  "graphql-parser",
  "indexmap",
  "juniper_codegen",
@@ -1300,6 +1245,7 @@ dependencies = [
  "serde",
  "smartstring",
  "static_assertions",
+ "tap",
  "url",
  "uuid",
  "void",
@@ -1308,52 +1254,34 @@ dependencies = [
 [[package]]
 name = "juniper_actix"
 version = "0.5.0-dev"
-source = "git+https://github.com/graphql-rust/juniper?rev=984973658217f73d63608283d18723e11ce65161#984973658217f73d63608283d18723e11ce65161"
+source = "git+https://github.com/graphql-rust/juniper?rev=ac6e60987f5c20ed2c0046fe08245215231f56b7#ac6e60987f5c20ed2c0046fe08245215231f56b7"
 dependencies = [
- "actix",
  "actix-http",
  "actix-web",
- "actix-web-actors",
+ "actix-ws",
  "anyhow",
  "futures",
- "http",
  "juniper",
- "juniper_graphql_transport_ws",
  "juniper_graphql_ws",
  "serde",
  "serde_json",
- "thiserror",
- "tokio",
 ]
 
 [[package]]
 name = "juniper_codegen"
 version = "0.16.0-dev"
-source = "git+https://github.com/graphql-rust/juniper?rev=984973658217f73d63608283d18723e11ce65161#984973658217f73d63608283d18723e11ce65161"
+source = "git+https://github.com/graphql-rust/juniper?rev=ac6e60987f5c20ed2c0046fe08245215231f56b7#ac6e60987f5c20ed2c0046fe08245215231f56b7"
 dependencies = [
- "proc-macro-error",
  "proc-macro2",
  "quote",
- "syn 1.0.109",
+ "syn 2.0.52",
  "url",
-]
-
-[[package]]
-name = "juniper_graphql_transport_ws"
-version = "0.4.0-dev"
-source = "git+https://github.com/graphql-rust/juniper?rev=984973658217f73d63608283d18723e11ce65161#984973658217f73d63608283d18723e11ce65161"
-dependencies = [
- "juniper",
- "juniper_graphql_ws",
- "juniper_subscriptions",
- "serde",
- "tokio",
 ]
 
 [[package]]
 name = "juniper_graphql_ws"
 version = "0.4.0-dev"
-source = "git+https://github.com/graphql-rust/juniper?rev=984973658217f73d63608283d18723e11ce65161#984973658217f73d63608283d18723e11ce65161"
+source = "git+https://github.com/graphql-rust/juniper?rev=ac6e60987f5c20ed2c0046fe08245215231f56b7#ac6e60987f5c20ed2c0046fe08245215231f56b7"
 dependencies = [
  "juniper",
  "juniper_subscriptions",
@@ -1364,7 +1292,7 @@ dependencies = [
 [[package]]
 name = "juniper_subscriptions"
 version = "0.17.0-dev"
-source = "git+https://github.com/graphql-rust/juniper?rev=984973658217f73d63608283d18723e11ce65161#984973658217f73d63608283d18723e11ce65161"
+source = "git+https://github.com/graphql-rust/juniper?rev=ac6e60987f5c20ed2c0046fe08245215231f56b7#ac6e60987f5c20ed2c0046fe08245215231f56b7"
 dependencies = [
  "futures",
  "juniper",
@@ -1765,30 +1693,6 @@ name = "ppv-lite86"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5b40af805b3121feab8a3c29f04d8ad262fa8e0561883e7653e024ae4479e6de"
-
-[[package]]
-name = "proc-macro-error"
-version = "1.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da25490ff9892aab3fcf7c36f08cfb902dd3e71ca0f9f9517bea02a73a5ce38c"
-dependencies = [
- "proc-macro-error-attr",
- "proc-macro2",
- "quote",
- "syn 1.0.109",
- "version_check",
-]
-
-[[package]]
-name = "proc-macro-error-attr"
-version = "1.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1be40180e52ecc98ad80b184934baf3d0d29f979574e439af5a55274b35f869"
-dependencies = [
- "proc-macro2",
- "quote",
- "version_check",
-]
 
 [[package]]
 name = "proc-macro2"
