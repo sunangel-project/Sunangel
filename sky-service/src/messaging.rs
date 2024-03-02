@@ -28,8 +28,7 @@ const ERR_STREAM: &str = "ERRORS";
 pub async fn setup_nats() -> (Context, Store) {
     info!("Setting up NATS");
 
-    let client = messages_common::connect_nats().await;
-    let jetstream = messages_common::connect_jetstream(client);
+    let jetstream = messages_common::connect_jetstream().await;
 
     messages_common::create_stream(&jetstream, OUT_STREAM).await;
     messages_common::create_stream(&jetstream, ERR_STREAM).await;

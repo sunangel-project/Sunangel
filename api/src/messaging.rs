@@ -59,3 +59,8 @@ pub async fn get_messages_stream(
 
     Ok(Box::pin(subscriber))
 }
+
+pub async fn delete_consumer(request_id: &str) -> Result<bool, anyhow::Error> {
+    let jetstream = messages_common::connect_jetstream().await;
+    messages_common::try_delete_queue_consumer(&jetstream, IN_STREAM, request_id, GROUP).await
+}

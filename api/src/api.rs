@@ -2,7 +2,7 @@ use async_stream::stream;
 
 use futures::StreamExt;
 use futures_util::Stream;
-use log::{error, info};
+use log::{debug, error, info, warn};
 use messages_common::MessageStream;
 use std::collections::HashSet;
 use std::{pin::Pin, str};
@@ -31,8 +31,7 @@ impl juniper::Context for Context {}
 
 impl Context {
     pub async fn new() -> Self {
-        let client = messages_common::connect_nats().await;
-        let jetstream = messages_common::connect_jetstream(client);
+        let jetstream = messages_common::connect_jetstream().await;
 
         messaging::create_streams(&jetstream).await;
 
@@ -81,7 +80,7 @@ impl Subscription {
         if context.fake {
             fake_result_stream(query)
         } else {
-            real_result_stream(context, query).await
+            result_stream(context, query).await
         }
     }
 }
@@ -111,7 +110,7 @@ fn fake_result_stream(query: APISearchQuery) -> SpotStreamPin {
     })
 }
 
-async fn real_result_stream(context: &Context, search_query: APISearchQuery) -> SpotStreamPin {
+async fn result_stream(context: &Context, search_query: APISearchQuery) -> SpotStreamPin {
     let request_id = Uuid::new_v4().to_string();
 
     let search_query = SearchQuery::from(search_query);
@@ -151,11 +150,14 @@ async fn connect_to_response_messages(context: &Context, request_id: String) -> 
 
     match messages {
         Err(error_stream) => error_stream,
-        Ok(messages) => translate_response_messages(messages).await,
+        Ok(messages) => translate_response_messages(messages, request_id).await,
     }
 }
 
-async fn translate_response_messages(mut messages: MessageStream) -> SpotStreamPin {
+async fn translate_response_messages(
+    mut messages: MessageStream,
+    request_id: String,
+) -> SpotStreamPin {
     Box::pin(stream! {
         let mut received_ids = HashSet::<u32>::new();
         while let Some(message) = messages.next().await {
@@ -174,6 +176,13 @@ async fn translate_response_messages(mut messages: MessageStream) -> SpotStreamP
                     }
                 }
             }
+        }
+
+        let result = messaging::delete_consumer(&request_id).await;
+        match result {
+            Err(error) => warn!("Error occured while deleting consumer: {}", error),
+            Ok(false) => warn!("Could not delete consumer for request {}", request_id),
+            _ => (),
         }
     })
 }

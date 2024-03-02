@@ -11,7 +11,8 @@ pub async fn connect_nats() -> async_nats::Client {
         .expect("Could not connect to NATS")
 }
 
-pub fn connect_jetstream(client: async_nats::Client) -> Context {
+pub async fn connect_jetstream() -> Context {
+    let client = connect_nats().await;
     async_nats::jetstream::new(client)
 }
 
@@ -71,12 +72,16 @@ async fn try_subscribe(
     Ok(Box::pin(messages))
 }
 
+// Pub-Sub
+
 pub async fn try_pub_sub_subscribe(
     jetstream: &Context,
     stream: &str,
 ) -> Result<MessageStream, Box<dyn Error + Send + Sync>> {
     try_subscribe(jetstream, stream, None, None).await
 }
+
+// Queues
 
 pub async fn try_queue_subscribe(
     jetstream: &Context,
@@ -96,7 +101,7 @@ pub async fn try_queue_subscribe_subject(
         jetstream,
         stream,
         Some(subject),
-        Some(&format!("{}-{}", group, subject)),
+        Some(&consumer_name(subject, group)),
     )
     .await
 }
@@ -106,6 +111,26 @@ pub async fn queue_subscribe(jetstream: &Context, stream: &str, group: &str) -> 
         .await
         .expect("Could not connect to stream")
 }
+
+pub async fn try_delete_queue_consumer(
+    jetstream: &Context,
+    stream: &str,
+    subject: &str,
+    group: &str,
+) -> Result<bool, anyhow::Error> {
+    let stream = jetstream.get_stream(stream).await?;
+    let status = stream
+        .delete_consumer(consumer_name(subject, group).as_str())
+        .await?;
+
+    Ok(status.success)
+}
+
+fn consumer_name(subject: &str, group: &str) -> String {
+    format!("{}-{}", group, subject)
+}
+
+// Key-Value
 
 pub async fn connect_kv_store(jetstream: &Context, name: &str) -> Store {
     let created = jetstream.get_key_value(name).await;
