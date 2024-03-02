@@ -2,7 +2,7 @@ use async_stream::stream;
 
 use futures::StreamExt;
 use futures_util::Stream;
-use log::{debug, error, info, warn};
+use log::{error, info, warn};
 use messages_common::MessageStream;
 use std::collections::HashSet;
 use std::{pin::Pin, str};
