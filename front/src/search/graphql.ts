@@ -20,7 +20,7 @@ export function setupGraphQLClient(): void {
     let protocol = "ws";
     let httpProtocol = "http";
     let apiHost = "localhost";
-    apiHost = "192.168.2.123";
+    //apiHost = "192.168.2.123";
     if (process.env.NODE_ENV == "production") {
         protocol = "wss"
         httpProtocol = "https"
@@ -55,10 +55,15 @@ export function setupGraphQLClient(): void {
         exchanges: [
             mapExchange({
                 onError: (error) => {
-                    // TODO: Check whether network error
-                    console.log(error);
-                    connection.connected = false;
-                    displayConnectionError();
+                    if (error.networkError) {
+                        console.log(error.networkError)
+                        // TODO: display error to user
+                        connection.connected = false;
+                        displayConnectionError();
+                    } else {
+                        console.log(error);
+                        // TODO: display error to user
+                    }
                 },
             }),
             cacheExchange,
