@@ -20,7 +20,7 @@ import { inputs, connection, spots } from "../state"
 
         <button v-if="!connection.connected" class="bg-red-700 search-button-shape">No Connection</button>
         <button v-else-if="spots.loading" class="bg-blue-700 search-button-shape">Loading...</button>
-        <button v-else class="bg-green-700 search-button-shape" @click="search">Search</button>
+        <button v-else class="bg-green-700 search-button-shape" @click="search">Search Benches</button>
     </div>
 </template>
 

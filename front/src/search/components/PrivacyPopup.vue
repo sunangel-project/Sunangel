@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { VueFinalModal } from 'vue-final-modal'
+
+defineEmits(['confirm'])
 </script>
 
 <template>

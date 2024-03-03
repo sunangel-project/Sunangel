@@ -35,7 +35,7 @@ if (showPrivacyPopup) {
     const { open, close } = useModal({
         component: PrivacyPopup,
         attrs: {
-            onConfirm() { // TODO fix
+            onConfirm() {
                 dontShowPrivacyPopupAgain();
                 close();
             },
