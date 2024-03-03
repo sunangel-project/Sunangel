@@ -6,9 +6,6 @@
         <div class="flex flex-col">
             <SearchInput />
             <SpotList class="grow overflow-auto" />
-            <div class="flex flex-row place-content-evenly text-neutral-400 text-sm">
-                <RouterLink to="/privacy">Privacy</RouterLink>
-            </div>
             <VersionInfo />
         </div>
     </div>
@@ -18,7 +15,6 @@
 
 <script setup lang="ts">
 import { ModalsContainer, useModal } from 'vue-final-modal'
-import { RouterLink } from 'vue-router'
 
 import SearchInput from './components/SearchInput.vue'
 import SpotList from './components/Results/SpotList.vue'
