@@ -305,7 +305,7 @@ checksum = "5ad32ce52e4161730f7098c077cd2ed6229b5804ccf99e5366be1ab72a98b4e1"
 
 [[package]]
 name = "api"
-version = "0.1.1"
+version = "0.1.0"
 dependencies = [
  "actix-cors",
  "actix-web",
@@ -1363,7 +1363,7 @@ checksum = "523dc4f511e55ab87b694dc30d0f820d60906ef06413f93d4d7a1385599cc149"
 
 [[package]]
 name = "messages-common"
-version = "0.1.2"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-nats",
@@ -2121,7 +2121,7 @@ checksum = "38b58827f4464d87d377d175e90bf58eb00fd8716ff0a62f80356b5e61555d0d"
 
 [[package]]
 name = "sky-service"
-version = "0.1.1"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-nats",
@@ -2198,7 +2198,7 @@ dependencies = [
 
 [[package]]
 name = "spot-finder"
-version = "0.1.1"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-nats",
