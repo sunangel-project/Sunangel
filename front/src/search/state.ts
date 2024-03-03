@@ -1,7 +1,7 @@
 import { computed, reactive, watch } from "vue";
 
 import type { UseSubscriptionResponse } from "@urql/vue";
-import { project } from "./projection";
+import { project, invertProject } from "./projection";
 
 export interface HorizonEvent {
     altitude: number;
@@ -63,12 +63,14 @@ interface Inputs {
     lat: number;
     lon: number;
     radius: number;
+    followView: boolean;
 }
 
 const defaultInputs: Inputs = {
     lat: 48.81872,
     lon: 9.58781,
     radius: 2000,
+    followView: false,
 };
 export const inputs: Inputs = reactive(
     loadObjectFromLocal("search.inputs", defaultInputs),
@@ -108,6 +110,12 @@ export const mapState: MapState = reactive(
 
 let mapStateToStore = defaultMapState;
 export function centerChanged(center: number[]) {
+    if (inputs.followView) {
+        const centerCoordinates = invertProject(center);
+        inputs.lat = centerCoordinates.lat;
+        inputs.lon = centerCoordinates.lon;
+    }
+
     mapStateToStore.center = center;
 }
 export function zoomChanged(zoom: number) {
