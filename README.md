@@ -2,7 +2,7 @@
 
 ![Version](https://img.shields.io/badge/Version-v0.1.6--beta.1-blue)
 ![API Version](https://img.shields.io/badge/API-v0.1.1-blue)
-[![Build and Test](https://github.com/sunangel-project/Sunangel/actions/workflows/test.yml/badge.svg?branch=latest)](https://github.com/sunangel-project/Sunangel/actions/workflows/test.yml)
+[![Build and Test](https://github.com/sunangel-project/Sunangel/actions/workflows/test.yml/badge.svg)](https://github.com/sunangel-project/Sunangel/actions/workflows/test.yml)
 [![Website](https://img.shields.io/badge/Website-limegreen)](https://sunn.cloudsftp.de)
 
 ## Execution
