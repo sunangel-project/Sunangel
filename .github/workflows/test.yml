@@ -1,11 +1,6 @@
 name: Build and Test
 
-on:
-  push:
-    branches:
-      - latest
-      - develop
-      - feature/automate_clippy
+on: push
 
 jobs:
   build_and_test:
