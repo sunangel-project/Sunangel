@@ -6,14 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-# TODO: replace with released versions as soon a possible
-juniper = { git = "https://github.com/graphql-rust/juniper", rev = "ac6e60987f5c20ed2c0046fe08245215231f56b7", features = ["chrono", "chrono-tz"] }
-juniper_graphql_ws = { git = "https://github.com/graphql-rust/juniper", rev = "ac6e60987f5c20ed2c0046fe08245215231f56b7" }
-juniper_actix = { git = "https://github.com/graphql-rust/juniper", rev = "ac6e60987f5c20ed2c0046fe08245215231f56b7", features = ["subscriptions"] }
-#juniper = { version = "0.16.0", features = ["chrono"] }
-#juniper_graphql_ws = "0.4.0"
-#juniper_actix = { version = "0.5.0", features = ["subscriptions"] }
-
+juniper = { version = "0.16.0", features = ["chrono", "chrono-tz"] }
+juniper_graphql_ws = "0.4.0"
+juniper_actix = { version = "0.5.0", features = ["subscriptions"] }
 actix-web = { version = "4.5.1", features = ["openssl"] }
 actix-cors = "0.6.5"
 chrono = { version = "0.4.34", features = ["serde"] }
