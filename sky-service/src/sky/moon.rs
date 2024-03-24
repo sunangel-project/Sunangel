@@ -54,7 +54,7 @@ const PERT_R_1: f64 = 0.46 * PI / 180.;
 pub struct Moon;
 impl SkyObject for Moon {
     fn period(&self) -> Duration {
-        Duration::hours(26)
+        Duration::try_hours(26).expect("constant value")
     }
 
     // source: http://www.stjarnhimlen.se/comp/tutorial.html#7

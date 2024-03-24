@@ -17,7 +17,7 @@ const SKEW_OF_ECLIPTIC_C1: f64 = 0.4e-6 * PI / 180.;
 pub struct Sun;
 impl SkyObject for Sun {
     fn period(&self) -> Duration {
-        Duration::days(1)
+        Duration::try_days(1).expect("constant value")
     }
 
     // source: https://de.wikipedia.org/wiki/Sonnenstand

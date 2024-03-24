@@ -1,5 +1,3 @@
-
-
 use chrono::{DateTime, Duration, NaiveDateTime, Utc};
 use log::warn;
 use serde::{Deserialize, Serialize};
@@ -142,7 +140,11 @@ where
         let SkyPosition { altitude, azimuth } = object.position(&middle, location);
         let target_altitude = horizon.altitude_at(azimuth);
 
-        if (left - right).num_milliseconds().abs() < Duration::seconds(1).num_milliseconds() {
+        if (left - right).num_milliseconds().abs()
+            < Duration::try_seconds(1)
+                .expect("constant value")
+                .num_milliseconds()
+        {
             warn!("Below 1s interval: {middle},");
             warn!("{altitude}, target: {target_altitude}");
             return HorizonEvent {
@@ -198,7 +200,7 @@ mod test {
 
     impl SkyObject for TestSkyObject {
         fn period(&self) -> Duration {
-            Duration::days(1)
+            Duration::try_days(1).expect("constant value")
         }
 
         fn position(
