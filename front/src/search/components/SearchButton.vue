@@ -1,0 +1,25 @@
+<script lang="ts" setup>
+import { search } from "../searching";
+import { connection, spots } from "../state";
+</script>
+
+<template>
+  <div class="flex flex-col gap-1 m-2 md:m-3">
+    <button v-if="!connection.connected" class="bg-red-700 search-button-shape">
+      No Connection
+    </button>
+    <button v-else-if="spots.loading" class="bg-blue-700 search-button-shape">
+      Loading...
+    </button>
+    <button v-else class="bg-green-700 search-button-shape" @click="search">
+      Search Benches
+    </button>
+  </div>
+</template>
+
+
+<style>
+.search-button-shape {
+  @apply py-2 my-2 mx-1 font-semibold rounded-lg shadow-md;
+}
+</style>

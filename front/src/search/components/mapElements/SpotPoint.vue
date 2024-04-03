@@ -28,7 +28,7 @@ const props = defineProps({
 const featureProperties = {
     'spot': props.spot,
 };
-const coordinates = ref(project(props.spot.location.lat, props.spot.location.lon));
+const coordinates = ref(project(props.spot.location));
 
 const fillColor = ref('green');
 let index = -1;

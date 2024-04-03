@@ -1,7 +1,8 @@
-import { computed, reactive, watch } from "vue";
+import { reactive, watch } from "vue";
 
 import type { UseSubscriptionResponse } from "@urql/vue";
-import { project, invertProject } from "./projection";
+import { project, invertProject, type Coordinates } from "./projection";
+import type { ObjectEvent } from "ol/Object";
 
 export interface HorizonEvent {
     altitude: number;
@@ -16,10 +17,7 @@ export interface HorizonEventCollection {
 
 export interface Result {
     kind: string;
-    location: {
-        lat: number;
-        lon: number;
-    };
+    location: Coordinates;
     events: {
         sun?: HorizonEventCollection;
         moon?: HorizonEventCollection;
@@ -35,7 +33,7 @@ interface SpotsState {
     loading: boolean;
     spots: Spot[];
     subscription: UseSubscriptionResponse | undefined;
-    nextSelectedId: number,
+    nextSelectedId: number;
 }
 
 export const spots: SpotsState = reactive({
@@ -48,50 +46,32 @@ export const spots: SpotsState = reactive({
 // Connection state
 
 export interface Connection {
-    connected: boolean,
-    apiVersion?: string,
-    backendVersion?: string,
+    connected: boolean;
+    apiVersion?: string;
+    backendVersion?: string;
 }
 
 export const connection: Connection = reactive({
     connected: false,
 });
 
-// Search input state
+// Interface state
 
-interface Inputs {
-    lat: number;
-    lon: number;
-    radius: number;
+interface InterfaceControls {
     followView: boolean;
 }
 
-const defaultInputs: Inputs = {
-    lat: 48.81872,
-    lon: 9.58781,
-    radius: 2000,
+const defaultInterfaceControls: InterfaceControls = {
     followView: false,
 };
-export const inputs: Inputs = reactive(
-    loadObjectFromLocal("search.inputs", defaultInputs),
+
+export const interfaceControls: InterfaceControls = reactive(
+    loadObjectFromLocal("interface.controls", defaultInterfaceControls),
 );
-export const searchCenter = computed(() => project(inputs.lat, inputs.lon));
 
-watch(inputs, (inputs) => {
-    storeObjectLocal("search.inputs", inputs);
+watch(interfaceControls, (interfaceControls) => {
+    storeObjectLocal("interface.controls", interfaceControls);
 });
-
-// Additional state for the query
-
-export interface Time {
-    time: string,
-    timezone: string,
-}
-
-export const time: Time = reactive({
-    time: (new Date()).toISOString(),
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-})
 
 // Map state
 
@@ -100,8 +80,10 @@ interface MapState {
     zoom: number;
 }
 
+const defaultCenterCoordinates = { lat: 48.818, lon: 9.587 };
+const defaultCenter = project(defaultCenterCoordinates);
 const defaultMapState: MapState = {
-    center: project(defaultInputs.lat, defaultInputs.lon),
+    center: defaultCenter,
     zoom: 14,
 };
 export const mapState: MapState = reactive(
@@ -109,31 +91,52 @@ export const mapState: MapState = reactive(
 );
 
 let mapStateToStore = defaultMapState;
-export function centerChanged(center: number[]) {
-    if (inputs.followView) {
-        const centerCoordinates = invertProject(center);
-        inputs.lat = centerCoordinates.lat;
-        inputs.lon = centerCoordinates.lon;
-    }
-
+export function centerChanged(event: ObjectEvent) {
+    const center = event.target.getCenter();
     mapStateToStore.center = center;
+
+    const extent: number[] = event.target.getViewStateAndExtent().extent;
+    searchArea.lowerLeft = invertProject(extent.slice(0, 2));
+    searchArea.upperRight = invertProject(extent.slice(2, 4));
 }
-export function zoomChanged(zoom: number) {
-    mapStateToStore.zoom = zoom;
+export function zoomChanged(event: ObjectEvent) {
+    mapStateToStore.zoom = event.target.getZoom();
 }
 export function storeMapState() {
     storeObjectLocal("map.state", mapStateToStore);
 }
 
+// Additional state for the query
+
+export interface SearchArea {
+    lowerLeft: Coordinates;
+    upperRight: Coordinates;
+}
+
+export const searchArea = reactive({
+    lowerLeft: defaultCenterCoordinates,
+    upperRight: defaultCenterCoordinates,
+})
+
+export interface Time {
+    time: string;
+    timezone: string;
+}
+
+export const time: Time = reactive({
+    time: new Date().toISOString(),
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+});
+
 // Privacy popup state
 
 const defaultShowPrivacyPopup = true;
 export const showPrivacyPopup = loadBoolFromLocal(
-    'popup.privacy.show',
+    "popup.privacy.show",
     defaultShowPrivacyPopup,
 );
 export function dontShowPrivacyPopupAgain() {
-    storeBoolLocal('popup.privacy.show', false);
+    storeBoolLocal("popup.privacy.show", false);
 }
 
 // Utils

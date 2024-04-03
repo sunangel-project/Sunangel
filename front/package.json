@@ -20,7 +20,7 @@
         "vue": "^3.3.2",
         "vue-final-modal": "^4.4.5",
         "vue-router": "^4.2.5",
-        "vue3-openlayers": "^2.0.0"
+        "vue3-openlayers": "^6.0.0"
     },
     "devDependencies": {
         "@tsconfig/node18": "^2.0.1",
