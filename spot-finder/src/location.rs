@@ -40,8 +40,8 @@ impl Location {
     }
 
     pub fn center(a: &Self, b: &Self) -> Self {
-        let a: geoutils::Location = a.clone().into();
-        let b: geoutils::Location = b.clone().into();
+        let a: geoutils::Location = (*a).into();
+        let b: geoutils::Location = (*b).into();
 
         geoutils::Location::center(&[&a, &b]).into()
     }
