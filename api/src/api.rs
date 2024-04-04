@@ -89,10 +89,13 @@ impl Subscription {
 }
 
 fn fake_result_stream(query: APISearchQuery) -> SpotStreamPin {
-    let lat = query.location.lat;
-    let lon = query.location.lon;
-    let events = HorizonEventsCollection::fake();
+    let avg = |a, b | (a + b) / 2.;
+    let lat = avg(query.lower_left.lat, query.upper_right.lat);
+    let lon = avg(query.lower_left.lon, query.upper_right.lon);
     let dist = 0.001;
+
+    let events = HorizonEventsCollection::fake();
+
     Box::pin(stream! {
         for i in 0..4 {
             let lat = lat + if i > 1 { dist } else { -dist };

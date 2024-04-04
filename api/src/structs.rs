@@ -144,8 +144,8 @@ pub struct LocationIn {
 pub struct APISearchQuery {
     pub time: DateTime<Utc>,
     pub timezone: Tz,
-    pub location: LocationIn,
-    pub radius: i32,
+    pub lower_left: LocationIn,
+    pub upper_right: LocationIn,
 }
 
 ////////////
@@ -158,8 +158,8 @@ pub struct APISearchQuery {
 pub struct SearchQuery {
     time: DateTime<Utc>,
     timezone: Tz,
-    loc: Location,
-    rad: i32,
+    lower_left: Location,
+    upper_right: Location,
 }
 
 impl From<APISearchQuery> for SearchQuery {
@@ -167,8 +167,8 @@ impl From<APISearchQuery> for SearchQuery {
         SearchQuery {
             time: value.time,
             timezone: value.timezone,
-            loc: value.location.into(),
-            rad: value.radius,
+            lower_left: value.lower_left.into(),
+            upper_right: value.upper_right.into(),
         }
     }
 }

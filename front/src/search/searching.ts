@@ -1,6 +1,6 @@
 import { gql, useSubscription } from "@urql/vue";
 import { v4 as uuidv4 } from "uuid";
-import { time, spots, type Spot, type Result } from "./state";
+import { time, spots, type Spot, type Result, searchArea } from "./state";
 import { toRefs } from "vue";
 
 export function search() {
@@ -29,8 +29,14 @@ set {
 }
 `;
   let query = gql`
-subscription spot($time: DateTime!, $timezone: TimeZone!) {
-  spots(query: { time: $time, timezone: $timezone }) {
+subscription spot(
+  $time: DateTime!, $timezone: TimeZone!,
+  $lowerLeft: LocationIn!, $upperRight: LocationIn!,
+) {
+  spots(query: {
+    time: $time, timezone: $timezone,
+    lowerLeft: $lowerLeft, upperRight: $upperRight,
+  }) {
     status
     spot {
       location {
@@ -55,6 +61,7 @@ subscription spot($time: DateTime!, $timezone: TimeZone!) {
     {
       query: query,
       variables: {
+        ...toRefs(searchArea),
         ...toRefs(time),
       },
       pause: true,
