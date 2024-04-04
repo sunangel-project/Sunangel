@@ -934,6 +934,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "geoutils"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "36d244a08113319b5ebcabad2b8b7925732d15eec46d7e7ac3c11734f3b7a6ad"
+
+[[package]]
 name = "getrandom"
 version = "0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2111,6 +2117,7 @@ dependencies = [
  "bytes",
  "env_logger",
  "futures-util",
+ "geoutils",
  "log",
  "messages-common",
  "osm-xml",

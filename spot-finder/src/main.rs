@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 
 use serde_json::{json, Value};
 use spot_finder::location::Location;
-use spot_finder::{find_spots, Spot};
+use spot_finder::{find_spots, search_area_short_enough, Spot};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct InMessage {
@@ -116,12 +116,24 @@ async fn handle_message(jetstream: &Context, message: &Message) -> Result<(), as
     Ok(())
 }
 
-async fn handle_payload(payload: &str) -> Result<Vec<Spot>, async_nats::Error> {
+const UPPER_SEARCH_AREA_DIAGONAL_LIMIT: u32 = 5_000;
+async fn handle_payload(payload: &str) -> Result<Vec<Spot>, anyhow::Error> {
     let in_message: InMessage = serde_json::from_str(payload)?;
     let query = in_message.search_query;
 
-    info!("Extraxted query {:?}, running spot finder", query);
-    find_spots(query.lower_left, query.upper_right).await
+    info!("Extraxted query {:?}", query);
+    if search_area_short_enough(
+        query.lower_left,
+        query.upper_right,
+        UPPER_SEARCH_AREA_DIAGONAL_LIMIT,
+    ) {
+        find_spots(query.lower_left, query.upper_right).await
+    } else {
+        Err(anyhow!(
+            "search area too big, diagonal was larger than {} meters",
+            UPPER_SEARCH_AREA_DIAGONAL_LIMIT
+        ))
+    }
 }
 
 fn build_output_payload(

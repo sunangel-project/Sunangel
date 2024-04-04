@@ -18,3 +18,4 @@ tokio = { version = "1.36.0", features = ["rt-multi-thread"] }
 messages-common = { path = "../messages-common" }
 log = "0.4.21"
 env_logger = "0.10.2"
+geoutils = "0.5.1"
