@@ -86,11 +86,31 @@ async fn run() {
         .await;
 }
 
+const UPPER_SEARCH_AREA_DIAGONAL_LIMIT: u32 = 10_000;
+
 // Event Loop
 async fn handle_message(jetstream: &Context, message: &Message) -> Result<(), async_nats::Error> {
     let payload = str::from_utf8(&message.payload)?;
 
-    let spots = handle_payload(payload).await?;
+    let in_message: InMessage = serde_json::from_str(payload)?;
+    let query = in_message.search_query;
+    info!("Extraxted query {:?}", query);
+
+    let spots = if search_area_short_enough(
+        query.lower_left,
+        query.upper_right,
+        UPPER_SEARCH_AREA_DIAGONAL_LIMIT,
+    ) {
+        find_spots(query.lower_left, query.upper_right).await
+    } else {
+        _ = message.ack().await; // Ignore result, next error is more important
+
+        Err(anyhow!(
+            "search area too big, diagonal was larger than {} meters",
+            UPPER_SEARCH_AREA_DIAGONAL_LIMIT
+        ))
+    }?;
+
     let total_num = spots.len();
 
     if total_num == 0 {
@@ -114,26 +134,6 @@ async fn handle_message(jetstream: &Context, message: &Message) -> Result<(), as
     message.ack().await.unwrap();
 
     Ok(())
-}
-
-const UPPER_SEARCH_AREA_DIAGONAL_LIMIT: u32 = 5_000;
-async fn handle_payload(payload: &str) -> Result<Vec<Spot>, anyhow::Error> {
-    let in_message: InMessage = serde_json::from_str(payload)?;
-    let query = in_message.search_query;
-
-    info!("Extraxted query {:?}", query);
-    if search_area_short_enough(
-        query.lower_left,
-        query.upper_right,
-        UPPER_SEARCH_AREA_DIAGONAL_LIMIT,
-    ) {
-        find_spots(query.lower_left, query.upper_right).await
-    } else {
-        Err(anyhow!(
-            "search area too big, diagonal was larger than {} meters",
-            UPPER_SEARCH_AREA_DIAGONAL_LIMIT
-        ))
-    }
 }
 
 fn build_output_payload(
