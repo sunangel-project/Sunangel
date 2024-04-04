@@ -7,9 +7,9 @@ pub struct Location {
     pub lon: f64,
 }
 
-impl Into<geoutils::Location> for Location {
-    fn into(self) -> geoutils::Location {
-        geoutils::Location::new(self.lat, self.lon)
+impl From<Location> for geoutils::Location {
+    fn from(value: Location) -> Self {
+        Self::new(value.lat, value.lon)
     }
 }
 
