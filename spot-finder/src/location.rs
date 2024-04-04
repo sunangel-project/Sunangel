@@ -13,6 +13,15 @@ impl From<Location> for geoutils::Location {
     }
 }
 
+impl From<geoutils::Location> for Location {
+    fn from(value: geoutils::Location) -> Self {
+        Self {
+            lat: value.latitude(),
+            lon: value.longitude(),
+        }
+    }
+}
+
 impl From<&Node> for Location {
     fn from(value: &Node) -> Self {
         Location {
@@ -28,5 +37,12 @@ impl Location {
         let diff_lon = other.lon - self.lon;
 
         diff_lat.powi(2) + diff_lon.powi(2)
+    }
+
+    pub fn center(a: &Self, b: &Self) -> Self {
+        let a: geoutils::Location = a.clone().into();
+        let b: geoutils::Location = b.clone().into();
+
+        geoutils::Location::center(&[&a, &b]).into()
     }
 }

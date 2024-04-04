@@ -87,7 +87,7 @@ pub async fn find_spots(
     let osm_data = get_osm_data(lower_left, upper_right).await?;
     let osm = OSM::parse(Cursor::new(osm_data))?;
 
-    let spots = osm
+    let mut spots: Vec<Spot> = osm
         .nodes
         .values()
         .filter(is_bench)
@@ -97,6 +97,14 @@ pub async fn find_spots(
             dir: direction_of_node(node),
         })
         .collect();
+
+    let center = Location::center(&lower_left, &upper_right);
+    // f64 does not implement Ord :( sort_by_key not possible
+    spots.sort_by(|a, b| {
+        a.loc
+            .fast_dist2(&center)
+            .total_cmp(&b.loc.fast_dist2(&center))
+    });
 
     Ok(spots)
 }
