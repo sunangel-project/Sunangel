@@ -24,8 +24,8 @@ struct InMessage {
 
 #[derive(Debug, Serialize, Deserialize)]
 struct SearchQuery {
-    loc: Location,
-    rad: u32,
+    lower_left: Location,
+    upper_right: Location,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -121,7 +121,7 @@ async fn handle_payload(payload: &str) -> Result<Vec<Spot>, async_nats::Error> {
     let query = in_message.search_query;
 
     info!("Extraxted query {:?}, running spot finder", query);
-    find_spots(&query.loc, query.rad).await
+    find_spots(query.lower_left, query.upper_right).await
 }
 
 fn build_output_payload(

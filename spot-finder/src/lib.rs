@@ -11,15 +11,19 @@ use serde::{Deserialize, Serialize};
 
 const OVERPASS_URL: &str = "https://overpass-api.de/api/interpreter";
 
-async fn get_osm_data(loc: &Location, rad: u32) -> Result<String, anyhow::Error> {
+async fn get_osm_data(
+    lower_left: Location,
+    upper_right: Location,
+) -> Result<String, anyhow::Error> {
     let body = format!(
-        "nwr(around:{},{},{})->.all;
+        "nwr({},{},{},{})->.all;
         (
             node.all[amenity=bench];
             node.all[bench=yes];
         );
         out meta;",
-        rad, loc.lat, loc.lon,
+        lower_left.lat, lower_left.lon,
+        upper_right.lat, upper_right.lon,
     );
 
     let client = reqwest::Client::new();
@@ -65,8 +69,11 @@ fn direction_of_node(node: &Node) -> Option<f64> {
         .and_then(Result::ok)
 }
 
-pub async fn find_spots(loc: &Location, rad: u32) -> Result<Vec<Spot>, async_nats::Error> {
-    let osm_data = get_osm_data(loc, rad).await?;
+pub async fn find_spots(
+    lower_left: Location,
+    upper_right: Location,
+) -> Result<Vec<Spot>, async_nats::Error> {
+    let osm_data = get_osm_data(lower_left, upper_right).await?;
     let osm = OSM::parse(Cursor::new(osm_data))?;
 
     let spots = osm
