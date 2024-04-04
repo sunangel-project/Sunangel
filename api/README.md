@@ -1,6 +1,4 @@
-# API ![version](https://img.shields.io/badge/v0.0.0-blue.svg)
-
-TODO: replace `juniper` with crates when new version of `juniper_actix` is released.
+# API
 
 ## Testing Queries
 
@@ -20,7 +18,12 @@ Do a `POST` request with the query as data to http://localhost:6660/graphql.
 
 ```
 subscription spots {
-  spots(query: { time: "2023-10-15T12:53:56Z", timezone: "Europe/Berlin", location: { lat: 48.81909, lon: 9.59523 }, radius: 2000 }) {
+  spots(query: {
+    time: "2023-10-15T12:53:56Z",
+    timezone: "Europe/Berlin",
+    lowerLeft: { lat: 48.81909, lon: 9.59523 },
+    upperRight: { lat: 48.90207, lon: 9.69243 },
+  }) {
     status
     spot {
       location {
@@ -90,37 +93,12 @@ The last spot will have `FINISHED` instead of `RUNNING` as `status`.
 
 ```
 subscription spots {
-  spots(query: { location: { lat: 48.81909, lon: 9.59523 }, radius: -1 }) {
-    status
-    spot {
-      location {
-        lat
-        lon
-      }
-      kind
-      events {
-        sun {
-          rise {
-            time
-            altitude
-            azimuth
-          }
-          set {
-            time
-            altitude
-            azimuth
-          }
-        }
-      }
-    }
-  }
-}
-```
-
-or simply
-```
-subscription spots {
-  spots(query: { location: { lat: 48.0, lon: 9.0 }, radius: -1 }) {
+  spots(query: {
+    time: "2023-10-15T12:53:56Z",
+    timezone: "Europe/Berlin",
+    lowerLeft: { lat: 0, lon: 0 },
+    upperRight: { lat: 1, lon: 1 },
+  }) {
     status
   }
 }
@@ -151,4 +129,6 @@ subscription spots {
 }
 ```
 
-Maybe display `message` in the UI.
+TODO: replace error message with actual error message
+
+TODO: Maybe display `message` in the UI.

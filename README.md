@@ -62,4 +62,7 @@ For details regarding the horizon group, check [horizon](horizon).
 
 Only API component has state.
 All other components can scale horizontally w/o restrictions.
-[Queues](https://en.wikipedia.org/wiki/Message_queue) used for communication for free load balancing ([competing consumer](https://learn.microsoft.com/en-us/azure/architecture/patterns/competing-consumers)).
+[Queues](https://aws.amazon.com/message-queue/) used for communication for free load balancing ([competing consumer](https://learn.microsoft.com/en-us/azure/architecture/patterns/competing-consumers)).
+
+API component can also scale horizontally since it does not follow the competing consumers pattern.
+Rather it follows the [pub-sub](https://aws.amazon.com/what-is/pub-sub-messaging/) pattern and each instance only consumes the messages it actually needs.
