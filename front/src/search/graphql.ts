@@ -1,20 +1,28 @@
 import { cacheExchange, fetchExchange, subscriptionExchange, Client, provideClient, gql, useQuery, mapExchange } from '@urql/vue';
 import { createClient as createWSClient, type SubscribePayload } from 'graphql-ws';
-import { connection } from './state';
+import { connection, spots } from './state';
 
 import { useModal } from 'vue-final-modal'
 import Popup from './components/Popup.vue'
 
-function displayConnectionError() {
+function displayError(message: string) {
     const { open } = useModal({
         component: Popup,
         attrs: {
             title: "Error",
-            message: "Couldn't connect to the backend... Please try again later.",
+            message,
         },
     });
     open();
+}
+
+function displayConnectionError() {
+    displayError("Couldn't connect to the backend... Please try again later");
 };
+
+function displayIntenalServerError() {
+    displayError("Internal Server Error");
+}
 
 export function setupGraphQLClient(): void {
     let protocol = "ws";
@@ -29,9 +37,6 @@ export function setupGraphQLClient(): void {
 
     const wsClient = createWSClient({
         url: `${protocol}://${apiHost}:6660/subscriptions`,
-        on: {
-            error: displayConnectionError,
-        },
     });
 
     const subExchange = subscriptionExchange({
@@ -56,13 +61,11 @@ export function setupGraphQLClient(): void {
             mapExchange({
                 onError: (error) => {
                     if (error.networkError) {
-                        console.log(error.networkError)
-                        // TODO: display error to user
                         connection.connected = false;
                         displayConnectionError();
                     } else {
-                        console.log(error);
-                        // TODO: display error to user
+                        spots.loading = false;
+                        displayIntenalServerError();
                     }
                 },
             }),

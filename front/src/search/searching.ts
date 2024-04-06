@@ -67,7 +67,7 @@ subscription spot(
       pause: true,
     },
     (_, result) => {
-      if (typeof result === "object") {
+      if (typeof result === "object" && result.spots != null) {
         // TODO: type safety!
         const spot = spotFromResult(result.spots.spot);
         spots.spots.push(spot);
@@ -76,7 +76,7 @@ subscription spot(
           spots.loading = false;
         }
       } else {
-        console.log("was not correct type");
+        console.log("response was of unexpected type: ", result);
       }
     },
   );
