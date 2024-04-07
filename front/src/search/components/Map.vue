@@ -2,7 +2,7 @@
   <ol-map @click="handleClick" @moveend="storeMapState" style="height: 100%" :loadTilesWhileAnimating="true"
     :loadTilesWhileInteracting="true">
     <ol-view ref="view" :center="mapState.center" @change:center="centerChanged" :zoom="mapState.zoom"
-      @change:zoom="zoomChanged" :projection="projection" />
+      @change:resolution="resolutionChanged" :projection="projection" />
 
     <ol-tile-layer>
       <ol-source-osm />
@@ -26,7 +26,7 @@ import SpotPoint from "./mapElements/SpotPoint.vue";
 import {
   mapState,
   centerChanged,
-  zoomChanged,
+  resolutionChanged,
   storeMapState,
   spots,
   type Spot,

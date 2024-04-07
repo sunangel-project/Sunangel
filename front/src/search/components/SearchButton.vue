@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { search } from "../searching";
-import { areaTooLarge, connection, spots } from "../state";
+import { interfaceState, connection, spots } from "../state";
 </script>
 
 <template>
@@ -11,7 +11,7 @@ import { areaTooLarge, connection, spots } from "../state";
     <button v-else-if="spots.loading" class="bg-blue-700 search-button-shape">
       Loading Spots...
     </button>
-    <button v-else-if="areaTooLarge" class="bg-red-700 search-button-shape">
+    <button v-else-if="interfaceState.areaTooLarge" class="bg-red-700 search-button-shape">
       Area Too Large - Please Zoom In
     </button>
     <button v-else class="bg-green-700 search-button-shape" @click="search">

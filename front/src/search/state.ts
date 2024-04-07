@@ -57,31 +57,6 @@ export const connection: Connection = reactive({
     connected: false,
 });
 
-// Interface state
-
-interface InterfaceControls {
-    followView: boolean;
-}
-
-const defaultInterfaceControls: InterfaceControls = {
-    followView: false,
-};
-
-export const interfaceControls: InterfaceControls = reactive(
-    loadObjectFromLocal("interface.controls", defaultInterfaceControls),
-);
-
-watch(interfaceControls, (interfaceControls) => {
-    storeObjectLocal("interface.controls", interfaceControls);
-});
-
-export const areaTooLarge = computed(() => {
-    const a = new LatLon(searchArea.lowerLeft.lat, searchArea.lowerLeft.lon);
-    const b = new LatLon(searchArea.upperRight.lat, searchArea.upperRight.lon);
-
-    return a.distanceTo(b) > 10_000;
-})
-
 // Map state
 
 interface MapState {
@@ -108,8 +83,10 @@ export function centerChanged(event: ObjectEvent) {
     searchArea.lowerLeft = invertProject(extent.slice(0, 2));
     searchArea.upperRight = invertProject(extent.slice(2, 4));
 }
-export function zoomChanged(event: ObjectEvent) {
+export function resolutionChanged(event: ObjectEvent) {
+    console.log(event.target.getZoom());
     mapStateToStore.zoom = event.target.getZoom();
+    interfaceState.areaTooLarge = areaIsTooLarge();
 }
 export function storeMapState() {
     storeObjectLocal("map.state", mapStateToStore);
@@ -136,6 +113,23 @@ export const time: Time = reactive({
     time: new Date().toISOString(),
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 });
+
+// Interface state
+
+interface InterfaceState {
+    areaTooLarge: boolean,
+}
+
+export const interfaceState: InterfaceState = reactive({
+    areaTooLarge: false,
+})
+
+function areaIsTooLarge(): boolean {
+    const a = new LatLon(searchArea.lowerLeft.lat, searchArea.lowerLeft.lon);
+    const b = new LatLon(searchArea.upperRight.lat, searchArea.upperRight.lon);
+
+    return a.distanceTo(b) > 10_000;
+}
 
 // Privacy popup state
 
