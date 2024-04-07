@@ -7,10 +7,8 @@ use std::str::{self, FromStr};
 
 use anyhow::anyhow;
 use async_nats::jetstream::{Context, Message};
-use bytes::Bytes;
-use futures_util::StreamExt;
-use log::{error, info};
-use messages_common::try_get_request_id;
+use log::info;
+use messages_common::handle_messages;
 use serde::{Deserialize, Serialize};
 
 use serde_json::{json, Value};
@@ -35,14 +33,6 @@ struct PartMessage {
     of: usize,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-struct ErrorMessage {
-    request_id: String,
-    sender: String,
-    reason: String,
-    input: String,
-}
-
 const IN_STREAM: &str = "SEARCH";
 const GROUP: &str = "spot-finder";
 
@@ -62,40 +52,21 @@ async fn run() {
 
     info!("Listening to NATS for messages in queue '{IN_STREAM}'");
 
-    messages
-        .for_each_concurrent(16, |message| async {
-            info!("Received message {:?}", message);
-
-            match message {
-                Ok(message) => {
-                    let res = handle_message(&jetstream, &message).await;
-                    if let Err(err) = res {
-                        error!("Could not handle received message: {err}");
-                        send_error_with_message(&jetstream, &message, err)
-                            .await
-                            .unwrap_or_else(|err| error!("Could not send error message: {err}"));
-                    }
-
-                    let res = message.ack().await;
-                    if let Err(err) = res {
-                        error!("Could not ack received message: {err}")
-                    }
-                }
-                Err(err) => {
-                    error!("Problem with received message: {err}");
-                    send_error_without_message(&jetstream, err.into())
-                        .await
-                        .unwrap_or_else(|err| error!("Could not send out error message: {err}"));
-                }
-            }
-        })
-        .await;
+    handle_messages(
+        &jetstream,
+        GROUP,
+        messages,
+        Box::new(move |jetstream, message| {
+            Box::pin(async move { handle_message(jetstream, message).await })
+        }),
+    )
+    .await;
 }
 
 const UPPER_SEARCH_AREA_DIAGONAL_LIMIT: u32 = 10_000;
 
 // Event Loop
-async fn handle_message(jetstream: &Context, message: &Message) -> Result<(), async_nats::Error> {
+async fn handle_message(jetstream: &Context, message: Message) -> Result<(), async_nats::Error> {
     let payload = str::from_utf8(&message.payload)?;
 
     let in_message: InMessage = serde_json::from_str(payload)?;
@@ -163,46 +134,4 @@ fn build_output_payload(
     );
 
     Ok(output)
-}
-
-async fn send_error_with_message(
-    jetstream: &Context,
-    message: &Message,
-    error: async_nats::Error,
-) -> Result<(), async_nats::Error> {
-    let request_id = try_get_request_id(&message.payload).unwrap_or("UNKNOWN".to_string());
-
-    let payload = json!(ErrorMessage {
-        request_id: request_id.clone(),
-        sender: GROUP.to_string(),
-        reason: error.to_string(),
-        input: format!("{message:?}"),
-    })
-    .to_string()
-    .into();
-
-    send_error(jetstream, format!("{ERR_STREAM}.{request_id}"), payload).await
-}
-
-async fn send_error_without_message(
-    jetstream: &Context,
-    error: async_nats::Error,
-) -> Result<(), async_nats::Error> {
-    send_error(
-        jetstream,
-        format!("{ERR_STREAM}.api"),
-        error.to_string().into(),
-    )
-    .await
-}
-
-async fn send_error(
-    jetstream: &Context,
-    queue: String,
-    payload: Bytes,
-) -> Result<(), async_nats::Error> {
-    let published = jetstream.publish(queue, payload).await?;
-    published.await?;
-
-    Ok(())
 }
