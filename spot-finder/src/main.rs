@@ -53,11 +53,12 @@ async fn run() {
     info!("Listening to NATS for messages in queue '{IN_STREAM}'");
 
     handle_messages(
-        &jetstream,
+        &(jetstream.clone()),
         GROUP,
         messages,
-        Box::new(move |jetstream, message| {
-            Box::pin(async move { handle_message(jetstream, message).await })
+        Box::new(move |message| {
+            let jetstream = jetstream.clone();
+            Box::pin(async move { handle_message(&jetstream, message).await })
         }),
     )
     .await;

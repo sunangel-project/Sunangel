@@ -14,9 +14,8 @@ use crate::{try_get_request_id, MessageStream};
 
 // TODO: replace with async closures as soon as they are stable
 // also why does it have to be FnMut...
-pub type HandleMessageFun<'a> = Box<
-    dyn FnMut(&'a Context, Message) -> Pin<Box<dyn Future<Output = Result<(), Error>> + 'a>> + 'a,
->;
+pub type HandleMessageFun<'a> =
+    Box<dyn FnMut(Message) -> Pin<Box<dyn Future<Output = Result<(), Error>> + 'a>> + 'a>;
 
 const ERR_STREAM: &str = "ERRORS";
 
@@ -32,7 +31,7 @@ pub async fn handle_messages<'a>(
 
         match message {
             Ok(message) => {
-                let res = handle_message(jetstream, message.clone()).await;
+                let res = handle_message(message.clone()).await;
                 if let Err(err) = res {
                     error!("Could not handle received message: {err}");
                     send_error_with_message(jetstream, group, &message, err)

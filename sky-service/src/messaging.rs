@@ -19,7 +19,7 @@ use crate::{
 
 const IN_STREAM: &str = "HORIZONS";
 const HORIZON_STORE: &str = "horizons";
-const GROUP: &str = "sun-service";
+pub const GROUP: &str = "sun-service";
 
 const OUT_STREAM: &str = "SUNSETS";
 const ERR_STREAM: &str = "ERRORS";
