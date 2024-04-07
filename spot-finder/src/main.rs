@@ -7,6 +7,7 @@ use std::str::{self, FromStr};
 
 use anyhow::anyhow;
 use async_nats::jetstream::{Context, Message};
+use bytes::Bytes;
 use futures_util::StreamExt;
 use log::{error, info};
 use messages_common::try_get_request_id;
@@ -70,14 +71,19 @@ async fn run() {
                     let res = handle_message(&jetstream, &message).await;
                     if let Err(err) = res {
                         error!("Could not handle received message: {err}");
-                        send_error_message(&jetstream, Some(message), err)
+                        send_error_with_message(&jetstream, &message, err)
                             .await
                             .unwrap_or_else(|err| error!("Could not send error message: {err}"));
+                    }
+
+                    let res = message.ack().await;
+                    if let Err(err) = res {
+                        error!("Could not ack received message: {err}")
                     }
                 }
                 Err(err) => {
                     error!("Problem with received message: {err}");
-                    send_error_message(&jetstream, None, err.into())
+                    send_error_without_message(&jetstream, err.into())
                         .await
                         .unwrap_or_else(|err| error!("Could not send out error message: {err}"));
                 }
@@ -103,7 +109,9 @@ async fn handle_message(jetstream: &Context, message: &Message) -> Result<(), as
     ) {
         find_spots(query.lower_left, query.upper_right).await
     } else {
-        _ = message.ack().await; // Ignore result, next error is more important
+        // _ = message.ack().await; // Ignore result, next error is more important
+        // moved ack to main fun
+        // TODO: work out concept for recoverable vs non-retryable errors (ack vs nack)
 
         Err(anyhow!(
             "search area too big, diagonal was larger than {} meters",
@@ -131,8 +139,6 @@ async fn handle_message(jetstream: &Context, message: &Message) -> Result<(), as
             .await?;
     }
 
-    message.ack().await.unwrap();
-
     Ok(())
 }
 
@@ -159,30 +165,44 @@ fn build_output_payload(
     Ok(output)
 }
 
-async fn send_error_message(
+async fn send_error_with_message(
     jetstream: &Context,
-    message: Option<Message>,
+    message: &Message,
     error: async_nats::Error,
 ) -> Result<(), async_nats::Error> {
-    let message = message.unwrap();
+    let request_id = try_get_request_id(&message.payload).unwrap_or("UNKNOWN".to_string());
 
-    jetstream
-        .publish(
-            format!("{ERR_STREAM}.{GROUP}"),
-            build_error_payload(&message, error).to_string().into(),
-        )
-        .await
-        .unwrap();
-
-    Ok(())
-}
-
-fn build_error_payload(msg: &Message, error: async_nats::Error) -> String {
-    json!(ErrorMessage {
-        request_id: try_get_request_id(&msg.payload).unwrap_or("UNKNOWN".to_string()),
+    let payload = json!(ErrorMessage {
+        request_id: request_id.clone(),
         sender: GROUP.to_string(),
         reason: error.to_string(),
-        input: format!("{msg:?}"),
+        input: format!("{message:?}"),
     })
     .to_string()
+    .into();
+
+    send_error(jetstream, format!("{ERR_STREAM}.{request_id}"), payload).await
+}
+
+async fn send_error_without_message(
+    jetstream: &Context,
+    error: async_nats::Error,
+) -> Result<(), async_nats::Error> {
+    send_error(
+        jetstream,
+        format!("{ERR_STREAM}.api"),
+        error.to_string().into(),
+    )
+    .await
+}
+
+async fn send_error(
+    jetstream: &Context,
+    queue: String,
+    payload: Bytes,
+) -> Result<(), async_nats::Error> {
+    let published = jetstream.publish(queue, payload).await?;
+    published.await?;
+
+    Ok(())
 }

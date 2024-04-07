@@ -53,7 +53,9 @@ pub async fn get_messages_stream(
     let messages_in =
         messages_common::try_queue_subscribe_subject(jetstream, IN_STREAM, request_id, GROUP)
             .await?;
-    let messages_err = messages_common::try_pub_sub_subscribe(jetstream, IN_ERR_STREAM).await?;
+    let messages_err =
+        messages_common::try_queue_subscribe_subject(jetstream, IN_ERR_STREAM, request_id, GROUP)
+            .await?;
 
     let subscriber = select(messages_in, messages_err);
 
