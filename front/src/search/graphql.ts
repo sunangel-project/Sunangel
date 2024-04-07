@@ -4,6 +4,7 @@ import { connection, spots } from './state';
 
 import { useModal } from 'vue-final-modal'
 import Popup from './components/Popup.vue'
+import type { GraphQLError } from '@0no-co/graphql.web';
 
 function displayError(message: string) {
     const { open } = useModal({
@@ -20,8 +21,13 @@ function displayConnectionError() {
     displayError("Couldn't connect to the backend... Please try again later");
 };
 
-function displayIntenalServerError() {
-    displayError("Internal Server Error");
+function displayIntenalServerError(errors: GraphQLError[]) {
+    let message = "Internal Server Error";
+    if (errors.length > 0) {
+        const extensions = JSON.parse(errors[0].extensions.toString());
+        message = extensions.reason;
+    }
+    displayError(message);
 }
 
 export function setupGraphQLClient(): void {
@@ -63,9 +69,9 @@ export function setupGraphQLClient(): void {
                     if (error.networkError) {
                         connection.connected = false;
                         displayConnectionError();
-                    } else {
+                    } else if (error.graphQLErrors) {
                         spots.loading = false;
-                        displayIntenalServerError();
+                        displayIntenalServerError(error.graphQLErrors);
                     }
                 },
             }),
