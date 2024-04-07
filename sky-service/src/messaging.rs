@@ -1,17 +1,16 @@
 use anyhow::anyhow;
 use async_nats::{
-    jetstream::{consumer::pull::MessagesError, kv::Store, Context, Message},
+    jetstream::{kv::Store, Context, Message},
     Error,
 };
 use chrono::{DateTime, NaiveDateTime, Timelike, Utc};
 use chrono_tz::Tz;
-use futures_util::Future;
-use log::{error, info};
+use log::info;
 use messages_common::MessageStream;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
+use std::str;
 use std::str::FromStr;
-use std::{pin::Pin, str};
 
 use crate::{
     sky::{moon::Moon, sun::Sun},
@@ -42,38 +41,6 @@ pub async fn messages(jetstream: &Context) -> MessageStream {
     messages_common::queue_subscribe(jetstream, IN_STREAM, GROUP).await
 }
 
-type HandleMessageFun<'a> =
-    Box<dyn FnMut(Result<Message, MessagesError>) -> Pin<Box<dyn Future<Output = ()> + 'a>> + 'a>;
-
-pub fn generate_handle_message_res<'a>(
-    jetstream: &'a Context,
-    store: &'a Store,
-) -> HandleMessageFun<'a> {
-    Box::new(move |message| {
-        Box::pin(async move {
-            info!("Received message {:?}", message);
-
-            match message {
-                Ok(message) => {
-                    let res = handle_message(&message, jetstream, store).await;
-                    if let Err(err) = res {
-                        error!("Could not handle received message: {err}");
-                        send_error_message(jetstream, Some(message), err)
-                            .await
-                            .unwrap_or_else(|err| error!("Could not send error message: {err}"));
-                    }
-                }
-                Err(err) => {
-                    error!("Problem with received message: {err}");
-                    send_error_message(jetstream, None, err.into())
-                        .await
-                        .unwrap_or_else(|err| error!("Could not send out error message: {err}"));
-                }
-            };
-        })
-    })
-}
-
 #[derive(Serialize, Deserialize)]
 struct SearchQuery {
     time: DateTime<Utc>,
@@ -100,8 +67,8 @@ struct OutEvents {
 }
 
 pub async fn handle_message(
-    message: &Message,
     jetstream: &Context,
+    message: &Message,
     store: &Store,
 ) -> Result<(), Error> {
     let payload = str::from_utf8(&message.payload)?;
@@ -164,41 +131,4 @@ fn build_output(in_value: Value, result: OutEvents) -> Result<Value, Error> {
     output_obj.insert("events".to_string(), json!(result));
 
     Ok(output)
-}
-
-async fn send_error_message(
-    jetstream: &Context,
-    message: Option<Message>,
-    error: async_nats::Error,
-) -> Result<(), async_nats::Error> {
-    let message = message.unwrap();
-
-    jetstream
-        .publish(
-            format!("{ERR_STREAM}.{GROUP}"),
-            build_error_payload(&message, error).to_string().into(),
-        )
-        .await
-        .unwrap();
-
-    Ok(())
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct ErrorMessage {
-    request_id: String,
-    sender: String,
-    reason: String,
-    input: String,
-}
-
-fn build_error_payload(msg: &Message, error: async_nats::Error) -> String {
-    json!(ErrorMessage {
-        request_id: messages_common::try_get_request_id(&msg.payload)
-            .unwrap_or("UNKNOWN".to_string()),
-        sender: GROUP.to_string(),
-        reason: error.to_string(),
-        input: format!("{msg:?}"),
-    })
-    .to_string()
 }
