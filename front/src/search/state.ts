@@ -1,8 +1,10 @@
-import { reactive, watch } from "vue";
+import { computed, reactive, watch } from "vue";
 
 import type { UseSubscriptionResponse } from "@urql/vue";
-import { project, invertProject, type Coordinates } from "./projection";
+import LatLon from 'geodesy/latlon-ellipsoidal-vincenty.js';
 import type { ObjectEvent } from "ol/Object";
+
+import { project, invertProject, type Coordinates } from "./projection";
 
 export interface HorizonEvent {
     altitude: number;
@@ -72,6 +74,13 @@ export const interfaceControls: InterfaceControls = reactive(
 watch(interfaceControls, (interfaceControls) => {
     storeObjectLocal("interface.controls", interfaceControls);
 });
+
+export const areaTooLarge = computed(() => {
+    const a = new LatLon(searchArea.lowerLeft.lat, searchArea.lowerLeft.lon);
+    const b = new LatLon(searchArea.upperRight.lat, searchArea.upperRight.lon);
+
+    return a.distanceTo(b) > 10_000;
+})
 
 // Map state
 

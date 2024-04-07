@@ -12,6 +12,7 @@
     "dependencies": {
         "@types/ol": "^7.0.0",
         "@urql/vue": "^1.1.2",
+        "geodesy": "^2.4.0",
         "graphql-ws": "^5.14.1",
         "npm": "^10.5.0",
         "ol": "^8.1.0",
