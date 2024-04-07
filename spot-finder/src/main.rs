@@ -1,8 +1,3 @@
-#[tokio::main]
-pub async fn main() {
-    run().await
-}
-
 use std::str::{self, FromStr};
 
 use anyhow::anyhow;
@@ -40,7 +35,8 @@ const OUT_STREAM: &str = "SPOTS";
 const OUT_SUBJECT: &str = "get-horizon";
 const ERR_STREAM: &str = "ERRORS";
 
-async fn run() {
+#[tokio::main]
+pub async fn main() {
     env_logger::init();
 
     let jetstream = messages_common::connect_jetstream().await;

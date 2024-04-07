@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/nats-io/nats.go/jetstream"
@@ -66,7 +67,7 @@ func main() {
 	_, err = cons.Consume(func(msg jetstream.Msg) {
 		if err := handleMessage(msg, coms); err != nil {
 			log.Printf(
-				"error while handling message: %s\nmessage: %v",
+				"Error while handling message: %s\nmessage: %v",
 				err, string(msg.Data()),
 			)
 			msg.Nak()
@@ -76,9 +77,10 @@ func main() {
 		panic(err)
 	}
 
-	for { // avoid shutdown
-		time.Sleep(time.Hour)
-	}
+	// avoid shutdown
+	var wg sync.WaitGroup
+	wg.Add(1)
+	wg.Wait()
 }
 
 func handleMessage(msg jetstream.Msg, coms *common.Communications) error {
@@ -92,7 +94,7 @@ func handleMessage(msg jetstream.Msg, coms *common.Communications) error {
 	if err != nil {
 		err := common.SendError(string(msg.Data()), err, req.RequestId, GROUP, coms)
 		if err != nil {
-			log.Printf("could not send out error: %s", err)
+			log.Printf("Could not send out error: %s", err)
 		}
 	}
 
@@ -163,7 +165,7 @@ func requeueGetRequestAndLog(
 ) {
 	if err := requeueGetRequest(msg, key, coms); err != nil {
 		log.Printf(
-			"error while handling message: %s\nmessage: %v",
+			"Error while handling message: %s\nmessage: %v",
 			err, string(msg.Data()),
 		)
 
@@ -174,7 +176,7 @@ func requeueGetRequestAndLog(
 			GROUP,
 			coms,
 		); err != nil {
-			log.Printf("could not send out error: %s", err)
+			log.Printf("Could not send out error: %s", err)
 		}
 
 		_ = msg.Nak() // Ignoring error

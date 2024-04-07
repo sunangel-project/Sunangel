@@ -79,7 +79,7 @@ func SendError(
 
 	_, err = coms.Js.Publish(
 		coms.Ctx,
-		fmt.Sprintf("%s.%s", ERR_STREAM, sender),
+		fmt.Sprintf("%s.%s", ERR_STREAM, requestId),
 		payload,
 	)
 	return err
