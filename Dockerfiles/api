@@ -2,7 +2,4 @@ FROM sunangel-rust-base:latest AS build
 COPY . .
 RUN cargo build --release -p api
 
-FROM build AS runtime
-COPY --from=build /app/target/release/api /usr/local/bin
-
-ENTRYPOINT ["api"]
+ENTRYPOINT ["/app/target/release/api"]

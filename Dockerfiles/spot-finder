@@ -1,7 +1,5 @@
-FROM rust:1.76.0
-
-WORKDIR /usr/src/sunangel
+FROM sunangel-rust-base:latest
 COPY . .
-RUN cargo install --path spot-finder
+RUN cargo build --release -p spot-finder
 
-CMD ["spot-finder"]
+ENTRYPOINT ["/app/target/release/spot-finder"]
