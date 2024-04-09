@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
+tag="latest"
 push="false"
 if [ "$1" = "--push" ]; then
     push="true"
 
     user="$2"
     password="$3"
-    tag="latest"
 fi
 
 services="api spot-finder horizon-get horizon-compute sky-service"
