@@ -16,3 +16,6 @@ jobs:
 
           - name: Build images
             run: ./scripts/build_images.sh
+
+          - name: Puch images
+            run: ./scripts/build_images.sh --push "${{ github.actor }}" "${{ github.token }}"
