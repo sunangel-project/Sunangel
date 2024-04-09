@@ -1,7 +1,5 @@
-FROM rust:1.76.0
-
-WORKDIR /usr/src/sunangel
+FROM sunangel-rust-base:latest AS build
 COPY . .
-RUN cargo install --path sky-service
+RUN cargo build --release -p sky-service
 
-CMD ["sky-service"]
+ENTRYPOINT ["/app/target/release/sky-service"]
