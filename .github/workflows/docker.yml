@@ -1,6 +1,6 @@
 name: Build and publish docker images
 
-on: push
+on:
 
 jobs:
     build:
