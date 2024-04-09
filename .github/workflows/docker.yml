@@ -1,0 +1,13 @@
+name: Build and publish docker images
+
+on: push
+
+jobs:
+    build:
+        name: Build docker images
+        runs-on: ubuntu-latest
+        steps:
+          - uses: actions/checkout@v3
+
+          - name: Build images
+            runs: ./scripts/build_images.sh
