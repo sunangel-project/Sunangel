@@ -1,10 +1,22 @@
-import { cacheExchange, fetchExchange, subscriptionExchange, Client, provideClient, gql, useQuery, mapExchange } from '@urql/vue';
-import { createClient as createWSClient, type SubscribePayload } from 'graphql-ws';
-import { connection, spots } from './state';
+import {
+    cacheExchange,
+    fetchExchange,
+    subscriptionExchange,
+    Client,
+    provideClient,
+    gql,
+    useQuery,
+    mapExchange,
+} from "@urql/vue";
+import {
+    createClient as createWSClient,
+    type SubscribePayload,
+} from "graphql-ws";
+import { connection, spots } from "./state";
 
-import { useModal } from 'vue-final-modal'
-import Popup from './components/Popup.vue'
-import type { GraphQLError } from '@0no-co/graphql.web';
+import { useModal } from "vue-final-modal";
+import Popup from "./components/Popup.vue";
+import type { GraphQLError } from "@0no-co/graphql.web";
 
 function displayError(message: string) {
     const { open } = useModal({
@@ -19,7 +31,7 @@ function displayError(message: string) {
 
 function displayConnectionError() {
     displayError("Couldn't connect to the backend... Please try again later");
-};
+}
 
 function displayIntenalServerError(errors: GraphQLError[]) {
     let message = "Internal Server Error";
@@ -36,8 +48,8 @@ export function setupGraphQLClient(): void {
     let apiHost = "localhost";
     //apiHost = "192.168.2.123";
     if (process.env.NODE_ENV == "production") {
-        protocol = "wss"
-        httpProtocol = "https"
+        protocol = "wss";
+        httpProtocol = "https";
         apiHost = "sunnapi.cloudsftp.de";
     }
 
@@ -66,6 +78,7 @@ export function setupGraphQLClient(): void {
         exchanges: [
             mapExchange({
                 onError: (error) => {
+                    console.log(error);
                     if (error.networkError) {
                         connection.connected = false;
                         displayConnectionError();
@@ -87,12 +100,12 @@ export function setupGraphQLClient(): void {
 export function fetchBackendVersions() {
     let query = gql`
         query versions {
-          apiVersion,
-          backendVersion,
+            apiVersion
+            backendVersion
         }
-`;
+    `;
 
-    useQuery({ query }).then(result => {
+    useQuery({ query }).then((result) => {
         if (result.error.value) {
             return;
         }

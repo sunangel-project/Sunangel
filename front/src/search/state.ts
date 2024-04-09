@@ -1,7 +1,7 @@
 import { computed, reactive, watch } from "vue";
 
 import type { UseSubscriptionResponse } from "@urql/vue";
-import LatLon from 'geodesy/latlon-ellipsoidal-vincenty.js';
+import LatLon from "geodesy/latlon-ellipsoidal-vincenty.js";
 import type { ObjectEvent } from "ol/Object";
 
 import { project, invertProject, type Coordinates } from "./projection";
@@ -84,7 +84,6 @@ export function centerChanged(event: ObjectEvent) {
     searchArea.upperRight = invertProject(extent.slice(2, 4));
 }
 export function resolutionChanged(event: ObjectEvent) {
-    console.log(event.target.getZoom());
     mapStateToStore.zoom = event.target.getZoom();
     interfaceState.areaTooLarge = areaIsTooLarge();
 }
@@ -102,7 +101,7 @@ export interface SearchArea {
 export const searchArea = reactive({
     lowerLeft: defaultCenterCoordinates,
     upperRight: defaultCenterCoordinates,
-})
+});
 
 export interface Time {
     time: string;
@@ -117,12 +116,12 @@ export const time: Time = reactive({
 // Interface state
 
 interface InterfaceState {
-    areaTooLarge: boolean,
+    areaTooLarge: boolean;
 }
 
 export const interfaceState: InterfaceState = reactive({
     areaTooLarge: false,
-})
+});
 
 function areaIsTooLarge(): boolean {
     const a = new LatLon(searchArea.lowerLeft.lat, searchArea.lowerLeft.lon);
