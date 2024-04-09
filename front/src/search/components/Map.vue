@@ -1,7 +1,7 @@
 <template>
-  <ol-map @click="handleClick" @moveend="storeMapState" style="height: 100%" :loadTilesWhileAnimating="true"
+  <ol-map class="map" @click="handleClick" @moveend="storeMapState" style="height: 100%" :loadTilesWhileAnimating="true"
     :loadTilesWhileInteracting="true">
-    <ol-view ref="view" :center="mapState.center" @change:center="centerChanged" :zoom="mapState.zoom"
+    <ol-view ref="viewRef" :center="mapState.center" @change:center="centerChanged" :zoom="mapState.zoom"
       @change:resolution="resolutionChanged" :projection="projection" />
 
     <ol-tile-layer>
@@ -20,21 +20,31 @@
 import type MapBrowserEvent from "ol/MapBrowserEvent";
 import type { FeatureLike } from "ol/Feature";
 
-import SearchCircle from "./mapElements/SearchCircle.vue";
 import SpotPoint from "./mapElements/SpotPoint.vue";
 
 import {
   mapState,
   centerChanged,
   resolutionChanged,
+  initialSetup,
   storeMapState,
   spots,
   type Spot,
 } from "../state";
 import { projection } from "../projection";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
+import type View from "ol/View";
 
 const vectorLayerKey = ref(0);
+
+const viewRef = ref<{ view: View | undefined }>({ view: undefined });
+
+onMounted(() => {
+  const view = viewRef.value.view;
+  if (view) {
+    initialSetup(view as any as View); // I hate typescript
+  }
+});
 
 /*
 Not using the built-in selection mechanism as it does not provide the desired behavior

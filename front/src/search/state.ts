@@ -5,6 +5,7 @@ import LatLon from "geodesy/latlon-ellipsoidal-vincenty.js";
 import type { ObjectEvent } from "ol/Object";
 
 import { project, invertProject, type Coordinates } from "./projection";
+import type { View } from "ol";
 
 export interface HorizonEvent {
     altitude: number;
@@ -79,14 +80,23 @@ export function centerChanged(event: ObjectEvent) {
     const center = event.target.getCenter();
     mapStateToStore.center = center;
 
-    const extent: number[] = event.target.getViewStateAndExtent().extent;
-    searchArea.lowerLeft = invertProject(extent.slice(0, 2));
-    searchArea.upperRight = invertProject(extent.slice(2, 4));
+    updateSearchArea(event.target);
 }
 export function resolutionChanged(event: ObjectEvent) {
     mapStateToStore.zoom = event.target.getZoom();
     interfaceState.areaTooLarge = areaIsTooLarge();
 }
+
+export function initialSetup(view: View) {
+    updateSearchArea(view);
+    interfaceState.areaTooLarge = areaIsTooLarge();
+}
+function updateSearchArea(view: View) {
+    const extent: number[] = view.getViewStateAndExtent().extent;
+    searchArea.lowerLeft = invertProject(extent.slice(0, 2));
+    searchArea.upperRight = invertProject(extent.slice(2, 4));
+}
+
 export function storeMapState() {
     storeObjectLocal("map.state", mapStateToStore);
 }
