@@ -16,4 +16,4 @@ jobs:
         run: ./scripts/build_images.sh
 
       - name: Push images
-        run: ./scripts/push_images.sh "${{ github.ref_name }}" "${{ github.actor }}" "${{ github.token }}"
+        run: ./scripts/push_images.sh "${{ github.ref_name }}" "${{ github.actor }}" "${{ GITHUB_TOKEN }}"
