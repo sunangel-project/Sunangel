@@ -9,6 +9,6 @@ password="$3"
 echo $password | docker login ghcr.io --username "$user" --password-stdin
 
 for service in $services; do
-    docker push "ghcr.io/$user/$service:$version"
-    docker push "ghcr.io/$user/$service:latest"
+    docker push "ghcr.io/sunangel-project/$service:$version"
+    docker push "ghcr.io/sunangel-project/$service:latest"
 done

@@ -1,21 +1,24 @@
 name: Build and publish docker images
 
-on: push
+on:
+  push:
+    tags:
+      - 'v*'
 
 jobs:
-    build:
-        name: Build docker images
-        runs-on: ubuntu-latest
-        steps:
-          - uses: actions/checkout@v3
+  build:
+    name: Build docker images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
 
-          - name: Cache Docker images.
-            uses: ScribeMD/docker-cache@0.5.0
-            with:
-              key: docker-${{ hashFiles('Cargo.toml', 'Cargo.lock') }}
+      - name: Cache Docker images
+        uses: ScribeMD/docker-cache@0.5.0
+        with:
+          key: docker-${{ hashFiles('Cargo.toml', 'Cargo.lock') }}
 
-          - name: Build images
-            run: ./scripts/build_images.sh
+      - name: Build images
+        run: ./scripts/build_images.sh
 
-          #- name: Push images
-          #  run: ./scripts/build_images.sh --push "${{ github.actor }}" "${{ github.token }}"
+      - name: Push images
+        run: ./scripts/push_images.sh "${{ github.ref_name }}" "${{ github.actor }}" "${{ github.token }}"
