@@ -8,8 +8,15 @@ password="$3"
 
 echo $password | docker login ghcr.io --username "$user" --password-stdin
 
-for service in $services; do
-    docker tag "$service" "ghcr.io/sunangel-project/$service"
+tag_and_push() {
+    service="$1"
+    version="$2"
+
+    docker tag "$service" "ghcr.io/sunangel-project/$service:$version"
     docker push "ghcr.io/sunangel-project/$service:$version"
-    docker push "ghcr.io/sunangel-project/$service:latest"
+}
+
+for service in $services; do
+    tag_and_push "$service" "$version"
+    tag_and_push "$service" "latest"
 done
