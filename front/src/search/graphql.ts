@@ -78,11 +78,12 @@ export function setupGraphQLClient(): void {
         exchanges: [
             mapExchange({
                 onError: (error) => {
-                    console.log(error);
                     if (error.networkError) {
+                        console.log(error.networkError);
                         connection.connected = false;
                         displayConnectionError();
                     } else if (error.graphQLErrors) {
+                        console.log(error.graphQLErrors);
                         spots.loading = false;
                         displayIntenalServerError(error.graphQLErrors);
                     }
