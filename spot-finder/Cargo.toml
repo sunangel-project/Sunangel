@@ -7,15 +7,15 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.82"
-async-nats = "0.32.1"
+async-nats = "0.34.0"
 bytes = "1.6.0"
 futures-util = "0.3.30"
 osm-xml = "0.6.2"
-reqwest = "0.11.27"
+reqwest = "0.12.3"
 serde = "1.0.197"
 serde_json = "1.0.115"
 tokio = { version = "1.37.0", features = ["rt-multi-thread"] }
 messages-common = { path = "../messages-common" }
 log = "0.4.21"
-env_logger = "0.10.2"
+env_logger = "0.11.3"
 geoutils = "0.5.1"
