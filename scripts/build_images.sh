@@ -8,7 +8,7 @@ function build-image() {
     docker build . -f "Dockerfiles/$file_name" -t "$image_name"
 }
 
-build-image sunangel-rust-base
+build-image "sunangel-rust-base" "sunangel-rust-base"
 
 # new certificate for localhost
 openssl req -x509 -newkey rsa:4096 -nodes -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost'
