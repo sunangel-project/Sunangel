@@ -9,6 +9,9 @@ jobs:
   build:
     name: Build and push
     runs-on: ubuntu-latest
+    env:
+      CLOUDSFTP_CERT: ${{ secrets.CLOUDSFTP_CERT }}
+      CLOUDSFTP_CERT_KEY: ${{ secrets.CLOUDSFTP_CERT_KEY }}
     steps:
       - uses: actions/checkout@v3
 
