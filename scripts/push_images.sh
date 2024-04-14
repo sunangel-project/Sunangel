@@ -10,10 +10,10 @@ echo $password | docker login ghcr.io --username "$user" --password-stdin
 
 tag_and_push() {
     service="$1"
-    version="$2"
+    local_version="$2"
 
-    docker tag "$service" "ghcr.io/sunangel-project/$service:$version"
-    docker push "ghcr.io/sunangel-project/$service:$version"
+    docker tag "$service" "ghcr.io/sunangel-project/$service:$local_version"
+    docker push "ghcr.io/sunangel-project/$service:$local_version"
 }
 
 for service in $services; do
