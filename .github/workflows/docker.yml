@@ -13,7 +13,7 @@ jobs:
       CLOUDSFTP_CERT: ${{ secrets.CLOUDSFTP_CERT }}
       CLOUDSFTP_CERT_KEY: ${{ secrets.CLOUDSFTP_CERT_KEY }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Build images
         run: ./scripts/build_images.sh
