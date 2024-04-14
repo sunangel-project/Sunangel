@@ -20,8 +20,3 @@ for service in $services; do
     tag_and_push "$service" "$version"
     tag_and_push "$service" "latest"
 done
-
-if [ -n "$CLOUDSFTP_CERT_KEY" ] && [ -n "$CLOUDSFTP_CERT" ]; then
-    tag_and_push "api-cloudsftp" "$version"
-    tag_and_push "api-cloudsftp" "latest"
-fi

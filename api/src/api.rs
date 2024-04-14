@@ -25,7 +25,6 @@ use crate::structs::{
 pub struct Context {
     jetstream: jetstream::Context,
     fake: bool,
-    pub production: bool,
 }
 impl juniper::Context for Context {}
 
@@ -36,15 +35,8 @@ impl Context {
         messaging::create_streams(&jetstream).await;
 
         let fake = std::env::var("FAKE").map(|val| val == "1").unwrap_or(false);
-        let production = std::env::var("PRODUCTION")
-            .map(|val| val == "1")
-            .unwrap_or(false);
 
-        Self {
-            jetstream,
-            fake,
-            production,
-        }
+        Self { jetstream, fake }
     }
 }
 
@@ -89,7 +81,7 @@ impl Subscription {
 }
 
 fn fake_result_stream(query: APISearchQuery) -> SpotStreamPin {
-    let avg = |a, b | (a + b) / 2.;
+    let avg = |a, b| (a + b) / 2.;
     let lat = avg(query.lower_left.lat, query.upper_right.lat);
     let lon = avg(query.lower_left.lon, query.upper_right.lon);
     let dist = 0.001;

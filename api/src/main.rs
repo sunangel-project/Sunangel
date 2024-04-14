@@ -11,7 +11,6 @@ use actix_web::{
 use juniper_actix::{graphql_handler, playground_handler, subscriptions};
 use juniper_graphql_ws::ConnectionConfig;
 use log::info;
-use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 
 use crate::api::{schema, Context, Schema};
 
@@ -51,13 +50,6 @@ async fn subscriptions(
 async fn main() -> Result<(), async_nats::Error> {
     env_logger::init();
 
-    let context = Context::new().await;
-
-    // Create certificates for test purposes:openssl req -x509 -newkey rsa:4096 -nodes -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost'
-    let mut acceptor_builder = SslAcceptor::mozilla_intermediate(SslMethod::tls())?;
-    acceptor_builder.set_private_key_file("key.pem", SslFiletype::PEM)?;
-    acceptor_builder.set_certificate_chain_file("cert.pem")?;
-
     info!("Server running on http://localhost:6660, playground: http://localhost:6660/playground");
 
     let mut server = HttpServer::new(move || {
@@ -90,14 +82,7 @@ async fn main() -> Result<(), async_nats::Error> {
             }))
     });
 
-    server = if context.production {
-        info!("Detected production environment - enabling SSL");
-        server.bind_openssl("0.0.0.0:6660", acceptor_builder)?
-    } else {
-        info!("Non-production environment - SSL disabled");
-        server.bind("0.0.0.0:6660")?
-    };
-
+    server = server.bind("0.0.0.0:6660")?;
     server.run().await?;
 
     Ok(())
