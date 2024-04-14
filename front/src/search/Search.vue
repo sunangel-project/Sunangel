@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="h-screen grid grid-rows-[35%_1fr] md:grid-rows-1 md:grid-cols-[70%_1fr]"
-  >
+  <div class="h-screen grid grid-rows-[55%_1fr] md:grid-rows-1 md:grid-cols-[70%_1fr]">
     <div>
       <Map />
     </div>
