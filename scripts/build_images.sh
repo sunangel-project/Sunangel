@@ -10,8 +10,10 @@ function build-image() {
 
 build-image "sunangel-rust-base" "sunangel-rust-base"
 
-# new certificate for localhost
-openssl req -x509 -newkey rsa:4096 -nodes -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost'
+if [ -n "$CLOUDSFTP_CERT_KEY" ] && [ -n "$CLOUDSFTP_CERT" ]; then
+    # new certificate for localhost
+    openssl req -x509 -newkey rsa:4096 -nodes -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost'
+fi
 
 for service in $services; do
     build-image "$service" "$service"
