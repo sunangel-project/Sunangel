@@ -4,8 +4,8 @@ source ./scripts/services.sh
 
 function build-image() {
     file_name="$1"
-    image_name="$1"
-    docker build . -f "Dockerfiles/$image_name" -t "$image_name"
+    image_name="$2"
+    docker build . -f "Dockerfiles/$file_name" -t "$image_name"
 }
 
 build-image sunangel-rust-base
