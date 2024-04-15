@@ -22,7 +22,7 @@ subscription spots {
     time: "2023-10-15T12:53:56Z",
     timezone: "Europe/Berlin",
     lowerLeft: { lat: 48.81909, lon: 9.59523 },
-    upperRight: { lat: 48.90207, lon: 9.69243 },
+    upperRight: { lat: 48.8500, lon: 9.6000 },
   }) {
     status
     spot {
@@ -128,5 +128,3 @@ subscription spots {
   ]
 }
 ```
-
-TODO: Maybe display `message` in the UI.

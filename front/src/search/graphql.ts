@@ -46,15 +46,17 @@ export function setupGraphQLClient(): void {
     let protocol = "ws";
     let httpProtocol = "http";
     let apiHost = "localhost";
+    let port = "6660";
     //apiHost = "192.168.2.123";
     if (process.env.NODE_ENV == "production") {
         protocol = "wss";
         httpProtocol = "https";
         apiHost = "sunnapi.cloudsftp.de";
+        port = "443";
     }
 
     const wsClient = createWSClient({
-        url: `${protocol}://${apiHost}:6660/subscriptions`,
+        url: `${protocol}://${apiHost}:${port}/subscriptions`,
     });
 
     const subExchange = subscriptionExchange({
@@ -74,7 +76,7 @@ export function setupGraphQLClient(): void {
     });
 
     const client = new Client({
-        url: `${httpProtocol}://${apiHost}:6660/graphql`,
+        url: `${httpProtocol}://${apiHost}:${port}/graphql`,
         exchanges: [
             mapExchange({
                 onError: (error) => {
