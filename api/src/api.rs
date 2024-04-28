@@ -47,7 +47,7 @@ impl Context {
 pub struct Query;
 
 const API_VERSION: &str = "v0.2.0";
-const BACKEND_VERSION: &str = "v0.2.2";
+const BACKEND_VERSION: &str = "v0.2.3";
 
 #[graphql_object(context = Context)]
 impl Query {
