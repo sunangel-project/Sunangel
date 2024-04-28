@@ -65,4 +65,3 @@ if [ "$update_api_version" = "true" ]; then
 else
     update_version_fun
 fi
-
