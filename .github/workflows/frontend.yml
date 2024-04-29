@@ -32,7 +32,7 @@ jobs:
 
       - uses: actions/upload-pages-artifact@3
         with:
-          path: ./font/dist
+          path: ./front/dist
 
       - name: Deploy to GitHub Pages
         id: deployment
