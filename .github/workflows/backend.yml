@@ -1,4 +1,4 @@
-name: Build and publish docker images
+name: Build, publish and deploy backend
 
 on:
   push:
@@ -6,40 +6,15 @@ on:
       - "v*"
 
 jobs:
-  build:
+  deploy-backend:
     name: Build and push
     runs-on: ubuntu-latest
     env:
       CLOUDSFTP_CERT: ${{ secrets.CLOUDSFTP_CERT }}
       CLOUDSFTP_CERT_KEY: ${{ secrets.CLOUDSFTP_CERT_KEY }}
+
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 21.x
-
-      - name: Build frontend
-        run: |
-          cd front
-          npm ci
-          npm run build
-
-      - name: Deploy frontend
-        run: |
-          cd front/dist
-          echo 'sunn.cloudsftp.de' > CNAME
-
-          git config --global user.name "Deploy Action"
-          git config --global user.email "deploy.action@github.com"
-
-          git init
-          git branch -m latest
-          git add -A
-          git commit -m 'deploy'
-
-          git push -f git@github.com:sunangel-project/Sunangel.git latest:gh-pages
 
         # Build and push
 
