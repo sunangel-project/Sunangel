@@ -38,12 +38,22 @@ jobs:
         with:
           node-version: 21.x
 
-      - name: Install dependencies
+      - name: Build frontend
         run: |
           cd front
           npm ci
+          npm run build
 
-      - name: Deploy frontend on github-pages
+      - name: Deploy frontend
         run: |
-          cd front
-          ./deploy.sh
+          cd front/dist
+          echo 'sunn.cloudsftp.de' > CNAME
+
+          git config --global user.name "Deploy Action"
+          git config --global user.email "deploy.action@github.com"
+
+          git init
+          git add -A
+          git commit -m 'deploy'
+
+          git push -f git@github.com:sunangel-project/Sunangel.git latest:gh-pages
