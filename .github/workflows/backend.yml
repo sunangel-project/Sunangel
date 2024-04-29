@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy-backend:
-    name: Build and push
+    name: Deploy backend
     runs-on: ubuntu-latest
     env:
       CLOUDSFTP_CERT: ${{ secrets.CLOUDSFTP_CERT }}

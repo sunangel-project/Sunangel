@@ -7,6 +7,8 @@ on:
 
 jobs:
   deploy-frontend:
+    name: Deploy frontend
+    runs-on: ubuntu-latest
     permissions:
       pages: write
       id-token: write
