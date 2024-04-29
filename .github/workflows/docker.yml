@@ -15,11 +15,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        # Build and push
+
       - name: Build images
         run: ./scripts/build_images.sh
 
       - name: Push images
         run: ./scripts/push_images.sh "${{ github.ref_name }}" "${{ github.actor }}" "${{ github.token }}"
+
+        # Deploy
 
       - name: Deploy backend on kusomiso
         uses: appleboy/ssh-action@v1.0.3
@@ -28,6 +32,14 @@ jobs:
           username: ${{ secrets.KUSOMISO_USERNAME }}
           key: ${{ secrets.KUSOMISO_SSH_KEY }}
           script: ./deploy.sh
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 21.x
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Deploy frontend on github-pages
         run: |
