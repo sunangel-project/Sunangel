@@ -16,7 +16,7 @@ require (
 	github.com/sunangel-project/angle v0.1.0 // indirect
 	github.com/sunangel-project/directory v0.1.0 // indirect
 	github.com/tkrajina/go-elevations v0.1.0 // indirect
-	golang.org/x/crypto v0.24.0 // indirect
-	golang.org/x/sys v0.21.0 // indirect
+	golang.org/x/crypto v0.25.0 // indirect
+	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 )
