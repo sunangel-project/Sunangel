@@ -69,7 +69,7 @@ const defaultCenterCoordinates = { lat: 48.818, lon: 9.587 };
 const defaultCenter = project(defaultCenterCoordinates);
 const defaultMapState: MapState = {
     center: defaultCenter,
-    zoom: 14,
+    zoom: 15,
 };
 export const mapState: MapState = reactive(
     loadObjectFromLocal("map.state", defaultMapState),
