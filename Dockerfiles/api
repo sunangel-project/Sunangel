@@ -1,5 +1,47 @@
-FROM sunangel-rust-base:latest AS build
-COPY . .
-RUN cargo build --release -p api
+# syntax=docker/dockerfile:1
 
-ENTRYPOINT ["/app/target/release/api"]
+################################################################################
+# Build stage
+
+ARG RUST_VERSION=1.80.0
+ARG APP_NAME=api
+FROM rust:${RUST_VERSION} AS build
+ARG APP_NAME
+WORKDIR /app
+
+RUN --mount=type=bind,source=api,target=api \
+    --mount=type=bind,source=messages-common,target=messages-common \
+    --mount=type=bind,source=sky-service,target=sky-service \
+    --mount=type=bind,source=spot-finder,target=spot-finder \
+    --mount=type=bind,source=Cargo.toml,target=Cargo.toml \
+    --mount=type=bind,source=Cargo.lock,target=Cargo.lock \
+    --mount=type=cache,target=/app/target/ \
+    --mount=type=cache,target=/usr/local/cargo/registry/ \
+    <<EOF
+set -e
+cargo build --locked --release -p $APP_NAME
+cp ./target/release/$APP_NAME /bin/$APP_NAME
+EOF
+
+################################################################################
+# Run stage
+
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y libssl3 ca-certificates && rm -rf /var/lib/apt/lists/*
+
+ARG UID=10001
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/nonexistent" \
+    --shell "/sbin/nologin" \
+    --no-create-home \
+    --uid "${UID}" \
+    appuser
+USER appuser
+
+COPY --from=build /bin/api /bin/
+
+EXPOSE 6660
+
+ENTRYPOINT ["/bin/api"]
