@@ -1,5 +1,7 @@
-FROM sunangel-rust-base:latest AS build
-COPY . .
-RUN cargo build --release -p sky-service
+# syntax=docker/dockerfile:1
 
-ENTRYPOINT ["/app/target/release/sky-service"]
+FROM rust-run
+
+COPY --from=rust-build /bin/sky-service /bin/sky-service
+
+ENTRYPOINT ["/bin/sky-service"]

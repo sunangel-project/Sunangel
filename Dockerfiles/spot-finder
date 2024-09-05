@@ -1,5 +1,7 @@
-FROM sunangel-rust-base:latest
-COPY . .
-RUN cargo build --release -p spot-finder
+# syntax=docker/dockerfile:1
 
-ENTRYPOINT ["/app/target/release/spot-finder"]
+FROM rust-run
+
+COPY --from=rust-build /bin/spot-finder /bin/spot-finder
+
+ENTRYPOINT ["/bin/spot-finder"]

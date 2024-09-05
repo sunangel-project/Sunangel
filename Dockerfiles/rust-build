@@ -16,4 +16,6 @@ RUN --mount=type=bind,source=api,target=api \
 set -e
 cargo build --locked --release
 cp ./target/release/api /bin/api
+cp ./target/release/spot-finder /bin/spot-finder
+cp ./target/release/sky-service /bin/sky-service
 EOF

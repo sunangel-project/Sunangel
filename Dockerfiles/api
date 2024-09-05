@@ -1,24 +1,8 @@
 # syntax=docker/dockerfile:1
 
-################################################################################
-# Run stage
+FROM rust-run
 
-FROM debian:bookworm-slim
-
-RUN apt-get update && apt-get install -y libssl3 ca-certificates && rm -rf /var/lib/apt/lists/*
-
-ARG UID=10001
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "/nonexistent" \
-    --shell "/sbin/nologin" \
-    --no-create-home \
-    --uid "${UID}" \
-    appuser
-USER appuser
-
-COPY --from=sunangel-rust-base /bin/api /bin/
+COPY --from=rust-build /bin/api /bin/api
 
 EXPOSE 6660
 

@@ -8,7 +8,8 @@ function build-image() {
     docker build . -f "Dockerfiles/$file_name" -t "$image_name"
 }
 
-build-image "sunangel-rust-base" "sunangel-rust-base"
+build-image "rust-build" "rust-build"
+build-image "rust-run" "rust-run"
 
 for service in $services; do
     build-image "$service" "$service"
