@@ -11,6 +11,8 @@ function build-image() {
 build-image "rust-build" "rust-build"
 build-image "rust-run" "rust-run"
 
+build-image "go-build" "go-build"
+
 for service in $services; do
     build-image "$service" "$service"
 done
