@@ -1,11 +1,19 @@
-FROM rust:1.76.0 AS chef
-RUN cargo install cargo-chef
-WORKDIR app
+# syntax=docker/dockerfile:1
 
-FROM chef AS planner
-COPY . .
-RUN cargo chef prepare --recipe-path recipe.json
+FROM rust:1.80.0 AS build
 
-FROM chef AS builder
-COPY --from=planner /app/recipe.json recipe.json
-RUN cargo chef cook --release --recipe-path recipe.json
+WORKDIR /app
+
+RUN --mount=type=bind,source=api,target=api \
+    --mount=type=bind,source=messages-common,target=messages-common \
+    --mount=type=bind,source=sky-service,target=sky-service \
+    --mount=type=bind,source=spot-finder,target=spot-finder \
+    --mount=type=bind,source=Cargo.toml,target=Cargo.toml \
+    --mount=type=bind,source=Cargo.lock,target=Cargo.lock \
+    --mount=type=cache,target=/app/target/ \
+    --mount=type=cache,target=/usr/local/cargo/registry/ \
+    <<EOF
+set -e
+cargo build --locked --release
+cp ./target/release/api /bin/api
+EOF
