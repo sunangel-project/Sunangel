@@ -8,13 +8,12 @@ ARG UID=10001
 RUN adduser \
     --disabled-password \
     --gecos "" \
-    --home "/nonexistent" \
+    --home "/app" \
     --shell "/sbin/nologin" \
-    --no-create-home \
     --uid "${UID}" \
     appuser
 USER appuser
 
-COPY --from=go-build /bin/horizon-get /bin/horizon-get
+COPY --from=go-build /bin/horizon-compute /bin/horizon-compute
 
-CMD ["/bin/horizon-get"]
+CMD ["/bin/horizon-compute"]
