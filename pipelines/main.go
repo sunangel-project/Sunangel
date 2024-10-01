@@ -14,9 +14,28 @@ func (m *Sunangel) BuildService(
 	source *dagger.Directory,
 	name string,
 ) *dagger.File {
-	source = source.WithoutDirectory("target")
-
 	outputFile := "/" + name
+
+	return cachedRustBuilder(source).
+		// Build
+		WithExec([]string{"cargo", "build", "--release", "-p", name}).
+		WithExec([]string{"cp", "target/release/" + name, outputFile}).
+		File(outputFile)
+}
+
+func (m *Sunangel) Lint(
+	ctx context.Context,
+	source *dagger.Directory,
+) (string, error) {
+	return cachedRustBuilder(source).
+		WithExec([]string{"cargo", "clippy", "--", "-D", "warnings"}).
+		Stdout(ctx)
+}
+
+func cachedRustBuilder(
+	source *dagger.Directory,
+) *dagger.Container {
+	source = source.WithoutDirectory("target")
 
 	return dag.Container().
 		From("rust:1.81-alpine").
@@ -33,10 +52,5 @@ func (m *Sunangel) BuildService(
 		// Caches
 		WithMountedCache("/cache/cargo", dag.CacheVolume("rust-packages")).
 		WithEnvVariable("CARGO_HOME", "/cache/cargo").
-		WithMountedCache("target", dag.CacheVolume("rust-target")).
-
-		// Build
-		WithExec([]string{"cargo", "build", "--release", "-p", name}).
-		WithExec([]string{"cp", "target/release/" + name, outputFile}).
-		File(outputFile)
+		WithMountedCache("target", dag.CacheVolume("rust-target"))
 }

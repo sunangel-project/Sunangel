@@ -58,12 +58,10 @@ fn direction_of_node(node: &Node) -> Option<f64> {
         .find(|tag| tag.key == "direction")
         .map(|tag| tag.val.as_str())
         .map(direction::direction_from_string)
-        .map(|dir| {
+        .inspect(|dir| {
             if let Err(err) = &dir {
                 println!("Couldn't parse direction of node {node:?}, {err}")
             }
-
-            dir
         })
         .and_then(Result::ok)
 }
