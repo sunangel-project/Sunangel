@@ -1,4 +1,4 @@
-name: Build and Test
+name: Build, Test, and Deploy
 
 on: push
 
@@ -83,7 +83,7 @@ jobs:
           path: ./front/dist
 
   deploy_frontend:
-    name: Deploay Frontend
+    name: Deploy Frontend
     runs-on: ubuntu-latest
 
     needs:
