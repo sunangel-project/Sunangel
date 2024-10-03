@@ -6,6 +6,7 @@ import (
 	"dagger/sunangel/internal/dagger"
 )
 
+// Instantiates all backend services
 func (m *Sunangel) LocalManualTesting(
 	ctx context.Context,
 	source *dagger.Directory,

@@ -25,15 +25,6 @@ func Connect() *nats.Conn {
 	return nc
 }
 
-func EncodedConnection(nc *nats.Conn) *nats.EncodedConn {
-	ec, err := nats.NewEncodedConn(nc, nats.JSON_ENCODER)
-	if err != nil {
-		panic(err)
-	}
-
-	return ec
-}
-
 func JetStream(nc *nats.Conn) jetstream.JetStream {
 	js, err := jetstream.New(nc)
 	if err != nil {

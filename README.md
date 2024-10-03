@@ -9,26 +9,11 @@
 
 ### Backend
 
-Run with `docker` or `podman`.
+Run with [dagger](https://dagger.io)
 
+``` sh
+dagger call local-manual-testing --source=. up --ports 6660:6660
 ```
-docker compose --profile all up
-```
-
-```
-podman-compose --profile all up
-```
-
-For `podman` remember to install `podman-compose` and the [dnsname plugin](https://github.com/containers/dnsname/tree/maig) (package `cni-plugin-dnsname` on openSuse)
-
-Currently, there are two profiles:
-- api
-    - nats
-    - api
-    - spot-finder
-- compute
-    - horizon-service
-    - sky-service
 
 ### Frontend
 
