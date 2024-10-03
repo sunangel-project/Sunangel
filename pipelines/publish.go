@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 
 	"dagger/sunangel/internal/dagger"
@@ -16,11 +17,13 @@ func (m *Sunangel) PublishImages(
 	actor string,
 	token *dagger.Secret,
 ) error {
+	version = strings.TrimLeft(version, "v")
+
 	tags := []string{"latest", version}
 
 	publishImage := func(image *dagger.Container, name string) error {
 		for _, tag := range tags {
-			url := fmt.Sprintf("ghcr.io/cloudsftp/%s:%s", name, tag)
+			url := fmt.Sprintf("ghcr.io/sunangel-project/%s:%s", name, tag)
 
 			_, err := image.Publish(ctx, url)
 			if err != nil {

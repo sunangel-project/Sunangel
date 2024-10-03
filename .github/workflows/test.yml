@@ -17,6 +17,16 @@ jobs:
           args: pipeline --source=.
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
 
+  publish_and_deploy:
+    name: Publish and Deploy
+    runs-on: ubuntu-latest
+
+    needs:
+      - build_and_test
+
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+
+    steps:
       - name: Publish Images
         uses: dagger/dagger-for-github@v6
         with:
