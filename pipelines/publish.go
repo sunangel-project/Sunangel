@@ -25,7 +25,9 @@ func (m *Sunangel) PublishImages(
 		for _, tag := range tags {
 			url := fmt.Sprintf("ghcr.io/sunangel-project/%s:%s", name, tag)
 
-			_, err := image.Publish(ctx, url)
+			_, err := image.
+				WithRegistryAuth("ghcr.io", actor, token).
+				Publish(ctx, url)
 			if err != nil {
 				return err
 			}
