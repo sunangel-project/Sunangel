@@ -107,7 +107,7 @@ func (m *Sunangel) ImageApi(
 ) *dagger.Container {
 	executable := buildRustServiceExecutable(ctx, source, "api")
 
-	return createServerContainer(executable).
+	return createServiceContainer(executable).
 		WithExposedPort(6660).
 		WithExec([]string{"/server"})
 }
@@ -117,7 +117,7 @@ func (m *Sunangel) ImageSpotFinder(
 	ctx context.Context,
 	source *dagger.Directory,
 ) *dagger.Container {
-	return buildRustServiceContainer(ctx, source, "api")
+	return buildRustServiceImage(ctx, source, "spot-finder")
 }
 
 // Build the image of the sky-service service
@@ -125,7 +125,7 @@ func (m *Sunangel) ImageSkyService(
 	ctx context.Context,
 	source *dagger.Directory,
 ) *dagger.Container {
-	return buildRustServiceContainer(ctx, source, "api")
+	return buildRustServiceImage(ctx, source, "sky-service")
 }
 
 // Build image of the horizon-get service
@@ -133,7 +133,7 @@ func (m *Sunangel) ImageHorizonGet(
 	ctx context.Context,
 	source *dagger.Directory,
 ) *dagger.Container {
-	return buildGoServiceContainer(ctx, source, "horizon/get", "horizon-get")
+	return buildGoServiceImage(ctx, source, "horizon/get", "horizon-get")
 }
 
 // Build image of the horizon-compute service
@@ -141,48 +141,5 @@ func (m *Sunangel) ImageHorizonCompute(
 	ctx context.Context,
 	source *dagger.Directory,
 ) *dagger.Container {
-	return buildGoServiceContainer(ctx, source, "horizon/compute", "horizon-compute")
-}
-
-func createServerContainer(
-	executable *dagger.File,
-) *dagger.Container {
-	return dag.Container().
-		From("alpine:"+AlpineVersion).
-		WithFile("/server", executable)
-}
-
-func (m *Sunangel) LocalManualTesting(
-	ctx context.Context,
-	source *dagger.Directory,
-) *dagger.Service {
-	natsService := dag.Container().
-		From("nats").
-		WithExposedPort(4222).
-		WithExposedPort(8222).
-		WithDefaultArgs([]string{
-			"--jetstream",
-			"--name", "main",
-			"--http_port", "8222",
-		}).
-		AsService()
-
-	// executable := buildRustServiceExecutable(ctx, source, "api")
-
-	// TODO graphql does no work properly :(
-	imageService := dag.Container().
-		From("rust:1.81").
-		WithDirectory("/src", source).
-		WithWorkdir("/src").
-
-		// Caches
-		WithMountedCache("/cache/cargo", dag.CacheVolume("rust-packages")).
-		WithEnvVariable("CARGO_HOME", "/cache/cargo").
-		WithMountedCache("target", dag.CacheVolume("rust-target")).
-		WithServiceBinding("nats", natsService).
-		WithExposedPort(6660).
-		WithExec([]string{"cargo", "run", "-p", "api"}).
-		AsService()
-
-	return imageService
+	return buildGoServiceImage(ctx, source, "horizon/compute", "horizon-compute")
 }

@@ -2,17 +2,19 @@ package main
 
 import (
 	"context"
+	"fmt"
+
 	"dagger/sunangel/internal/dagger"
 )
 
-func buildRustServiceContainer(
+func buildRustServiceImage(
 	ctx context.Context,
 	source *dagger.Directory,
 	name string,
 ) *dagger.Container {
 	executable := buildRustServiceExecutable(ctx, source, name)
 
-	return createServerContainer(executable).
+	return createServiceContainer(executable).
 		WithEntrypoint([]string{"/server"})
 }
 
@@ -35,7 +37,7 @@ func cachedRustBuilder(
 	source = source.WithoutDirectory("target")
 
 	return dag.Container().
-		From("rust:1.81-alpine").
+		From(fmt.Sprintf("rust:%s-alpine%s", RustVersion, AlpineVersion)).
 		WithExec([]string{"apk", "update"}).
 		WithExec([]string{
 			"apk", "add", "--no-cache",

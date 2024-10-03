@@ -7,7 +7,7 @@ import (
 	"dagger/sunangel/internal/dagger"
 )
 
-func buildGoServiceContainer(
+func buildGoServiceImage(
 	ctx context.Context,
 	source *dagger.Directory,
 	path string,
@@ -15,7 +15,7 @@ func buildGoServiceContainer(
 ) *dagger.Container {
 	executable := buildGoServiceExecutable(ctx, source, path, name)
 
-	return createServerContainer(executable).
+	return createServiceContainer(executable).
 		WithEntrypoint([]string{"/server"})
 }
 
@@ -37,7 +37,7 @@ func cachedGoBuilder(
 	source *dagger.Directory,
 ) *dagger.Container {
 	return dag.Container().
-		From("golang:"+GoVersion).
+		From(fmt.Sprintf("golang:%s-alpine%s", GoVersion, AlpineVersion)).
 
 		// Caches
 		WithMountedCache("/go/pkg/mod", dag.CacheVolume("go-mod")).
