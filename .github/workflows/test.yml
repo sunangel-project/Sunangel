@@ -22,11 +22,12 @@ jobs:
         with:
           version: "latest"
           verb: call
-          args: publish-images --source=. --actor=$GITHUB_ACTOR --token=env:GITHUB_TOKEN
+          args: publish-images --source=. --version=$VERSION --actor=$GITHUB_ACTOR --token=env:GITHUB_TOKEN
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ github.token }}
+          VERSION: ${{ github.ref_name }}
 
       #- name: Deploy
       #  uses: dagger/dagger-for-github@v6

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"dagger/sunangel/internal/dagger"
 )
@@ -30,6 +31,10 @@ func (m *Sunangel) PublishImages(
 		return nil
 	}
 
+	errChan := make(chan error)
+	done := make(chan any)
+	var wg sync.WaitGroup
+
 	for _, pair := range []struct {
 		image *dagger.Container
 		name  string
@@ -39,10 +44,26 @@ func (m *Sunangel) PublishImages(
 		{m.ImageHorizonCompute(ctx, source), "horizon-compute"},
 		{m.ImageSkyService(ctx, source), "sky-service"},
 	} {
-		err := publishImage(pair.image, pair.name)
-		if err != nil {
-			return err
-		}
+		wg.Add(1)
+		go func() {
+			err := publishImage(pair.image, pair.name)
+			if err != nil {
+				errChan <- err
+			}
+
+			wg.Done()
+		}()
+	}
+
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+
+	select {
+	case err := <-errChan:
+		return err
+	case <-done:
 	}
 
 	return nil
