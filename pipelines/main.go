@@ -15,8 +15,8 @@ const (
 
 type Sunangel struct{}
 
-// Run the checking and testing pipeline
-func (m *Sunangel) Pipeline(
+// Build backend and run extensive testing
+func (m *Sunangel) BuildAndTestBackend(
 	ctx context.Context,
 	source *dagger.Directory,
 ) error {

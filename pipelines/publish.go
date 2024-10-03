@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"sync"
 
 	"dagger/sunangel/internal/dagger"
 )
@@ -36,10 +35,6 @@ func (m *Sunangel) PublishImages(
 		return nil
 	}
 
-	errChan := make(chan error)
-	done := make(chan any)
-	var wg sync.WaitGroup
-
 	for _, pair := range []struct {
 		image *dagger.Container
 		name  string
@@ -49,32 +44,16 @@ func (m *Sunangel) PublishImages(
 		{m.ImageHorizonCompute(ctx, source), "horizon-compute"},
 		{m.ImageSkyService(ctx, source), "sky-service"},
 	} {
-		wg.Add(1)
-		go func() {
-			err := publishImage(pair.image, pair.name)
-			if err != nil {
-				errChan <- err
-			}
-
-			wg.Done()
-		}()
-	}
-
-	go func() {
-		wg.Wait()
-		close(done)
-	}()
-
-	select {
-	case err := <-errChan:
-		return err
-	case <-done:
+		err := publishImage(pair.image, pair.name)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-// Build the image of the api service
+// Build image of the api service
 func (m *Sunangel) ImageApi(
 	ctx context.Context,
 	source *dagger.Directory,
@@ -86,7 +65,7 @@ func (m *Sunangel) ImageApi(
 		WithExec([]string{"/server"})
 }
 
-// Build the image of the spot-finder service
+// Build image of the spot-finder service
 func (m *Sunangel) ImageSpotFinder(
 	ctx context.Context,
 	source *dagger.Directory,
@@ -94,7 +73,7 @@ func (m *Sunangel) ImageSpotFinder(
 	return buildRustServiceImage(ctx, source, "spot-finder")
 }
 
-// Build the image of the sky-service service
+// Build image of the sky-service service
 func (m *Sunangel) ImageSkyService(
 	ctx context.Context,
 	source *dagger.Directory,

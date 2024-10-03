@@ -3,8 +3,8 @@ name: Build and Test
 on: push
 
 jobs:
-  build_and_test:
-    name: Build and Test All
+  build_and_test_backend:
+    name: Build and Test Backend
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -14,22 +14,22 @@ jobs:
         with:
           version: "latest"
           verb: call
-          args: pipeline --source=.
+          args: build-and-test-backend --source=.
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
 
-  publish_and_deploy:
-    name: Publish and Deploy
+  publish_and_deploy_backend:
+    name: Publish and Deploy Backend
     runs-on: ubuntu-latest
 
     needs:
-      - build_and_test
+      - build_and_test_backend
 
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Publish Images
+      - name: Publish Backend Images
         uses: dagger/dagger-for-github@v6
         with:
           version: "latest"
@@ -60,3 +60,39 @@ jobs:
           username: ${{ secrets.KUSOMISO_USERNAME }}
           key: ${{ secrets.KUSOMISO_SSH_KEY }}
           script: ./deploy.sh
+
+  build_and_test_frontend:
+    name: Build and Test Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 21.x
+
+      - name: Build frontend
+        run: |
+          cd front
+          npm ci
+          npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./front/dist
+
+  deploy_frontend:
+    name: Deploay Frontend
+    runs-on: ubuntu-latest
+
+    needs:
+      - build_and_test_frontend
+
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+
+    steps:
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
