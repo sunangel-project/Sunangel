@@ -27,6 +27,8 @@ jobs:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
 
     steps:
+      - uses: actions/checkout@v4
+
       - name: Publish Images
         uses: dagger/dagger-for-github@v6
         with:
