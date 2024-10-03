@@ -15,7 +15,7 @@ const (
 
 type Sunangel struct{}
 
-// Run the pipeline
+// Run the checking and testing pipeline
 func (m *Sunangel) Pipeline(
 	ctx context.Context,
 	source *dagger.Directory,
@@ -98,48 +98,4 @@ func (m *Sunangel) Test(
 	return cachedRustBuilder(source).
 		WithExec([]string{"cargo", "test"}).
 		Stdout(ctx)
-}
-
-// Build the image of the api service
-func (m *Sunangel) ImageApi(
-	ctx context.Context,
-	source *dagger.Directory,
-) *dagger.Container {
-	executable := buildRustServiceExecutable(ctx, source, "api")
-
-	return createServiceContainer(executable).
-		WithExposedPort(6660).
-		WithExec([]string{"/server"})
-}
-
-// Build the image of the spot-finder service
-func (m *Sunangel) ImageSpotFinder(
-	ctx context.Context,
-	source *dagger.Directory,
-) *dagger.Container {
-	return buildRustServiceImage(ctx, source, "spot-finder")
-}
-
-// Build the image of the sky-service service
-func (m *Sunangel) ImageSkyService(
-	ctx context.Context,
-	source *dagger.Directory,
-) *dagger.Container {
-	return buildRustServiceImage(ctx, source, "sky-service")
-}
-
-// Build image of the horizon-get service
-func (m *Sunangel) ImageHorizonGet(
-	ctx context.Context,
-	source *dagger.Directory,
-) *dagger.Container {
-	return buildGoServiceImage(ctx, source, "horizon/get", "horizon-get")
-}
-
-// Build image of the horizon-compute service
-func (m *Sunangel) ImageHorizonCompute(
-	ctx context.Context,
-	source *dagger.Directory,
-) *dagger.Container {
-	return buildGoServiceImage(ctx, source, "horizon/compute", "horizon-compute")
 }

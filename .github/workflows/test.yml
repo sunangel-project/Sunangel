@@ -4,18 +4,46 @@ on: push
 
 jobs:
   build_and_test:
-    name: Build and Test
+    name: Build and Test All
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v2
 
-      - name: Build
-        run: cargo build
+      - name: Build and Test All
+        uses: dagger/dagger-for-github@v6
+        with:
+          version: "latest"
+          verb: call
+          args: pipeline --source=.
+          cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
 
-      - name: Test
-        run: cargo test
-      
-      - name: Lint
-        run: cargo clippy -- -D warnings
+      - name: Publish Images
+        uses: dagger/dagger-for-github@v6
+        with:
+          version: "latest"
+          verb: call
+          args: publish-images --source=. --actor=$GITHUB_ACTOR --token=env:GITHUB_TOKEN
+          cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ github.token }}
+
+      #- name: Deploy
+      #  uses: dagger/dagger-for-github@v6
+      #  with:
+      #    version: "latest"
+      #    verb: call
+      #    args: deploy --source=. --host=env:HOST --username=env:USERNAME --key=env:KEY
+      #    cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+      #  env:
+      #    HOST: ${{ secrets.KUSOMISO_HOST }}
+      #    USERNAME: ${{ secrets.KUSOMISO_USERNAME }}
+      #    KEY: ${{ secrets.KUSOMISO_SSH_KEY }}
+
+      - name: Deploy backend on kusomiso
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.KUSOMISO_HOST }}
+          username: ${{ secrets.KUSOMISO_USERNAME }}
+          key: ${{ secrets.KUSOMISO_SSH_KEY }}
+          script: ./deploy.sh
