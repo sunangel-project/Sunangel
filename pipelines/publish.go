@@ -62,7 +62,7 @@ func (m *Sunangel) ImageApi(
 
 	return createServiceContainer(executable).
 		WithExposedPort(6660).
-		WithExec([]string{"/server"})
+		WithEntrypoint([]string{"/server"})
 }
 
 // Build image of the spot-finder service
