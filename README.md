@@ -12,7 +12,7 @@
 Run with [dagger](https://dagger.io)
 
 ``` sh
-dagger call local-manual-testing --source=. up --ports 6660:6660
+dagger call local-manual-testing --source=. up --ports=6660:6660
 ```
 
 ### Frontend

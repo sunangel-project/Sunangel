@@ -3,11 +3,11 @@ use chrono_tz::Tz;
 use juniper::{GraphQLEnum, GraphQLInputObject, GraphQLObject};
 use serde::{Deserialize, Serialize};
 
-////////////
-/// NATS ///
-////////////
+///////////
+// NATS ///
+///////////
 
-/// In
+// In
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Part {
@@ -40,9 +40,9 @@ pub struct SearchError {
     pub sender: String,
 }
 
-///////////////
-/// GraphQL ///
-///////////////
+//////////////
+// GraphQL ///
+//////////////
 
 // Out
 
@@ -129,8 +129,8 @@ pub struct SpotsSuccess {
     pub spot: APISpot,
 }
 
-//////////////////////////////////////////////////////////////////////////////
-/// Search
+/////////////////////////////////////////////////////////////////////////////
+// Search
 
 // In
 
@@ -148,11 +148,11 @@ pub struct APISearchQuery {
     pub upper_right: LocationIn,
 }
 
-////////////
-/// NATS ///
-////////////
+///////////
+// NATS ///
+///////////
 
-/// Out
+// Out
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SearchQuery {
