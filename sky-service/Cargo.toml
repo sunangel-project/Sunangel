@@ -10,12 +10,12 @@ anyhow = "1.0.95"
 async-nats = "0.38.0"
 bytes = "1.9.0"
 chrono = { version = "0.4.39", features = ["serde"] }
-chrono-tz = { version = "0.10.0", features = ["serde"] }
+chrono-tz = { version = "0.10.1", features = ["serde"] }
 env_logger = "0.11.6"
 futures-util = "0.3.31"
-log = "0.4.22"
+log = "0.4.25"
 messages-common = { path = "../messages-common" }
 serde = "1.0.217"
-serde_json = "1.0.134"
-thiserror = "2.0.9"
-tokio = { version = "1.42.0", features = ["rt-multi-thread"] }
+serde_json = "1.0.137"
+thiserror = "2.0.11"
+tokio = { version = "1.43.0", features = ["rt-multi-thread"] }
