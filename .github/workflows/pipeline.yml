@@ -41,26 +41,6 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           VERSION: ${{ github.ref_name }}
 
-      #- name: Deploy
-      #  uses: dagger/dagger-for-github@v6
-      #  with:
-      #    version: "latest"
-      #    verb: call
-      #    args: deploy --source=. --host=env:HOST --username=env:USERNAME --key=env:KEY
-      #    cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
-      #  env:
-      #    HOST: ${{ secrets.KUSOMISO_HOST }}
-      #    USERNAME: ${{ secrets.KUSOMISO_USERNAME }}
-      #    KEY: ${{ secrets.KUSOMISO_SSH_KEY }}
-
-      - name: Deploy backend on kusomiso
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.KUSOMISO_HOST }}
-          username: ${{ secrets.KUSOMISO_USERNAME }}
-          key: ${{ secrets.KUSOMISO_SSH_KEY }}
-          script: ./deploy.sh
-
   build_and_test_frontend:
     name: Build and Test Frontend
     runs-on: ubuntu-latest
