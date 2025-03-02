@@ -41,6 +41,14 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           VERSION: ${{ github.ref_name }}
 
+      - name: Deploy backend on kusomiso
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.KUSOMISO_HOST }}
+          username: ${{ secrets.KUSOMISO_USERNAME }}
+          key: ${{ secrets.KUSOMISO_SSH_KEY }}
+          script: ./deploy.sh
+
   build_and_test_frontend:
     name: Build and Test Frontend
     runs-on: ubuntu-latest
