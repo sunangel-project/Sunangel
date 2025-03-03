@@ -24,7 +24,7 @@ const (
 	RES_OUT_STREAM = "HORIZONS"
 	RES_OUT_Q      = RES_OUT_STREAM + ".sunsets"
 
-	ERR_STREAM = "ERROR"
+	ERR_STREAM = "ERRORS"
 )
 
 type Communications struct {
