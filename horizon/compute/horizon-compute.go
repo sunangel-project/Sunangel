@@ -76,6 +76,7 @@ func main() {
 				"error while handling message: %s\nmessage: %v",
 				err, string(msg.Data()),
 			)
+			//			msg.Nak()
 		}
 	})
 	if err != nil {

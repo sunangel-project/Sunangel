@@ -12,14 +12,15 @@ func (m *Sunangel) LocalManualTesting(
 	source *dagger.Directory,
 ) (*dagger.Container, error) {
 	natsService := dag.Container().
-		From("nats").
-		WithExposedPort(4222).
-		WithExposedPort(8222).
-		WithDefaultArgs([]string{
+		From("nats:latest").
+		WithEntrypoint([]string{
+			"/nats-server",
 			"--jetstream",
 			"--name", "main",
 			"--http_port", "8222",
 		}).
+		WithExposedPort(4222).
+		WithExposedPort(8222).
 		AsService()
 
 	_, err := buildSpotFinderService(ctx, source, natsService).Start(ctx)
@@ -83,7 +84,7 @@ func buildRustService(
 		WithServiceBinding("nats", natsService).
 		WithEnvVariable("NATS_HOST", "nats").
 		WithEnvVariable("RUST_LOG", "debug").
-		WithExec([]string{"/server"}).
+		WithEntrypoint([]string{"/server"}).
 		AsService()
 }
 
@@ -116,6 +117,6 @@ func buildGoService(
 	return createServiceContainer(executable).
 		WithServiceBinding("nats", natsService).
 		WithEnvVariable("NATS_HOST", "nats").
-		WithExec([]string{"/server"}).
+		WithEntrypoint([]string{"/server"}).
 		AsService()
 }
