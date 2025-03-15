@@ -15,6 +15,7 @@ require (
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/nats-io/nkeys v0.4.10 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
+	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/sunangel-project/angle v0.1.0 // indirect
 	github.com/sunangel-project/directory v0.1.0 // indirect
 	github.com/tkrajina/go-elevations v0.1.0 // indirect

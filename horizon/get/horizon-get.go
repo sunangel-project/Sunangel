@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/nats-io/nats.go/jetstream"
+	"github.com/sirupsen/logrus"
 
 	"sunangel/horizon/common"
 	"sunangel/horizon/messages"
@@ -23,6 +24,9 @@ const (
 )
 
 func main() {
+	logrus.SetLevel(logrus.TraceLevel)
+	logrus.Infof("Starting up (version %s)", common.BACKEND_VERSION)
+
 	nc := messaging.Connect()
 	defer nc.Close()
 
@@ -62,7 +66,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	log.Print("Setup complete, listening to " + IN_Q)
+	logrus.Infof("Setup complete, listening to " + IN_Q)
 
 	_, err = cons.Consume(func(msg jetstream.Msg) {
 		if err := handleMessage(msg, coms); err != nil {

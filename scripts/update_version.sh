@@ -1,6 +1,7 @@
 #!/bin/bash
 
 rust_versions_file="version-common/src/lib.rs"
+go_versions_file="horizon/common/version.go"
 frontend_versions_file="front/src/main.ts"
 readme="README.md"
 
@@ -32,6 +33,10 @@ function update_version_in_rust_versions_file_fun {
     sed -i "s#\(${prefix}_VERSION: &str = \)\".*\"#\1\"$version\"#" $rust_versions_file
 }
 
+function update_version_in_go_versions_file_fun {
+    sed -i "s#\(const BACKEND_VERSION = \)\".*\"#\1\"$version\"#" $go_versions_file
+}
+
 function join_by {
     local d=${1-} f=${2-}
     if shift 2; then
@@ -51,6 +56,7 @@ function update_version_in_frontend_version_file_fun {
 
 function update_version_fun {
     update_version_in_rust_versions_file_fun "BACKEND"
+    update_version_in_go_versions_file_fun
     update_version_in_readme_fun "Version"
     update_version_in_frontend_version_file_fun
 }
