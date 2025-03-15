@@ -43,6 +43,7 @@ func (m *Sunangel) PublishImages(
 		{m.ImageHorizonGet(ctx, source), "horizon-get"},
 		{m.ImageHorizonCompute(ctx, source), "horizon-compute"},
 		{m.ImageSkyService(ctx, source), "sky-service"},
+		{m.ImageSpotFinder(ctx, source), "spot-finder"},
 	} {
 		err := publishImage(pair.image, pair.name)
 		if err != nil {
