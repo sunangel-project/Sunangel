@@ -50,6 +50,7 @@ async fn subscriptions(
 async fn main() -> Result<(), async_nats::Error> {
     env_logger::init();
 
+    info!("Starting up (version {})", version_common::BACKEND_VERSION);
     info!("Server running on http://localhost:6660, playground: http://localhost:6660/playground");
 
     let mut server = HttpServer::new(move || {

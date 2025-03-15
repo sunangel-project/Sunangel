@@ -39,6 +39,8 @@ const ERR_STREAM: &str = "ERRORS";
 pub async fn main() {
     env_logger::init();
 
+    info!("Starting up (version {})", version_common::BACKEND_VERSION);
+
     let jetstream = messages_common::connect_jetstream().await;
 
     messages_common::create_stream(&jetstream, OUT_STREAM).await;

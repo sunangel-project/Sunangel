@@ -3,6 +3,7 @@
 resolver = "2"
 
 members = [
+    "version-common",
     "messages-common",
     "api",
     "spot-finder",

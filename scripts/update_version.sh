@@ -1,6 +1,6 @@
 #!/bin/bash
 
-api_versions_file="api/src/api.rs"
+rust_versions_file="version-common/src/lib.rs"
 frontend_versions_file="front/src/main.ts"
 readme="README.md"
 
@@ -13,13 +13,13 @@ display_help() {
 
 if [ $# -gt 1 ]; then
     case "$1" in
-        "--api")
-            update_api_version="true"
-            shift
-            ;;
-        *)
-            display_help
-            ;;
+    "--api")
+        update_api_version="true"
+        shift
+        ;;
+    *)
+        display_help
+        ;;
     esac
 fi
 
@@ -27,16 +27,16 @@ version="$1"
 
 #TODO: validate version?
 
-function update_version_in_api_file_fun {
+function update_version_in_rust_versions_file_fun {
     local prefix="$1"
-    sed -i "s#\(${prefix}_VERSION: &str = \)\".*\"#\1\"$version\"#" $api_versions_file
+    sed -i "s#\(${prefix}_VERSION: &str = \)\".*\"#\1\"$version\"#" $rust_versions_file
 }
 
 function join_by {
-  local d=${1-} f=${2-}
-  if shift 2; then
-    printf %s "$f" "${@/#/$d}"
-  fi
+    local d=${1-} f=${2-}
+    if shift 2; then
+        printf %s "$f" "${@/#/$d}"
+    fi
 }
 
 function update_version_in_readme_fun {
@@ -50,13 +50,13 @@ function update_version_in_frontend_version_file_fun {
 }
 
 function update_version_fun {
-    update_version_in_api_file_fun "BACKEND"
+    update_version_in_rust_versions_file_fun "BACKEND"
     update_version_in_readme_fun "Version"
     update_version_in_frontend_version_file_fun
 }
 
 function update_api_version_fun {
-    update_version_in_api_file_fun "API"
+    update_version_in_rust_versions_file_fun "API"
     update_version_in_readme_fun "API"
 }
 

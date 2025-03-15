@@ -46,17 +46,14 @@ impl Context {
 
 pub struct Query;
 
-const API_VERSION: &str = "v0.2.0";
-const BACKEND_VERSION: &str = "v0.2.11";
-
 #[graphql_object(context = Context)]
 impl Query {
     fn api_version() -> &'static str {
-        API_VERSION
+        version_common::API_VERSION
     }
 
     fn backend_version() -> &'static str {
-        BACKEND_VERSION
+        version_common::BACKEND_VERSION
     }
 }
 
