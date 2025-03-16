@@ -71,9 +71,9 @@ func main() {
 
 	_, err = cons.Consume(func(msg jetstream.Msg) {
 		if err := handleMessage(msg, coms); err != nil {
-			log.Printf(
-				"Error while handling message: %s\nmessage: %v",
-				err, string(msg.Data()),
+			logrus.WithError(err).Errorf(
+				"Error while handling message: %v",
+				string(msg.Data()),
 			)
 			msg.Nak()
 		}
@@ -112,13 +112,16 @@ func handleRequest(
 	req messages.HorizonRequest,
 	coms *common.Communications,
 ) error {
+	logrus.Trace("Handling the request")
+
 	var err error
 	key := common.HorizonKey(req.Spot.Loc, 500)
+
 	logrus.Tracef("Checking for horizon key %s - belonging to location %#v", key, req.Spot.Loc)
 	if _, err := coms.KvHor.Get(coms.Ctx, key); err != nil {
 		logrus.Trace("Received errror when checking for horizon")
 		if !common.IsKeyDoesntExistsError(err) {
-			logrus.Tracef("Error %s was not a KeyDoesntExistError", err)
+			logrus.WithError(err).Trace("Error was not a KeyDoesntExistError")
 			return err
 		}
 
@@ -153,6 +156,7 @@ func handleMissingHorizon(
 			return err
 		}
 
+		logrus.Tracef("Queueing request to compute horizon %s", key)
 		if _, err := coms.Js.Publish(
 			coms.Ctx,
 			common.REQ_COMP_Q,
@@ -161,9 +165,7 @@ func handleMissingHorizon(
 			return err
 		}
 
-		if err := msg.Ack(); err != nil {
-			return err
-		}
+		requeueGetRequestAndLog(msg, requestId, key, coms)
 	}
 	return nil
 }
@@ -175,19 +177,19 @@ func requeueGetRequestAndLog(
 	coms *common.Communications,
 ) {
 	if err := requeueGetRequest(msg, key, coms); err != nil {
-		logrus.Errorf(
-			"Error while handling message: %s\nmessage: %v",
-			err, string(msg.Data()),
+		logrus.WithError(err).Errorf(
+			"Error while handling message: %v",
+			string(msg.Data()),
 		)
 
-		if err := common.SendError(
+		if sendErr := common.SendError(
 			string(msg.Data()),
 			err,
 			requestId,
 			GROUP,
 			coms,
-		); err != nil {
-			logrus.Errorf("Could not send out error: %s", err)
+		); sendErr != nil {
+			logrus.WithError(sendErr).Errorf("Could not send out error '%s'", err)
 		}
 
 		_ = msg.Nak() // Ignoring error
@@ -205,9 +207,6 @@ func requeueGetRequest(
 	}
 
 	updates := watch.Updates()
-	for <-updates != nil {
-		logrus.Trace("stuck in this loop here: for <-updates != nil")
-	}
 
 	timer := time.NewTimer(REQUEUE_SECONDS * time.Second)
 
@@ -216,6 +215,11 @@ func requeueGetRequest(
 		case <-timer.C:
 			return msg.Nak()
 		case update := <-updates:
+			logrus.WithField("update", update).Tracef("Received update: %#v", update)
+			if update == nil {
+				break
+			}
+
 			isInCompute, err := common.DecodeIsIncomputeEntry(update)
 			if err != nil {
 				return err

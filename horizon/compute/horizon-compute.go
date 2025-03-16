@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"sync"
+	"time"
 
 	"github.com/nats-io/nats.go/jetstream"
 	"github.com/sirupsen/logrus"
@@ -66,6 +67,7 @@ func main() {
 
 	consConfig := jetstream.ConsumerConfig{
 		Name:           GROUP,
+		AckWait:        2 * time.Minute,
 		FilterSubjects: []string{IN_Q},
 	}
 	cons, err := messaging.ConnectOrCreateConsumer(ctx, stream, GROUP, consConfig)
@@ -76,9 +78,9 @@ func main() {
 
 	_, err = cons.Consume(func(msg jetstream.Msg) {
 		if err := handleMessage(msg, coms); err != nil {
-			logrus.Errorf(
-				"error while handling message: %s\nmessage: %v",
-				err, string(msg.Data()),
+			logrus.WithError(err).Errorf(
+				"Error while handling message: %v",
+				string(msg.Data()),
 			)
 			msg.Nak()
 		}
@@ -129,7 +131,7 @@ func handleRequest(
 		Longitude: req.Spot.Loc.Lon,
 	}
 	logrus.Infof(
-		"Computing horizon for spot %s\ncoordinates: %v\nradius: %d",
+		"Computing horizon for spot %s, coordinates: %v, radius: %d",
 		key, loc, radius,
 	)
 	hor := horizon.NewHorizon(&loc, radius)
@@ -142,9 +144,11 @@ func handleRequest(
 		return err
 	}
 
-	if err := common.ForwardHorizonKey(msg, key, coms); err != nil {
-		return err
-	}
+	/*
+		if err := common.ForwardHorizonKey(msg, key, coms); err != nil {
+			return err
+		}
+	*/
 
 	return msg.Ack()
 }

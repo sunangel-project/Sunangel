@@ -104,13 +104,14 @@ func IsHorizonInCompute(
 	logrus.Tracef("Checking whether horizon %s is in compute", key)
 	isInComputeEntry, err := coms.KvComp.Get(coms.Ctx, key)
 	if err != nil {
-		logrus.Trace("Received errror when checking for horizon")
-		if IsKeyDoesntExistsError(err) {
+		logrus.WithError(err).Trace("Received errror when checking for horizon")
+		if !IsKeyDoesntExistsError(err) {
 			logrus.Tracef("Error %s was not a KeyDoesntExistError", err)
-			return false, nil
+			return false, err
 		}
 
-		return false, err
+		logrus.Trace("Received error was KeyDoesntExistError, returning false")
+		return false, nil
 	}
 
 	return DecodeIsIncomputeEntry(isInComputeEntry)
