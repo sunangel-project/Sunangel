@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"sync"
 	"time"
 
 	"github.com/nats-io/nats.go/jetstream"
@@ -33,6 +33,7 @@ const (
 func main() {
 	logrus.SetLevel(logrus.TraceLevel) // TODO: set via environment variable
 	logrus.Infof("Starting up (version %s)", common.BACKEND_VERSION)
+	defer logrus.Info("Shutting down")
 
 	nc := messaging.Connect()
 	defer nc.Close()
@@ -72,31 +73,32 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	logrus.Infof("Setup complete, listening to " + IN_Q)
+	logrus.Infof("Setup complete, listening to %s", IN_Q)
 
 	_, err = cons.Consume(func(msg jetstream.Msg) {
 		if err := handleMessage(msg, coms); err != nil {
-			log.Printf(
+			logrus.Errorf(
 				"error while handling message: %s\nmessage: %v",
 				err, string(msg.Data()),
 			)
-			//			msg.Nak()
+			msg.Nak()
 		}
 	})
 	if err != nil {
 		panic(err)
 	}
 
-	for { // avoid shutdown
-		time.Sleep(time.Hour)
-	}
+	// avoid shutdown
+	var wg sync.WaitGroup
+	wg.Add(1)
+	wg.Wait()
 }
 
 func handleMessage(
 	msg jetstream.Msg,
 	coms *common.Communications,
 ) error {
-	log.Printf("received message: %s", string(msg.Data()))
+	logrus.Debugf("received message: %s", string(msg.Data()))
 
 	var req messages.HorizonRequest
 	if err := json.Unmarshal(msg.Data(), &req); err != nil {
@@ -108,7 +110,7 @@ func handleMessage(
 	if err != nil {
 		err := common.SendError(string(msg.Data()), err, req.RequestId, GROUP, coms)
 		if err != nil {
-			log.Printf("could not send out error: %s", err)
+			logrus.Errorf("could not send out error: %s", err)
 		}
 	}
 
@@ -127,7 +129,7 @@ func handleRequest(
 		Latitude:  req.Spot.Loc.Lat,
 		Longitude: req.Spot.Loc.Lon,
 	}
-	log.Printf(
+	logrus.Infof(
 		"Computing horizon for spot %s\ncoordinates: %v\nradius: %d",
 		key, loc, radius,
 	)

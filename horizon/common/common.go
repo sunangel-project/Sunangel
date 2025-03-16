@@ -10,6 +10,7 @@ import (
 
 	"github.com/nats-io/nats.go/jetstream"
 	uuid "github.com/satori/go.uuid"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -100,9 +101,12 @@ func IsHorizonInCompute(
 	key string,
 	coms *Communications,
 ) (bool, error) {
+	logrus.Tracef("Checking whether horizon %s is in compute", key)
 	isInComputeEntry, err := coms.KvComp.Get(coms.Ctx, key)
 	if err != nil {
+		logrus.Trace("Received errror when checking for horizon")
 		if IsKeyDoesntExistsError(err) {
+			logrus.Tracef("Error %s was not a KeyDoesntExistError", err)
 			return false, nil
 		}
 
@@ -115,10 +119,13 @@ func IsHorizonInCompute(
 func DecodeIsIncomputeEntry(
 	entry jetstream.KeyValueEntry,
 ) (bool, error) {
+	logrus.Trace("Decoding entry is in compute")
 	if entry.Operation() == jetstream.KeyValueDelete {
+		logrus.Trace("Operation was KeyValueDelete")
 		return false, nil
 	}
 
+	logrus.Tracef("Parsing bool from %s", string(entry.Value()))
 	isInCompute, err := strconv.ParseBool(
 		string(entry.Value()),
 	)

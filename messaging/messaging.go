@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
+	"github.com/sirupsen/logrus"
 )
 
 func Connect() *nats.Conn {
@@ -83,7 +83,7 @@ func ConnectOrCreateConsumer(
 func ConnectOrCreateKV(ctx context.Context, js jetstream.JetStream, name string) jetstream.KeyValue {
 	kv, err := js.KeyValue(ctx, name)
 	if err != nil {
-		log.Printf("Bucket %s not found, creating", name)
+		logrus.Infof("Bucket %s not found, creating", name)
 		kv, err = js.CreateKeyValue(ctx, jetstream.KeyValueConfig{
 			Bucket: name,
 		})
