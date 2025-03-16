@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"sync"
-	"time"
 
 	"github.com/nats-io/nats.go/jetstream"
 	"github.com/sirupsen/logrus"
@@ -67,7 +66,6 @@ func main() {
 
 	consConfig := jetstream.ConsumerConfig{
 		Durable:        GROUP,
-		AckWait:        2 * time.Minute,
 		FilterSubjects: []string{IN_Q},
 	}
 	cons, err := messaging.ConnectOrCreateConsumer(ctx, stream, GROUP, consConfig)
@@ -144,11 +142,9 @@ func handleRequest(
 		return err
 	}
 
-	/*
-		if err := common.ForwardHorizonKey(msg, key, coms); err != nil {
-			return err
-		}
-	*/
+	if err := common.ForwardHorizonKey(msg, key, coms); err != nil {
+		return err
+	}
 
 	return msg.Ack()
 }

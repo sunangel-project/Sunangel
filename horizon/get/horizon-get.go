@@ -165,7 +165,9 @@ func handleMissingHorizon(
 			return err
 		}
 
-		requeueGetRequestAndLog(msg, requestId, key, coms)
+		if err := msg.Ack(); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -215,7 +217,7 @@ func requeueGetRequest(
 		case <-timer.C:
 			return msg.Nak()
 		case update := <-updates:
-			logrus.WithField("update", update).Tracef("Received update: %#v", update)
+			logrus.WithField("update", update).Trace("Received update")
 			if update == nil {
 				break
 			}
