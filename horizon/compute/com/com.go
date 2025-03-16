@@ -1,11 +1,8 @@
 package com
 
 import (
-	"context"
 	"fmt"
-	"sunangel/messaging"
 
-	"github.com/nats-io/nats.go/jetstream"
 	uuid "github.com/satori/go.uuid"
 	"github.com/sunangel-project/horizon/location"
 )
@@ -49,18 +46,6 @@ type OutMessage struct {
 	Spot      SpotSubMessage `json:"spot"`
 	RequestId string         `json:"request_id"`
 	Horizon   string         `json:"horizon"`
-}
-
-func SetupStreams(ctx context.Context, js jetstream.JetStream) error {
-	if err := messaging.CreateStream(ctx, js, OUT_STREAM); err != nil {
-		return err
-	}
-
-	if err := messaging.CreateStream(ctx, js, ERR_STREAM); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func HorizonKey(loc location.Location, radius int) string {
