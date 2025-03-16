@@ -77,11 +77,23 @@ func (m *Sunangel) Lint(
 	ctx context.Context,
 	source *dagger.Directory,
 ) (string, error) {
-	// TODO: lint go source code
+	goLintResults, err := cachedGoBuilder(source).
+		WithExec([]string{"golangci-lint", "run"}).
+		Stdout(ctx)
 
-	return cachedRustBuilder(source).
+	if err != nil {
+		return "", err
+	}
+
+	rustLintResults, err := cachedRustBuilder(source).
 		WithExec([]string{"cargo", "clippy", "--", "-D", "warnings"}).
 		Stdout(ctx)
+
+	if err != nil {
+		return "", err
+	}
+
+	return goLintResults + "\n" + rustLintResults, nil
 }
 
 // Run unit tests
@@ -89,9 +101,21 @@ func (m *Sunangel) Test(
 	ctx context.Context,
 	source *dagger.Directory,
 ) (string, error) {
-	// TODO: run go tests
+	goTestResults, err := cachedGoBuilder(source).
+		WithExec([]string{"go", "test", "./..."}).
+		Stdout(ctx)
 
-	return cachedRustBuilder(source).
+	if err != nil {
+		return "", err
+	}
+
+	rustTestResults, err := cachedRustBuilder(source).
 		WithExec([]string{"cargo", "test"}).
 		Stdout(ctx)
+
+	if err != nil {
+		return "", err
+	}
+
+	return goTestResults + "\n" + rustTestResults, nil
 }

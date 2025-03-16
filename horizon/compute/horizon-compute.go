@@ -80,7 +80,7 @@ func main() {
 				"Error while handling message: %v",
 				string(msg.Data()),
 			)
-			msg.Nak()
+			_ = msg.Nak()
 		}
 	})
 	if err != nil {

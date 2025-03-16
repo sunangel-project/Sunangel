@@ -75,7 +75,7 @@ func main() {
 				"Error while handling message: %v",
 				string(msg.Data()),
 			)
-			msg.Nak()
+			_ = msg.Nak()
 		}
 	})
 	if err != nil {
@@ -113,8 +113,6 @@ func handleRequest(
 	coms *common.Communications,
 ) error {
 	logrus.Trace("Handling the request")
-
-	var err error
 	key := common.HorizonKey(req.Spot.Loc, 500)
 
 	logrus.Tracef("Checking for horizon key %s - belonging to location %#v", key, req.Spot.Loc)
@@ -126,6 +124,9 @@ func handleRequest(
 		}
 
 		err = handleMissingHorizon(msg, req.RequestId, key, coms)
+		if err != nil {
+			return err
+		}
 	} else {
 		logrus.Trace("Forwarding the horizon key")
 		if err := common.ForwardHorizonKey(msg, key, coms); err != nil {
@@ -133,8 +134,12 @@ func handleRequest(
 		}
 
 		err = msg.Ack()
+		if err != nil {
+			return err
+		}
 	}
-	return err
+
+	return nil
 }
 
 func handleMissingHorizon(

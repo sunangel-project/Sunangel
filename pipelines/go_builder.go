@@ -7,6 +7,11 @@ import (
 	"dagger/sunangel/internal/dagger"
 )
 
+const (
+	golangciVersion = "v1.64"
+	golangciLintURL = "github.com/golangci/golangci-lint/cmd/golangci-lint@" + golangciVersion
+)
+
 func buildGoServiceImage(
 	ctx context.Context,
 	source *dagger.Directory,
@@ -44,6 +49,9 @@ func cachedGoBuilder(
 		WithEnvVariable("GOMODCACHE", "/go/pkg/mod").
 		WithMountedCache("/go/build-cache", dag.CacheVolume("go-build")).
 		WithEnvVariable("GOCACHE", "/go/build-cache").
+
+		// Linter
+		WithExec([]string{"go", "install", golangciLintURL}).
 
 		// Execute tests
 		WithDirectory("/src", source).

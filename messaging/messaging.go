@@ -45,7 +45,10 @@ func CreateStream(ctx context.Context, js jetstream.JetStream, name string) erro
 			return err
 		}
 
-		js.CreateStream(ctx, streamConfig)
+		_, err = js.CreateStream(ctx, streamConfig)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
