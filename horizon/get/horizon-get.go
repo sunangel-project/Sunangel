@@ -59,7 +59,7 @@ func main() {
 	}
 
 	consConfig := jetstream.ConsumerConfig{
-		Name:           GROUP,
+		Durable:        GROUP,
 		AckWait:        (REQUEUE_SECONDS + 10) * time.Second,
 		FilterSubjects: []string{IN_Q},
 	}
