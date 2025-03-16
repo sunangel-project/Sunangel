@@ -57,13 +57,9 @@ func (m *Sunangel) CheckGo(
 	ctx context.Context,
 	source *dagger.Directory,
 ) (string, error) {
-	return "", nil
-
-	/* TODO: fix go code
 	return cachedGoBuilder(source).
 		WithExec([]string{"go", "vet", "./..."}).
 		Stdout(ctx)
-	*/
 }
 
 // Checks that the rust code compiles

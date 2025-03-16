@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"sync"
-	"time"
 
 	"github.com/nats-io/nats.go/jetstream"
 	"github.com/sirupsen/logrus"

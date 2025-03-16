@@ -1,12 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
-
-	"github.com/sunangel-project/horizon"
-	"github.com/sunangel-project/horizon/location"
+	"os"
 )
 
 func main() {
@@ -19,22 +16,27 @@ func main() {
 
 	flag.Parse()
 
-	nc := messaging.Connect()
-	defer nc.Close()
-	js := messaging.JetStream(nc)
-	kv := messaging.KeyValueHorizon(js)
+	fmt.Print("Currently out of order")
+	os.Exit(1)
 
-	key := storage.HorizonKey(*location.NewLocation(lat, lon), radius)
-	horEntry, err := kv.Get(key)
-	if err != nil {
-		panic(err)
-	}
+	/*
+		nc := messaging.Connect()
+		defer nc.Close()
+		js := messaging.JetStream(nc)
+		kv := messaging.KeyValueHorizon(js)
 
-	alt, err := horizon.AltitudeFromBytes(horEntry.Value())
-	if err != nil {
-		panic(err)
-	}
+		key := storage.HorizonKey(*location.NewLocation(lat, lon), radius)
+		horEntry, err := kv.Get(key)
+		if err != nil {
+			panic(err)
+		}
 
-	b, _ := json.Marshal(alt)
-	fmt.Print(string(b))
+		alt, err := horizon.AltitudeFromBytes(horEntry.Value())
+		if err != nil {
+			panic(err)
+		}
+
+		b, _ := json.Marshal(alt)
+		fmt.Print(string(b))
+	*/
 }

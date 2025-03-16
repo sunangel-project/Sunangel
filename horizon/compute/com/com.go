@@ -1,10 +1,11 @@
 package com
 
 import (
+	"context"
 	"fmt"
 	"sunangel/messaging"
 
-	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
 	uuid "github.com/satori/go.uuid"
 	"github.com/sunangel-project/horizon/location"
 )
@@ -50,12 +51,12 @@ type OutMessage struct {
 	Horizon   string         `json:"horizon"`
 }
 
-func SetupStreams(js nats.JetStreamContext) error {
-	if err := messaging.CreateStream(js, OUT_STREAM); err != nil {
+func SetupStreams(ctx context.Context, js jetstream.JetStream) error {
+	if err := messaging.CreateStream(ctx, js, OUT_STREAM); err != nil {
 		return err
 	}
 
-	if err := messaging.CreateStream(js, ERR_STREAM); err != nil {
+	if err := messaging.CreateStream(ctx, js, ERR_STREAM); err != nil {
 		return err
 	}
 
