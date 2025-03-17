@@ -214,6 +214,9 @@ func requeueGetRequest(
 	}
 
 	updates := watch.Updates()
+	for nil != <-updates {
+	} // nil signals the end of historical data
+	// https://pkg.go.dev/github.com/nats-io/nats.go/jetstream#readme-watching-for-changes-on-a-bucket
 
 	timer := time.NewTimer(REQUEUE_SECONDS * time.Second)
 
@@ -222,10 +225,14 @@ func requeueGetRequest(
 		case <-timer.C:
 			return msg.Nak()
 		case update := <-updates:
-			logrus.WithField("update", update).Trace("Received update")
-			if update == nil {
+			if nil == update {
+				logrus.Warn("Received nil update in waiting loop. This should not happen, please review")
 				break
 			}
+			logrus.WithFields(logrus.Fields{
+				"operation": update.Operation(),
+				"value":     string(update.Value()),
+			}).Trace("Received update")
 
 			isInCompute, err := common.DecodeIsIncomputeEntry(update)
 			if err != nil {
