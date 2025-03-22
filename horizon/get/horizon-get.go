@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/nats-io/nats.go/jetstream"
 	"github.com/sirupsen/logrus"
 
@@ -24,7 +25,12 @@ const (
 )
 
 func main() {
-	logrus.SetLevel(logrus.TraceLevel)
+	err := godotenv.Load()
+	if err != nil {
+		panic(err)
+	}
+
+	logrus.SetLevel(logrus.TraceLevel) // TODO: set based on env variable
 	logrus.Infof("Starting up (version %s)", common.BACKEND_VERSION)
 	defer logrus.Info("Shutting down")
 

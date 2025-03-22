@@ -1,9 +1,12 @@
+use anyhow::Error;
+use dotenv::dotenv;
 use log::info;
 use messages_common::handle_messages;
 use sky_service::messaging::{self, handle_message, GROUP};
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), Error> {
+    dotenv()?;
     env_logger::init();
 
     info!("Starting up (version {})", version_common::BACKEND_VERSION);
@@ -21,5 +24,7 @@ async fn main() {
             Box::pin(async move { handle_message(&jetstream, &message, &store).await })
         }),
     )
-    .await
+    .await;
+
+    Ok(())
 }
