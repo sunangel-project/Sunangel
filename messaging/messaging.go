@@ -11,6 +11,21 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+func SetLogLevel() error {
+	levelString := os.Getenv("GO_LOG")
+	if levelString == "" {
+		return errors.New("env variable 'GO_LOG' is not defined")
+	}
+
+	level, err := logrus.ParseLevel(levelString)
+	if err != nil {
+		return fmt.Errorf("could not set log level: %w", err)
+	}
+
+	logrus.SetLevel(level)
+	return nil
+}
+
 func Connect() *nats.Conn {
 	natsURL := os.Getenv("NATS_HOST")
 	if natsURL == "" {

@@ -30,7 +30,11 @@ func main() {
 		panic(err)
 	}
 
-	logrus.SetLevel(logrus.TraceLevel) // TODO: set based on env variable
+	err = messaging.SetLogLevel()
+	if err != nil {
+		panic(err)
+	}
+
 	logrus.Infof("Starting up (version %s)", common.BACKEND_VERSION)
 	defer logrus.Info("Shutting down")
 
