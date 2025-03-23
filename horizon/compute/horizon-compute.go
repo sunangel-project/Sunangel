@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"sync"
 
 	"github.com/joho/godotenv"
@@ -107,23 +108,27 @@ func handleMessage(
 	msg jetstream.Msg,
 	coms *common.Communications,
 ) error {
-	logrus.Debugf("received message: %s", string(msg.Data()))
-
+	logrus.WithField("request", string(msg.Data())).Trace("Parsing the request")
 	var req messages.HorizonRequest
 	if err := json.Unmarshal(msg.Data(), &req); err != nil {
 		return err
 	}
+	logrus.WithFields(logrus.Fields{
+		"request": req.RequestId,
+		"spot":    req.Spot,
+	}).Info("Received request")
 
-	err := handleRequest(msg, req, coms)
-
-	if err != nil {
-		err := common.SendError(string(msg.Data()), err, req.RequestId, GROUP, coms)
-		if err != nil {
-			logrus.Errorf("could not send out error: %s", err)
+	if err := handleRequest(msg, req, coms); err != nil {
+		sendError := common.SendError(string(msg.Data()), err, req.RequestId, GROUP, coms)
+		if sendError != nil {
+			logrus.WithError(sendError).Errorf("Could not send out error '%w'", err)
+			if err := msg.Nak(); err != nil {
+				logrus.WithError(err).Error("Could not nak request message")
+			}
 		}
 	}
 
-	return err
+	return nil
 }
 
 func handleRequest(
@@ -138,23 +143,35 @@ func handleRequest(
 		Latitude:  req.Spot.Loc.Lat,
 		Longitude: req.Spot.Loc.Lon,
 	}
-	logrus.Infof(
-		"Computing horizon for spot %s, coordinates: %v, radius: %d",
-		key, loc, radius,
+	logrus.WithFields(logrus.Fields{
+		"request": req.RequestId,
+		"spot":    req.Spot,
+		"key":     key,
+		"log":     loc,
+		"radius":  radius,
+	}).Infof(
+		"Computing horizon",
 	)
 	hor := horizon.NewHorizon(&loc, radius)
 
+	logrus.WithField("key", key).Trace("Storing horizon in cache")
 	if _, err := coms.KvHor.Put(coms.Ctx, key, hor.AltitudeToBytes()); err != nil {
-		return err
+		return fmt.Errorf("could not store horizon in cache: %w", err)
 	}
 
+	logrus.WithField("key", key).Trace("Setting in compute to false")
 	if err := common.SetHorizonInCompute(key, false, coms); err != nil {
-		return err
+		return fmt.Errorf("could not set in compute to false: %w", err)
 	}
 
+	logrus.WithField("key", key).Trace("Sending out horizon key")
 	if err := common.ForwardHorizonKey(msg, key, coms); err != nil {
-		return err
+		return fmt.Errorf("could not send out horizon key: %w", err)
 	}
 
-	return msg.Ack()
+	if err := msg.Ack(); err != nil {
+		return fmt.Errorf("could not acknowledge request message: %w", err)
+	}
+
+	return nil
 }

@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"fmt"
 	"sync"
 	"time"
 
@@ -85,7 +85,12 @@ func main() {
 				"Error while handling message: %v",
 				string(msg.Data()),
 			)
-			_ = msg.Nak()
+			if err := msg.Nak(); err != nil {
+				logrus.
+					WithField("request", string(msg.Data())).
+					WithError(err).
+					Error("Could not nak request message")
+			}
 		}
 	})
 	if err != nil {
@@ -99,22 +104,30 @@ func main() {
 }
 
 func handleMessage(msg jetstream.Msg, coms *common.Communications) error {
-	logrus.Trace("Unmarshaling the request")
+	logrus.WithField("request", string(msg.Data())).Trace("Parsing the request")
 	var req messages.HorizonRequest
 	if err := json.Unmarshal(msg.Data(), &req); err != nil {
-		return err
+		return fmt.Errorf("could not parse request '%s': %w", string(msg.Data()), err)
 	}
+	logrus.
+		WithFields(logrus.Fields{
+			"id":   req.RequestId,
+			"spot": req.Spot,
+		}).
+		Info("Received request")
 
 	err := handleRequest(msg, req, coms)
-
 	if err != nil {
-		err := common.SendError(string(msg.Data()), err, req.RequestId, GROUP, coms)
-		if err != nil {
-			log.Printf("Could not send out error: %s", err)
+		sendError := common.SendError(string(msg.Data()), err, req.RequestId, GROUP, coms)
+		if sendError != nil {
+			logrus.
+				WithField("id", req.RequestId).
+				WithError(sendError).
+				Errorf("Could not send out error '%w'", err)
 		}
 	}
 
-	return err
+	return nil
 }
 
 func handleRequest(
@@ -122,30 +135,32 @@ func handleRequest(
 	req messages.HorizonRequest,
 	coms *common.Communications,
 ) error {
-	logrus.Trace("Handling the request")
 	key := common.HorizonKey(req.Spot.Loc, 500)
 
-	logrus.Tracef("Checking for horizon key %s - belonging to location %#v", key, req.Spot.Loc)
+	logger := logrus.
+		WithFields(logrus.Fields{
+			"request": req.RequestId,
+			"spot":    req.Spot,
+			"key":     key,
+		})
+	logger.Trace("Checking for horizon key")
 	if _, err := coms.KvHor.Get(coms.Ctx, key); err != nil {
-		logrus.Trace("Received errror when checking for horizon")
+		logger.WithError(err).Trace("Received error when checking for key in key value store")
 		if !common.IsKeyDoesntExistsError(err) {
-			logrus.WithError(err).Trace("Error was not a KeyDoesntExistError")
-			return err
+			return fmt.Errorf("received unexpected error when checking whether horizon is being computed: %w", err)
 		}
 
-		err = handleMissingHorizon(msg, req.RequestId, key, coms)
-		if err != nil {
-			return err
+		if err := handleMissingHorizon(msg, req.RequestId, key, coms, logger); err != nil {
+			return fmt.Errorf("error while handling the missing horizon: %w", err)
 		}
 	} else {
-		logrus.Trace("Forwarding the horizon key")
+		logger.Trace("Horizon exists in cache")
 		if err := common.ForwardHorizonKey(msg, key, coms); err != nil {
-			return err
+			return fmt.Errorf("could not forward horizon key: %w", err)
 		}
 
-		err = msg.Ack()
-		if err != nil {
-			return err
+		if err := msg.Ack(); err != nil {
+			return fmt.Errorf("could not acknowledge request message: %w", err)
 		}
 	}
 
@@ -157,21 +172,24 @@ func handleMissingHorizon(
 	requestId string,
 	key string,
 	coms *common.Communications,
+	logger *logrus.Entry,
 ) error {
-	logrus.Tracef("Handling missing horizon %s", key)
+	logger.Trace("Checking whether the horizon is in compute")
 	isInCompute, err := common.IsHorizonInCompute(key, coms)
 	if err != nil {
 		return err
 	}
 
 	if isInCompute {
-		go requeueGetRequestAndLog(msg, requestId, key, coms)
+		logger.Trace("The horizon is already being computed")
+		go requeueGetRequestAndLog(msg, requestId, key, coms, logger)
 	} else {
+		logger.Trace("The horizon is not being computed yet, marking as in compute")
 		if err := common.SetHorizonInCompute(key, true, coms); err != nil {
-			return err
+			return fmt.Errorf("could not mark horizon as in compute: %w", err)
 		}
 
-		logrus.Tracef("Queueing request to compute horizon %s", key)
+		logger.Trace("Sending a request to compute the horizon")
 		if _, err := coms.Js.Publish(
 			coms.Ctx,
 			common.REQ_COMP_Q,
@@ -181,7 +199,7 @@ func handleMissingHorizon(
 		}
 
 		if err := msg.Ack(); err != nil {
-			return err
+			return fmt.Errorf("could not acknowledge request message: %w", err)
 		}
 	}
 	return nil
@@ -192,12 +210,10 @@ func requeueGetRequestAndLog(
 	requestId string,
 	key string,
 	coms *common.Communications,
+	logger *logrus.Entry,
 ) {
-	if err := requeueGetRequest(msg, key, coms); err != nil {
-		logrus.WithError(err).Errorf(
-			"Error while handling message: %v",
-			string(msg.Data()),
-		)
+	if err := requeueGetRequest(msg, key, coms, logger); err != nil {
+		logger.WithError(err).Error("Error while handling message")
 
 		if sendErr := common.SendError(
 			string(msg.Data()),
@@ -206,10 +222,12 @@ func requeueGetRequestAndLog(
 			GROUP,
 			coms,
 		); sendErr != nil {
-			logrus.WithError(sendErr).Errorf("Could not send out error '%s'", err)
+			logger.WithError(sendErr).Errorf("Could not send out error '%s'", err)
 		}
 
-		_ = msg.Nak() // Ignoring error
+		if err := msg.Nak(); err != nil {
+			logger.WithError(err).Error("Could not nak request message")
+		}
 	}
 }
 
@@ -217,6 +235,7 @@ func requeueGetRequest(
 	msg jetstream.Msg,
 	key string,
 	coms *common.Communications,
+	logger *logrus.Entry,
 ) error {
 	watch, err := coms.KvComp.Watch(coms.Ctx, key)
 	if err != nil {
@@ -233,16 +252,15 @@ func requeueGetRequest(
 	for {
 		select {
 		case <-timer.C:
-			return msg.Nak()
+			if err := msg.Nak(); err != nil {
+				logger.WithError(err).Error("Could not nak request message")
+			}
+			return nil
 		case update := <-updates:
 			if nil == update {
-				logrus.Warn("Received nil update in waiting loop. This should not happen, please review")
+				logger.Warn("Received nil update in waiting loop. This should not happen, please review")
 				break
 			}
-			logrus.WithFields(logrus.Fields{
-				"operation": update.Operation(),
-				"value":     string(update.Value()),
-			}).Trace("Received update")
 
 			isInCompute, err := common.DecodeIsIncomputeEntry(update)
 			if err != nil {
@@ -251,9 +269,14 @@ func requeueGetRequest(
 
 			if !isInCompute {
 				if err := common.ForwardHorizonKey(msg, key, coms); err != nil {
-					return err
+					return fmt.Errorf("could not send out the horizon key: %w", err)
 				}
-				return msg.Ack()
+
+				if err := msg.Ack(); err != nil {
+					fmt.Errorf("could not acknowledge the request message: %w", err)
+				}
+
+				return nil
 			}
 		}
 	}
