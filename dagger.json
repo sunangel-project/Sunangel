@@ -1,6 +1,8 @@
 {
   "name": "Sunangel",
-  "engineVersion": "v0.15.2",
-  "sdk": "go",
+  "engineVersion": "v0.17.0",
+  "sdk": {
+    "source": "go"
+  },
   "source": "pipelines"
 }
