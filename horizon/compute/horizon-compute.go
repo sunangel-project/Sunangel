@@ -121,7 +121,7 @@ func handleMessage(
 	if err := handleRequest(msg, req, coms); err != nil {
 		sendError := common.SendError(string(msg.Data()), err, req.RequestId, GROUP, coms)
 		if sendError != nil {
-			logrus.WithError(sendError).Errorf("Could not send out error '%w'", err)
+			logrus.WithError(sendError).Errorf("Could not send out error '%s'", err)
 			if err := msg.Nak(); err != nil {
 				logrus.WithError(err).Error("Could not nak request message")
 			}

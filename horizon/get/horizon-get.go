@@ -123,7 +123,7 @@ func handleMessage(msg jetstream.Msg, coms *common.Communications) error {
 			logrus.
 				WithField("id", req.RequestId).
 				WithError(sendError).
-				Errorf("Could not send out error '%w'", err)
+				Errorf("Could not send out error '%s'", err)
 		}
 	}
 
@@ -273,7 +273,7 @@ func requeueGetRequest(
 				}
 
 				if err := msg.Ack(); err != nil {
-					fmt.Errorf("could not acknowledge the request message: %w", err)
+					return fmt.Errorf("could not acknowledge the request message: %w", err)
 				}
 
 				return nil
