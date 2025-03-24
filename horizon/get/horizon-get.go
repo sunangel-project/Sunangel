@@ -38,12 +38,41 @@ func main() {
 	logrus.Infof("Starting up (version %s)", common.BACKEND_VERSION)
 	defer logrus.Info("Shutting down")
 
+	coms, cons, err := setupMessaging()
+	if err != nil {
+		panic(err)
+	}
+	defer coms.Close()
+
+	if err != nil {
+		panic(err)
+	}
+	logrus.Infof("Setup complete, listening to %s", IN_Q)
+
+	_, err = cons.Consume(func(msg jetstream.Msg) {
+		logger := logrus.WithField("request", string(msg.Data()))
+
+		if err := handleMessage(msg, coms, logger); err != nil {
+			logger.WithError(err).Error("Error while handling message")
+			if err := msg.Nak(); err != nil {
+				logger.WithError(err).Error("Could not nak request message")
+			}
+		}
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	// avoid shutdown
+	var wg sync.WaitGroup
+	wg.Add(1)
+	wg.Wait()
+}
+
+func setupMessaging() (*common.Communications, jetstream.Consumer, error) {
 	nc := messaging.Connect()
-	defer nc.Close()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
+	ctx := context.Background()
 	js := messaging.JetStream(nc)
 
 	kvHor := messaging.ConnectOrCreateKV(ctx, js, common.HOR_STORE_NAME)
@@ -60,12 +89,12 @@ func main() {
 		common.RES_OUT_STREAM,
 		common.ERR_STREAM,
 	}); err != nil {
-		panic(err)
+		return nil, nil, err
 	}
 
 	stream, err := js.Stream(ctx, common.SPOT_STREAM)
 	if err != nil {
-		panic(err)
+		return nil, nil, fmt.Errorf("could not connect to spot stream: %w", err)
 	}
 
 	consConfig := jetstream.ConsumerConfig{
@@ -75,55 +104,35 @@ func main() {
 	}
 	cons, err := messaging.ConnectOrCreateConsumer(ctx, stream, GROUP, consConfig)
 	if err != nil {
-		panic(err)
-	}
-	logrus.Infof("Setup complete, listening to %s", IN_Q)
-
-	_, err = cons.Consume(func(msg jetstream.Msg) {
-		if err := handleMessage(msg, coms); err != nil {
-			logrus.WithError(err).Errorf(
-				"Error while handling message: %v",
-				string(msg.Data()),
-			)
-			if err := msg.Nak(); err != nil {
-				logrus.
-					WithField("request", string(msg.Data())).
-					WithError(err).
-					Error("Could not nak request message")
-			}
-		}
-	})
-	if err != nil {
-		panic(err)
+		return nil, nil, err
 	}
 
-	// avoid shutdown
-	var wg sync.WaitGroup
-	wg.Add(1)
-	wg.Wait()
+	return coms, cons, nil
 }
 
-func handleMessage(msg jetstream.Msg, coms *common.Communications) error {
-	logrus.WithField("request", string(msg.Data())).Trace("Parsing the request")
+func handleMessage(
+	msg jetstream.Msg,
+	coms *common.Communications,
+	logger *logrus.Entry,
+) error {
+	logger.Trace("Parsing the request")
 	var req messages.HorizonRequest
 	if err := json.Unmarshal(msg.Data(), &req); err != nil {
-		return fmt.Errorf("could not parse request '%s': %w", string(msg.Data()), err)
+		return fmt.Errorf("could not parse request: %w", err)
 	}
-	logrus.
-		WithFields(logrus.Fields{
-			"id":   req.RequestId,
-			"spot": req.Spot,
-		}).
-		Info("Received request")
 
-	err := handleRequest(msg, req, coms)
+	logger = logrus.
+		WithFields(logrus.Fields{
+			"request id": req.RequestId,
+			"spot":       req.Spot,
+		})
+	logger.Info("Received request")
+
+	err := handleRequest(msg, req, coms, logger)
 	if err != nil {
 		sendError := common.SendError(string(msg.Data()), err, req.RequestId, GROUP, coms)
 		if sendError != nil {
-			logrus.
-				WithField("id", req.RequestId).
-				WithError(sendError).
-				Errorf("Could not send out error '%s'", err)
+			return fmt.Errorf("could not send out error '%w': %w", err, sendError)
 		}
 	}
 
@@ -134,16 +143,12 @@ func handleRequest(
 	msg jetstream.Msg,
 	req messages.HorizonRequest,
 	coms *common.Communications,
+	logger *logrus.Entry,
 ) error {
 	key := common.HorizonKey(req.Spot.Loc, 500)
+	logger = logger.WithField("horizon key", key)
 
-	logger := logrus.
-		WithFields(logrus.Fields{
-			"request": req.RequestId,
-			"spot":    req.Spot,
-			"key":     key,
-		})
-	logger.Trace("Checking for horizon key")
+	logger.Trace("Checking for horizon key in cache")
 	if _, err := coms.KvHor.Get(coms.Ctx, key); err != nil {
 		logger.WithError(err).Trace("Received error when checking for key in key value store")
 		if !common.IsKeyDoesntExistsError(err) {

@@ -35,6 +35,10 @@ type Communications struct {
 	KvComp jetstream.KeyValue
 }
 
+func (c *Communications) Close() {
+	c.Js.Conn().Close()
+}
+
 func ForwardHorizonKey(
 	msg jetstream.Msg,
 	key string,
@@ -58,6 +62,24 @@ func ForwardHorizonKey(
 
 	return nil
 }
+
+func HandleError(
+	input string,
+	err error,
+	requestId string,
+	sender string,
+	coms *Communications,
+) {
+	sendError := SendError(input, err, requestId, sender, coms)
+	if sendError != nil {
+		logrus.
+			WithField("request", input). // TODO: double check content of inut
+			WithError(sendError).
+			Errorf("Could not send out error '%s'", err)
+	}
+}
+
+// ???
 
 func SendError(
 	input string,

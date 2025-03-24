@@ -91,7 +91,12 @@ func ConnectOrCreateConsumer(
 
 		cons, err = stream.CreateConsumer(ctx, conf)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf(
+				"could not create consumer '%s' for stream '%s': %w",
+				name,
+				stream.CachedInfo().Config.Name,
+				err,
+			)
 		}
 	}
 
@@ -101,6 +106,8 @@ func ConnectOrCreateConsumer(
 func ConnectOrCreateKV(ctx context.Context, js jetstream.JetStream, name string) jetstream.KeyValue {
 	kv, err := js.KeyValue(ctx, name)
 	if err != nil {
+		// TODO: check err type
+
 		logrus.Infof("Bucket %s not found, creating", name)
 		kv, err = js.CreateKeyValue(ctx, jetstream.KeyValueConfig{
 			Bucket: name,
