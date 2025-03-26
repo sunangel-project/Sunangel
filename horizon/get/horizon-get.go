@@ -183,7 +183,6 @@ func handleMissingHorizon(
 	coms *common.Communications,
 	logger *logrus.Entry,
 ) error {
-	logger.Trace("Checking whether the horizon is in compute")
 	isInCompute, err := common.IsHorizonInCompute(key, coms)
 	if err != nil {
 		return err
