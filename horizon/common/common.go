@@ -10,6 +10,7 @@ import (
 
 	"github.com/nats-io/nats.go/jetstream"
 	uuid "github.com/satori/go.uuid"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -32,6 +33,10 @@ type Communications struct {
 	Js     jetstream.JetStream
 	KvHor  jetstream.KeyValue
 	KvComp jetstream.KeyValue
+}
+
+func (c *Communications) Close() {
+	c.Js.Conn().Close()
 }
 
 func ForwardHorizonKey(
@@ -57,6 +62,24 @@ func ForwardHorizonKey(
 
 	return nil
 }
+
+func HandleError(
+	input string,
+	err error,
+	requestId string,
+	sender string,
+	coms *Communications,
+) {
+	sendError := SendError(input, err, requestId, sender, coms)
+	if sendError != nil {
+		logrus.
+			WithField("request", input). // TODO: double check content of inut
+			WithError(sendError).
+			Errorf("Could not send out error '%s'", err)
+	}
+}
+
+// ???
 
 func SendError(
 	input string,
@@ -100,16 +123,30 @@ func IsHorizonInCompute(
 	key string,
 	coms *Communications,
 ) (bool, error) {
+	logger := logrus.WithField("horizon key", key)
+
+	logger.Tracef("Checking whether horizon is in compute")
 	isInComputeEntry, err := coms.KvComp.Get(coms.Ctx, key)
 	if err != nil {
-		if IsKeyDoesntExistsError(err) {
-			return false, nil
+		logger = logger.WithError(err)
+		if !IsKeyDoesntExistsError(err) {
+			logger.Error("The received error was unexpected (not KeyDoesNotExist)")
+			return false, err
 		}
 
+		logger.Trace("Received KeyDoesntExistError error -> returning false")
+		return false, nil
+	}
+
+	logger = logger.WithField("entry", isInComputeEntry)
+	logger.Trace("Got entry")
+	isInCompute, err := DecodeIsIncomputeEntry(isInComputeEntry)
+	if err != nil {
+		logger.WithError(err).Error("Could not decode value")
 		return false, err
 	}
 
-	return DecodeIsIncomputeEntry(isInComputeEntry)
+	return isInCompute, nil
 }
 
 func DecodeIsIncomputeEntry(

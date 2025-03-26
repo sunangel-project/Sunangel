@@ -4,12 +4,27 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
+	"github.com/sirupsen/logrus"
 )
+
+func SetLogLevel() error {
+	levelString := os.Getenv("GO_LOG")
+	if levelString == "" {
+		return errors.New("env variable 'GO_LOG' is not defined")
+	}
+
+	level, err := logrus.ParseLevel(levelString)
+	if err != nil {
+		return fmt.Errorf("could not set log level: %w", err)
+	}
+
+	logrus.SetLevel(level)
+	return nil
+}
 
 func Connect() *nats.Conn {
 	natsURL := os.Getenv("NATS_HOST")
@@ -45,7 +60,10 @@ func CreateStream(ctx context.Context, js jetstream.JetStream, name string) erro
 			return err
 		}
 
-		js.CreateStream(ctx, streamConfig)
+		_, err = js.CreateStream(ctx, streamConfig)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -73,7 +91,12 @@ func ConnectOrCreateConsumer(
 
 		cons, err = stream.CreateConsumer(ctx, conf)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf(
+				"could not create consumer '%s' for stream '%s': %w",
+				name,
+				stream.CachedInfo().Config.Name,
+				err,
+			)
 		}
 	}
 
@@ -83,7 +106,9 @@ func ConnectOrCreateConsumer(
 func ConnectOrCreateKV(ctx context.Context, js jetstream.JetStream, name string) jetstream.KeyValue {
 	kv, err := js.KeyValue(ctx, name)
 	if err != nil {
-		log.Printf("Bucket %s not found, creating", name)
+		// TODO: check err type
+
+		logrus.Infof("Bucket %s not found, creating", name)
 		kv, err = js.CreateKeyValue(ctx, jetstream.KeyValueConfig{
 			Bucket: name,
 		})
@@ -95,4 +120,13 @@ func ConnectOrCreateKV(ctx context.Context, js jetstream.JetStream, name string)
 	}
 
 	return kv
+}
+
+func LoggedNak(
+	msg jetstream.Msg,
+	logger *logrus.Entry,
+) {
+	if err := msg.Nak(); err != nil {
+		logger.WithError(err).Error("Could not nak request message")
+	}
 }

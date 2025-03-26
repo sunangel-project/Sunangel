@@ -31,7 +31,10 @@ func main() {
 	}
 
 	// Simple Publisher
-	nc.Publish(messaging.IN_Q, []byte(payload))
+	err = nc.Publish(messaging.IN_Q, []byte(payload))
+	if err != nil {
+		panic(err)
+	}
 
 	nc.Close()
 }

@@ -8,6 +8,7 @@ use actix_web::{
     App, Error, HttpRequest, HttpResponse, HttpServer,
 };
 
+use dotenv::dotenv;
 use juniper_actix::{graphql_handler, playground_handler, subscriptions};
 use juniper_graphql_ws::ConnectionConfig;
 use log::info;
@@ -47,9 +48,11 @@ async fn subscriptions(
 }
 
 #[actix_web::main]
-async fn main() -> Result<(), async_nats::Error> {
+async fn main() -> Result<(), anyhow::Error> {
+    dotenv()?;
     env_logger::init();
 
+    info!("Starting up (version {})", version_common::BACKEND_VERSION);
     info!("Server running on http://localhost:6660, playground: http://localhost:6660/playground");
 
     let mut server = HttpServer::new(move || {

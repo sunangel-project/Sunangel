@@ -1,7 +1,8 @@
 use std::str::{self, FromStr};
 
-use anyhow::anyhow;
+use anyhow::{anyhow, Error};
 use async_nats::jetstream::{Context, Message};
+use dotenv::dotenv;
 use log::info;
 use messages_common::handle_messages;
 use serde::{Deserialize, Serialize};
@@ -36,8 +37,11 @@ const OUT_SUBJECT: &str = "get-horizon";
 const ERR_STREAM: &str = "ERRORS";
 
 #[tokio::main]
-pub async fn main() {
+pub async fn main() -> Result<(), Error> {
+    dotenv()?;
     env_logger::init();
+
+    info!("Starting up (version {})", version_common::BACKEND_VERSION);
 
     let jetstream = messages_common::connect_jetstream().await;
 
@@ -58,6 +62,8 @@ pub async fn main() {
         }),
     )
     .await;
+
+    Ok(())
 }
 
 const UPPER_SEARCH_AREA_DIAGONAL_LIMIT: u32 = 10_000;
