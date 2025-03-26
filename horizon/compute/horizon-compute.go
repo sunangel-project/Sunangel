@@ -45,11 +45,41 @@ func main() {
 	logrus.Infof("Starting up (version %s)", common.BACKEND_VERSION)
 	defer logrus.Info("Shutting down")
 
-	nc := messaging.Connect()
-	defer nc.Close()
+	ctx := context.Background()
+	coms, cons, err := setupMessaging(ctx)
+	if err != nil {
+		panic(err)
+	}
+	defer coms.Close()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	logrus.Infof("Setup complete, listening to %s", IN_Q)
+
+	_, err = cons.Consume(func(msg jetstream.Msg) {
+		logger := logrus.WithField(
+			"request",
+			string(msg.Data()),
+		)
+
+		if err := handleMessage(msg, coms, logger); err != nil {
+			logger = logger.WithError(err)
+			logger.Error("Error while handling message")
+			messaging.LoggedNak(msg, logger)
+		}
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	// avoid shutdown
+	var wg sync.WaitGroup
+	wg.Add(1)
+	wg.Wait()
+}
+
+func setupMessaging(ctx context.Context) (*common.Communications, jetstream.Consumer, error) {
+	nc := messaging.Connect()
+
+	// ctx, cancel := context.WithCancel(context.Background())
 
 	js := messaging.JetStream(nc)
 
@@ -67,12 +97,12 @@ func main() {
 		common.RES_OUT_STREAM,
 		ERR_STREAM,
 	}); err != nil {
-		panic(err)
+		return nil, nil, err
 	}
 
 	stream, err := js.Stream(ctx, IN_STREAM)
 	if err != nil {
-		panic(err)
+		return nil, nil, fmt.Errorf("could not connect to spot stream: %w", err)
 	}
 
 	consConfig := jetstream.ConsumerConfig{
@@ -81,50 +111,43 @@ func main() {
 	}
 	cons, err := messaging.ConnectOrCreateConsumer(ctx, stream, GROUP, consConfig)
 	if err != nil {
-		panic(err)
-	}
-	logrus.Infof("Setup complete, listening to %s", IN_Q)
-
-	_, err = cons.Consume(func(msg jetstream.Msg) {
-		if err := handleMessage(msg, coms); err != nil {
-			logrus.WithError(err).Errorf(
-				"Error while handling message: %v",
-				string(msg.Data()),
-			)
-			_ = msg.Nak()
-		}
-	})
-	if err != nil {
-		panic(err)
+		return nil, nil, err
 	}
 
-	// avoid shutdown
-	var wg sync.WaitGroup
-	wg.Add(1)
-	wg.Wait()
+	return coms, cons, nil
 }
 
 func handleMessage(
 	msg jetstream.Msg,
 	coms *common.Communications,
+	logger *logrus.Entry,
 ) error {
-	logrus.WithField("request", string(msg.Data())).Trace("Parsing the request")
+	logger.Trace("Parsing the request")
 	var req messages.HorizonRequest
 	if err := json.Unmarshal(msg.Data(), &req); err != nil {
-		return err
+		return fmt.Errorf("could not parse request: %w", err)
 	}
-	logrus.WithFields(logrus.Fields{
-		"request": req.RequestId,
-		"spot":    req.Spot,
-	}).Info("Received request")
 
-	if err := handleRequest(msg, req, coms); err != nil {
+	logger = logger.
+		WithFields(logrus.Fields{
+			"request id": req.RequestId,
+			"spot":       req.Spot,
+		})
+	logger.Info("Received request")
+
+	if err := handleRequest(msg, req, coms, logger); err != nil {
+		logger = logger.WithError(err)
+
 		sendError := common.SendError(string(msg.Data()), err, req.RequestId, GROUP, coms)
 		if sendError != nil {
-			logrus.WithError(sendError).Errorf("Could not send out error '%s'", err)
-			if err := msg.Nak(); err != nil {
-				logrus.WithError(err).Error("Could not nak request message")
-			}
+			logger = logger.WithField("send error", sendError)
+			logger.Errorf("Could not send out error")
+
+			return err
+		}
+
+		if err := msg.Ack(); err != nil {
+			return err
 		}
 	}
 
@@ -135,9 +158,12 @@ func handleRequest(
 	msg jetstream.Msg,
 	req messages.HorizonRequest,
 	coms *common.Communications,
+	logger *logrus.Entry,
 ) error {
 	radius := 500
 	key := common.HorizonKey(req.Spot.Loc, radius)
+
+	logger = logger.WithField("key", key)
 
 	loc := location.Location{
 		Latitude:  req.Spot.Loc.Lat,
@@ -154,23 +180,23 @@ func handleRequest(
 	)
 	hor := horizon.NewHorizon(&loc, radius)
 
-	logrus.WithField("key", key).Trace("Storing horizon in cache")
+	logger.Trace("Storing horizon in cache")
 	if _, err := coms.KvHor.Put(coms.Ctx, key, hor.AltitudeToBytes()); err != nil {
 		return fmt.Errorf("could not store horizon in cache: %w", err)
 	}
 
-	logrus.WithField("key", key).Trace("Setting in compute to false")
+	logger.Trace("Setting in compute to false")
 	if err := common.SetHorizonInCompute(key, false, coms); err != nil {
 		return fmt.Errorf("could not set in compute to false: %w", err)
 	}
 
-	logrus.WithField("key", key).Trace("Sending out horizon key")
+	logger.Trace("Sending out horizon key")
 	if err := common.ForwardHorizonKey(msg, key, coms); err != nil {
 		return fmt.Errorf("could not send out horizon key: %w", err)
 	}
 
 	if err := msg.Ack(); err != nil {
-		return fmt.Errorf("could not acknowledge request message: %w", err)
+		return err
 	}
 
 	return nil

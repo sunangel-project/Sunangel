@@ -38,25 +38,22 @@ func main() {
 	logrus.Infof("Starting up (version %s)", common.BACKEND_VERSION)
 	defer logrus.Info("Shutting down")
 
-	coms, cons, err := setupMessaging()
+	ctx := context.Background()
+	coms, cons, err := setupMessaging(ctx)
 	if err != nil {
 		panic(err)
 	}
 	defer coms.Close()
 
-	if err != nil {
-		panic(err)
-	}
 	logrus.Infof("Setup complete, listening to %s", IN_Q)
 
 	_, err = cons.Consume(func(msg jetstream.Msg) {
 		logger := logrus.WithField("request", string(msg.Data()))
 
 		if err := handleMessage(msg, coms, logger); err != nil {
-			logger.WithError(err).Error("Error while handling message")
-			if err := msg.Nak(); err != nil {
-				logger.WithError(err).Error("Could not nak request message")
-			}
+			logger = logger.WithError(err)
+			logger.Error("Error while handling message")
+			messaging.LoggedNak(msg, logger)
 		}
 	})
 	if err != nil {
@@ -69,10 +66,8 @@ func main() {
 	wg.Wait()
 }
 
-func setupMessaging() (*common.Communications, jetstream.Consumer, error) {
+func setupMessaging(ctx context.Context) (*common.Communications, jetstream.Consumer, error) {
 	nc := messaging.Connect()
-
-	ctx := context.Background()
 	js := messaging.JetStream(nc)
 
 	kvHor := messaging.ConnectOrCreateKV(ctx, js, common.HOR_STORE_NAME)
@@ -130,9 +125,18 @@ func handleMessage(
 
 	err := handleRequest(msg, req, coms, logger)
 	if err != nil {
+		logger = logger.WithError(err)
+
 		sendError := common.SendError(string(msg.Data()), err, req.RequestId, GROUP, coms)
 		if sendError != nil {
-			return fmt.Errorf("could not send out error '%w': %w", err, sendError)
+			logger = logger.WithField("send error", sendError)
+			logger.Errorf("Could not send out error")
+
+			return err
+		}
+
+		if err := msg.Ack(); err != nil {
+			return err
 		}
 	}
 
@@ -159,13 +163,13 @@ func handleRequest(
 			return fmt.Errorf("error while handling the missing horizon: %w", err)
 		}
 	} else {
-		logger.Trace("Horizon exists in cache")
+		logger.Trace("Horizon exists in cache, forwarding horizon key")
 		if err := common.ForwardHorizonKey(msg, key, coms); err != nil {
 			return fmt.Errorf("could not forward horizon key: %w", err)
 		}
 
 		if err := msg.Ack(); err != nil {
-			return fmt.Errorf("could not acknowledge request message: %w", err)
+			return err
 		}
 	}
 
@@ -204,7 +208,7 @@ func handleMissingHorizon(
 		}
 
 		if err := msg.Ack(); err != nil {
-			return fmt.Errorf("could not acknowledge request message: %w", err)
+			return err
 		}
 	}
 	return nil
@@ -230,9 +234,7 @@ func requeueGetRequestAndLog(
 			logger.WithError(sendErr).Errorf("Could not send out error '%s'", err)
 		}
 
-		if err := msg.Nak(); err != nil {
-			logger.WithError(err).Error("Could not nak request message")
-		}
+		messaging.LoggedNak(msg, logger)
 	}
 }
 
@@ -257,9 +259,7 @@ func requeueGetRequest(
 	for {
 		select {
 		case <-timer.C:
-			if err := msg.Nak(); err != nil {
-				logger.WithError(err).Error("Could not nak request message")
-			}
+			messaging.LoggedNak(msg, logger)
 			return nil
 		case update := <-updates:
 			if nil == update {
@@ -267,22 +267,24 @@ func requeueGetRequest(
 				break
 			}
 
+			logger = logger.WithField("update", update)
+			logger.Trace("Received update")
 			isInCompute, err := common.DecodeIsIncomputeEntry(update)
 			if err != nil {
 				return err
 			}
 
-			if !isInCompute {
-				if err := common.ForwardHorizonKey(msg, key, coms); err != nil {
-					return fmt.Errorf("could not send out the horizon key: %w", err)
-				}
-
-				if err := msg.Ack(); err != nil {
-					return fmt.Errorf("could not acknowledge the request message: %w", err)
-				}
-
-				return nil
+			if isInCompute {
+				logger.Trace("Horizon is still in compute")
+				continue
 			}
+
+			logger.Trace("Horizon computed, forwarding key")
+			if err := common.ForwardHorizonKey(msg, key, coms); err != nil {
+				return fmt.Errorf("could not send out the horizon key: %w", err)
+			}
+
+			return msg.Ack()
 		}
 	}
 }

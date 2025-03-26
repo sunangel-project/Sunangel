@@ -123,32 +123,39 @@ func IsHorizonInCompute(
 	key string,
 	coms *Communications,
 ) (bool, error) {
-	logrus.Tracef("Checking whether horizon %s is in compute", key)
+	logger := logrus.WithField("horizon key", key)
+
+	logger.Tracef("Checking whether horizon is in compute")
 	isInComputeEntry, err := coms.KvComp.Get(coms.Ctx, key)
 	if err != nil {
-		logrus.WithError(err).Trace("Received errror when checking for horizon")
+		logger = logger.WithError(err)
 		if !IsKeyDoesntExistsError(err) {
-			logrus.Tracef("Error %s was not a KeyDoesntExistError", err)
+			logger.Error("The received error was unexpected (not KeyDoesNotExist)")
 			return false, err
 		}
 
-		logrus.Trace("Received error was KeyDoesntExistError, returning false")
+		logger.Trace("Received KeyDoesntExistError error -> returning false")
 		return false, nil
 	}
 
-	return DecodeIsIncomputeEntry(isInComputeEntry)
+	logger = logger.WithField("entry", isInComputeEntry)
+	logger.Trace("Got entry")
+	isInCompute, err := DecodeIsIncomputeEntry(isInComputeEntry)
+	if err != nil {
+		logger.WithError(err).Error("Could not decode value")
+		return false, err
+	}
+
+	return isInCompute, nil
 }
 
 func DecodeIsIncomputeEntry(
 	entry jetstream.KeyValueEntry,
 ) (bool, error) {
-	logrus.Trace("Decoding entry is in compute")
 	if entry.Operation() == jetstream.KeyValueDelete {
-		logrus.Trace("Operation was KeyValueDelete")
 		return false, nil
 	}
 
-	logrus.Tracef("Parsing bool from %s", string(entry.Value()))
 	isInCompute, err := strconv.ParseBool(
 		string(entry.Value()),
 	)

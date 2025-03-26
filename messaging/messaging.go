@@ -121,3 +121,12 @@ func ConnectOrCreateKV(ctx context.Context, js jetstream.JetStream, name string)
 
 	return kv
 }
+
+func LoggedNak(
+	msg jetstream.Msg,
+	logger *logrus.Entry,
+) {
+	if err := msg.Nak(); err != nil {
+		logger.WithError(err).Error("Could not nak request message")
+	}
+}
