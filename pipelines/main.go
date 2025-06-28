@@ -7,10 +7,10 @@ import (
 )
 
 const (
-	RustVersion = "1.83"
-	GoVersion   = "1.23"
+	RustVersion = "1.88.0"
+	GoVersion   = "1.24"
 
-	AlpineVersion = "3.21"
+	AlpineVersion = "3.22"
 )
 
 type Sunangel struct{}

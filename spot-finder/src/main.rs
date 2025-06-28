@@ -74,7 +74,7 @@ async fn handle_message(jetstream: &Context, message: Message) -> Result<(), asy
 
     let in_message: InMessage = serde_json::from_str(payload)?;
     let query = in_message.search_query;
-    info!("Extraxted query {:?}", query);
+    info!("Extraxted query {query:?}");
 
     let spots = if search_area_short_enough(
         query.lower_left,

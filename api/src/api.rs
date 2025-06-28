@@ -175,8 +175,8 @@ async fn translate_response_messages(
 
         let result = messaging::delete_consumer(&request_id).await;
         match result {
-            Err(error) => warn!("Error occured while deleting consumer: {}", error),
-            Ok(false) => warn!("Could not delete consumer for request {}", request_id),
+            Err(error) => warn!("Error occured while deleting consumer: {error}"),
+            Ok(false) => warn!("Could not delete consumer for request {request_id}"),
             _ => (),
         }
     })
@@ -221,7 +221,7 @@ fn transform_spot_message(
             Ok((SpotsSuccess { status, spot }, last))
         }
         (_, Ok(err_response)) => {
-            error!("Received error from microservices: {:?}", err_response);
+            error!("Received error from microservices: {err_response:?}");
 
             Err(FieldError::new(
                 "Internal server error",
