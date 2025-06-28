@@ -27,7 +27,7 @@ pub async fn handle_messages<'a>(
 ) {
     // TODO: return to concurrently processing
     while let Some(message) = messages.next().await {
-        info!("Received message {:?}", message);
+        info!("Received message {message:?}");
 
         match message {
             Ok(message) => {

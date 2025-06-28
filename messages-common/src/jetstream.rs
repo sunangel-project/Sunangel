@@ -47,15 +47,15 @@ async fn try_subscribe(
 ) -> Result<MessageStream, async_nats::Error> {
     try_create_stream(jetstream, stream_name).await?;
 
-    debug!("Trying to connect to {}", stream_name);
+    debug!("Trying to connect to {stream_name}");
     let stream = jetstream.get_stream(stream_name).await?;
 
     let mut subjects = vec![];
     if let Some(subject) = subject {
-        subjects.push(format!("{}.{}", stream_name, subject));
+        subjects.push(format!("{stream_name}.{subject}"));
     }
 
-    debug!("Trying to create consumer for {:?}", stream_name);
+    debug!("Trying to create consumer for {stream_name:?}");
     let consumer = stream
         .get_or_create_consumer(
             group.unwrap_or("sole_consumer"),
@@ -127,7 +127,7 @@ pub async fn try_delete_queue_consumer(
 }
 
 fn consumer_name(subject: &str, group: &str) -> String {
-    format!("{}-{}", group, subject)
+    format!("{group}-{subject}")
 }
 
 // Key-Value
