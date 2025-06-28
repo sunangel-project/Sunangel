@@ -1,4 +1,7 @@
 target
 **/Session.vim
 passwords
+
 *.pem
+*.key
+*.cer
