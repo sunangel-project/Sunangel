@@ -1,3 +1,3 @@
 package common
 
-const BACKEND_VERSION = "v0.2.14"
+const BACKEND_VERSION = "v0.2.15"
