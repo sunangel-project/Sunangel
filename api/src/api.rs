@@ -250,7 +250,7 @@ fn transform_spot_message(
 // Schema //
 ////////////
 
-pub type Schema = juniper::RootNode<'static, Query, EmptyMutation<Context>, Subscription>;
+pub type Schema = juniper::RootNode<Query, EmptyMutation<Context>, Subscription>;
 
 pub fn schema() -> Schema {
     Schema::new(Query, EmptyMutation::<Context>::new(), Subscription)
