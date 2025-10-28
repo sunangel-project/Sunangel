@@ -3,7 +3,6 @@ use futures_util::stream::select;
 
 use log::info;
 use messages_common::MessageStream;
-use serde::{Deserialize, Serialize};
 use std::{error::Error, str};
 
 use crate::structs::SearchQueryMessage;
@@ -15,18 +14,6 @@ const IN_STREAM: &str = "SUNSETS";
 const IN_ERR_STREAM: &str = "ERRORS";
 
 const GROUP: &str = "api";
-
-#[derive(Serialize, Deserialize)]
-struct Location {
-    lat: f64,
-    lon: f64,
-}
-
-#[derive(Serialize, Deserialize)]
-struct SearchQuery {
-    loc: Location,
-    rad: i32,
-}
 
 pub async fn create_streams(jetstream: &Context) {
     messages_common::create_stream(jetstream, SEARCH_STREAM).await;
