@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	RustVersion = "1.88.0"
+	RustVersion = "1.90.0"
 	GoVersion   = "1.24"
 
 	AlpineVersion = "3.22"
