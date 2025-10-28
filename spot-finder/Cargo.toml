@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.100"
-async-nats = "0.42.0"
+async-nats = "0.44.2"
 bytes = "1.10.1"
 futures-util = "0.3.31"
 osm-xml = "0.6.2"

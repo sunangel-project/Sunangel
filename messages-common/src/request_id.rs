@@ -58,10 +58,7 @@ pub fn try_get_request_id(payload: &Bytes) -> Result<String, Box<dyn Error + Sen
 
     let request_id = request_id
         .as_str()
-        .ok_or(anyhow!(
-            "request_id was {} not a string",
-            request_id.to_string()
-        ))?
+        .ok_or(anyhow!("request_id was {} not a string", request_id))?
         .to_string();
 
     Ok(request_id)
