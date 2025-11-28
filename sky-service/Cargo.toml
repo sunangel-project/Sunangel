@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.100"
 async-nats = "0.44.2"
-bytes = "1.10.1"
+bytes = "1.11.0"
 chrono = { version = "0.4.42", features = ["serde"] }
 chrono-tz = { version = "0.10.4", features = ["serde"] }
 env_logger = "0.11.8"
