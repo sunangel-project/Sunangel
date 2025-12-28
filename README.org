@@ -1,0 +1,65 @@
+#+title: Sunangel Home Edition
+
+#+BEGIN_HTML
+<p>
+    <a href="https://img.shields.io/badge/Version-v0.2.17-blue">
+        <img src="https://img.shields.io/badge/Version-v0.2.17-blue">
+    </a>
+    <a href="https://img.shields.io/badge/API-v0.2.0-blue">
+        <img src="https://img.shields.io/badge/API-v0.2.0-blue">
+    </a>
+    <a href="https://github.com/sunangel-project/Sunangel/actions/workflows/pipeline.yml">
+        <img src="https://github.com/sunangel-project/Sunangel/actions/workflows/pipeline.yml/badge.svg">
+    </a>
+    <a href="https://sunn.cloudsftp.de">
+        <img src="https://img.shields.io/badge/Website-limegreen">
+    </a>
+</p>
+#+END_HTML
+
+* Execution
+
+** Backend
+
+Run with [[https://dagger.io][dagger]]
+
+#+begin_src shell
+dagger call local-manual-testing --source=. up --ports=6660:6660
+#+end_src
+
+** Frontend
+
+Currently, it is not in the =docker-compose.yml= file.
+Run with =bun=.
+
+#+begin_src shell
+cd front
+bun install # only needed once
+bun run dev
+#+end_src
+
+You can also compile it to =html= and =javascript=.
+
+#+begin_src shell
+cd front
+bun run build
+#+end_src
+
+* Architecture
+
+[[./Diagrams/architecture-all.png]]
+
+For details regarding the horizon group, check [[./horizon][horizon]].
+
+** Rationale
+
+- =spot-finder= creates many messages from one request (one message per found location)
+- =API= has to gather all messages that belong to the same request
+- requests identified w/ UUID
+
+Only API component has state.
+All other components can scale horizontally w/o restrictions.
+[[https://aws.amazon.com/message-queue/][Queues]] used for communication for free load balancing ([[https://learn.microsoft.com/en-us/azure/architecture/patterns/competing-consumers][competing consumer]]).
+
+The API component does not follow the competing consumers pattern.
+Rather, any instance listens only to the subjects related to the requests it sent out on the =RESULTS= stream, as well as on the =ERRORS= stream.
