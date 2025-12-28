@@ -22,6 +22,8 @@ import { interfaceState, connection, spots } from "../state";
 
 
 <style>
+@import "tailwindcss";
+
 .search-button-shape {
   @apply py-2 my-2 mx-1 font-semibold rounded-lg shadow-md;
 }
