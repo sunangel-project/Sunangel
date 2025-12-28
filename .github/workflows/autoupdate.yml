@@ -26,10 +26,13 @@ jobs:
       - name: Update Go dependencies
         run: go get -u ./...
 
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
+
       - name: Update node dependencies
         run: |
           cd front
-          npm update
+          bun update
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7

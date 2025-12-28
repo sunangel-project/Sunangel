@@ -17,3 +17,9 @@ bun run dev
 ```sh
 bun run build
 ```
+
+### Upgrade
+
+``` sh
+bun update --latest
+```
