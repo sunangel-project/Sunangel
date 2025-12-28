@@ -2,7 +2,7 @@ import { createApp } from "vue";
 import { createRouter, createWebHashHistory } from "vue-router";
 
 import OpenLayersMap from "vue3-openlayers";
-import "vue3-openlayers/dist/vue3-openlayers.css";
+
 import "vue-final-modal/style.css";
 
 import "./index.css";

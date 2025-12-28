@@ -36,7 +36,7 @@ function displayConnectionError() {
 function displayIntenalServerError(errors: GraphQLError[]) {
     let message = "Internal Server Error";
     if (errors.length > 0) {
-        const extensions = JSON.parse(errors[0].extensions.toString());
+        const extensions = JSON.parse(errors[0]!.extensions.toString());
         message = extensions.reason;
     }
     displayError(message);

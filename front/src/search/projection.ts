@@ -20,7 +20,7 @@ export function project(coordinates: Coordinates): number[] {
 export function invertProject(input: number[]): Coordinates {
     let out = proj4(projectionIdentifier, "WGS84", input);
     return {
-        lat: out[1],
-        lon: out[0],
+        lat: out[1]!,
+        lon: out[0]!,
     };
 }
