@@ -10,7 +10,6 @@
         "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false"
     },
     "dependencies": {
-        "@types/ol": "^7.0.0",
         "@urql/vue": "^1.4.3",
         "caniuse-lite": "^1.0.30001761",
         "geodesy": "^2.4.0",
@@ -28,7 +27,6 @@
         "@tsconfig/node18": "^2.0.1",
         "@types/geodesy": "^2.2.8",
         "@types/node": "^22.19.3",
-        "@types/proj4": "^2.19.0",
         "@types/uuid": "^9.0.8",
         "@vitejs/plugin-vue": "^6.0.3",
         "@vue/tsconfig": "^0.8.1",
