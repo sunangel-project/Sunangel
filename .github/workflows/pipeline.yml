@@ -55,16 +55,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22.x
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
 
       - name: Build frontend
         run: |
           cd front
-          npm ci
-          npm run build
+          bun ci
+          bun run build
 
       - uses: actions/upload-pages-artifact@v3
         with:
