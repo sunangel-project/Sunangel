@@ -13,11 +13,11 @@ chrono = { version = "0.4.42", features = ["serde"] }
 chrono-tz = { version = "0.10.4", features = ["serde"] }
 env_logger = "0.11.8"
 futures-util = "0.3.31"
-log = "0.4.28"
+log = "0.4.29"
 messages-common = { path = "../messages-common" }
 version-common = { path = "../version-common" }
 serde = "1.0.228"
-serde_json = "1.0.145"
+serde_json = "1.0.148"
 thiserror = "2.0.17"
 tokio = { version = "1.48.0", features = ["rt-multi-thread"] }
 dotenv = "0.15.0"
