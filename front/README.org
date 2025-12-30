@@ -1,0 +1,26 @@
+#+title: Front
+
+* Project setup
+
+#+begin_src shell
+bun install
+#+end_src
+
+** Compile and Hot-Reload for Development
+
+#+begin_src shell
+bun run dev
+#+end_src
+
+** Type-Check, Compile and Minify for Production
+
+#+begin_src shell
+bun run build
+#+end_src
+
+** Upgrade
+
+#+begin_src shell
+bun update --latest
+#+end_src
+

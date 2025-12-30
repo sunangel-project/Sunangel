@@ -1,22 +1,22 @@
-# API
+#+title: API
 
-## Testing Queries
+* Testing Queries
 
-### Interactively
+** Interactively
 
 When API is running, open http://localhost:6660/playground in the browser.
 
-### Real Applications
+** Real Applications
 
-Do a `POST` request with the query as data to http://localhost:6660/graphql.
+Do a =POST= request with the query as data to http://localhost:6660/graphql.
 
-### Example Queries
+** Example Queries
 
-#### Get Spots
+*** Get Spots
 
-##### Input
+**** Input
 
-```
+#+begin_src graphql
 subscription spots {
   spots(query: {
     time: "2023-10-15T12:53:56Z",
@@ -48,13 +48,13 @@ subscription spots {
     }
   }
 }
-```
+#+end_src
 
-##### Output
+**** Output
 
-Sequence of these `JSON` objects
+Sequence of these =JSON= objects
 
-```
+#+begin_src json
 {
   "data": {
     "spots": {
@@ -83,15 +83,15 @@ Sequence of these `JSON` objects
     }
   }
 }
-```
+#+end_src
 
-The last spot will have `FINISHED` instead of `RUNNING` as `status`.
+The last spot will have =FINISHED= instead of =RUNNING= as =status=.
 
-#### Provoking Error
+*** Provoking Error
 
-##### Input
+**** Input
 
-```
+#+begin_src graphql
 subscription spots {
   spots(query: {
     time: "2023-10-15T12:53:56Z",
@@ -102,11 +102,11 @@ subscription spots {
     status
   }
 }
-```
+#+end_src
 
-##### Output
+**** Output
 
-```
+#+begin_src json
 {
   "data": {
     "spots": null
@@ -127,4 +127,4 @@ subscription spots {
     }
   ]
 }
-```
+#+end_src
