@@ -10,10 +10,11 @@
         "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false"
     },
     "dependencies": {
+        "@urql/core": "^5.2.0",
         "@urql/vue": "^1.4.3",
+        "graphql-ws": "^6.0.6",
         "caniuse-lite": "^1.0.30001761",
         "geodesy": "^2.4.0",
-        "graphql-ws": "^5.16.2",
         "npm": "^11.7.0",
         "ol": "^10.7.0",
         "proj4": "^2.20.2",

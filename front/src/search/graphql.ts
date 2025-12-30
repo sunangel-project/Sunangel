@@ -47,7 +47,6 @@ export function setupGraphQLClient(): void {
     let httpProtocol = "http";
     let apiHost = "localhost";
     let port = "6660";
-    //apiHost = "192.168.2.123";
     if (process.env.NODE_ENV == "production") {
         protocol = "wss";
         httpProtocol = "https";
