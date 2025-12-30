@@ -2,8 +2,8 @@
 
 #+BEGIN_HTML
 <p>
-    <a href="https://img.shields.io/badge/Version-v0.2.17-blue">
-        <img src="https://img.shields.io/badge/Version-v0.2.17-blue">
+    <a href="https://img.shields.io/badge/Version-v0.2.18-blue">
+        <img src="https://img.shields.io/badge/Version-v0.2.18-blue">
     </a>
     <a href="https://img.shields.io/badge/API-v0.2.0-blue">
         <img src="https://img.shields.io/badge/API-v0.2.0-blue">

@@ -3,7 +3,7 @@
 rust_versions_file="version-common/src/lib.rs"
 go_versions_file="horizon/common/version.go"
 frontend_versions_file="front/src/main.ts"
-readme="README.md"
+readme="README.org"
 
 update_api_version="false"
 
