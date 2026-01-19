@@ -1,7 +1,7 @@
 #+title: Sunangel Home Edition
 
 #+BEGIN_HTML
-<p>
+<p align="center">
     <a href="https://img.shields.io/badge/Version-v0.2.18-blue">
         <img src="https://img.shields.io/badge/Version-v0.2.18-blue">
     </a>
