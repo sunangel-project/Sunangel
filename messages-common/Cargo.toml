@@ -7,9 +7,9 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.100"
-async-nats = "0.45.0"
+async-nats = "0.46.0"
 bytes = "1.11.0"
 futures-util = "0.3.31"
 log = "0.4.29"
 serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.148"
+serde_json = "1.0.149"
