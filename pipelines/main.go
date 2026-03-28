@@ -18,6 +18,7 @@ type Sunangel struct{}
 // Build backend and run extensive testing
 func (m *Sunangel) BuildAndTestBackend(
 	ctx context.Context,
+	// +defaultPath="/"
 	source *dagger.Directory,
 ) error {
 	err := m.Check(ctx, source)
@@ -41,6 +42,7 @@ func (m *Sunangel) BuildAndTestBackend(
 // Checks that all code compiles
 func (m *Sunangel) Check(
 	ctx context.Context,
+	// +defaultPath="/"
 	source *dagger.Directory,
 ) error {
 	_, err := m.CheckGo(ctx, source)
@@ -55,6 +57,7 @@ func (m *Sunangel) Check(
 // Checks that the go code compiles
 func (m *Sunangel) CheckGo(
 	ctx context.Context,
+	// +defaultPath="/"
 	source *dagger.Directory,
 ) (string, error) {
 	return cachedGoBuilder(source).
@@ -65,6 +68,7 @@ func (m *Sunangel) CheckGo(
 // Checks that the rust code compiles
 func (m *Sunangel) CheckRust(
 	ctx context.Context,
+	// +defaultPath="/"
 	source *dagger.Directory,
 ) (string, error) {
 	return cachedRustBuilder(source).
@@ -75,6 +79,7 @@ func (m *Sunangel) CheckRust(
 // Run linters
 func (m *Sunangel) Lint(
 	ctx context.Context,
+	// +defaultPath="/"
 	source *dagger.Directory,
 ) (string, error) {
 	goLintResults, err := cachedGoBuilder(source).
@@ -99,6 +104,7 @@ func (m *Sunangel) Lint(
 // Run unit tests
 func (m *Sunangel) Test(
 	ctx context.Context,
+	// +defaultPath="/"
 	source *dagger.Directory,
 ) (string, error) {
 	goTestResults, err := cachedGoBuilder(source).
