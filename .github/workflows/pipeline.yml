@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
   build_and_test_backend:
     name: Build and Test Backend
-    runs-on: depot-ubuntu-24.04,dagger=0.20.0
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
