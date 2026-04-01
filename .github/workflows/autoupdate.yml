@@ -3,7 +3,6 @@ name: Update Dependencies
 on:
   schedule:
     - cron: "0 3 28 * *"
-  push: {}
 
 jobs:
   update-dep:
@@ -13,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-        #with:
-        #  ref: latest
+        with:
+          ref: latest
 
       - name: Update Dependencies
         uses: dagger/dagger-for-github@v8.4.1
