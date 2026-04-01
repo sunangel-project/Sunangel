@@ -87,7 +87,10 @@ func (m *Sunangel) UpdateDependencies(
 	return rustDir, nil
 }
 
-func mergeDirectories(ctx context.Context, dirs []*dagger.Directory) (*dagger.Directory, error) {
+func mergeDirectories(
+	ctx context.Context,
+	dirs []*dagger.Directory,
+) (*dagger.Directory, error) {
 	var err error
 
 	if len(dirs) < 2 {
@@ -105,15 +108,54 @@ func mergeDirectories(ctx context.Context, dirs []*dagger.Directory) (*dagger.Di
 	return first, nil
 }
 
-func mergeDirectories2(ctx context.Context, first *dagger.Directory, second *dagger.Directory) (*dagger.Directory, error) {
+func mergeDirectories2(
+	ctx context.Context,
+	first *dagger.Directory,
+	second *dagger.Directory,
+) (*dagger.Directory, error) {
 	entries, err := second.Entries(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("could not get entries from second directory: %w", err)
 	}
 
 	for _, path := range entries {
+		first, err = copyPath(ctx, first, second, path)
+		if err != nil {
+			return nil, fmt.Errorf("could not copy at path '%s': %w", path, err)
+		}
+	}
+
+	return first, nil
+}
+
+func copyPath(
+	ctx context.Context,
+	first *dagger.Directory,
+	second *dagger.Directory,
+	path string,
+) (*dagger.Directory, error) {
+	fileType, err := second.Stat(path).FileType(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("could not get file type of path: %w", err)
+	}
+
+	switch fileType {
+	case dagger.FileTypeDirectory:
+		directory := second.Directory(path)
+		first = first.WithDirectory(path, directory)
+
+	case dagger.FileTypeRegular:
 		file := second.File(path)
 		first = first.WithFile(path, file)
+
+	case dagger.FileTypeSymlink:
+		return nil, fmt.Errorf("symlink at")
+
+	case dagger.FileTypeUnknown:
+		return nil, fmt.Errorf("unknown file type")
+
+	default:
+		return nil, fmt.Errorf("unexpected file type: %#v", fileType)
 	}
 
 	return first, nil
