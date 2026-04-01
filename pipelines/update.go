@@ -7,20 +7,23 @@ import (
 	"dagger/sunangel/internal/dagger"
 )
 
-// Update all dependencies
-func (m *Sunangel) UpdateDependencies(
+func updateRust(
 	ctx context.Context,
-	// +defaultPath="/"
 	source *dagger.Directory,
-) (*dagger.Directory, error) {
-	rustDir := cachedRustBuilder(source).
+) *dagger.Directory {
+	return cachedRustBuilder(source).
 		WithExec([]string{"cargo", "update"}).
 		Directory("").
 		Filter(dagger.DirectoryFilterOpts{
 			Include: []string{"Cargo.lock"},
 		})
+}
 
-	goDir := cachedGoBuilder(source).
+func updateGo(
+	ctx context.Context,
+	source *dagger.Directory,
+) *dagger.Directory {
+	return cachedGoBuilder(source).
 		WithExec([]string{"go", "get", "-u", "./..."}).
 		Directory("").
 		Filter(dagger.DirectoryFilterOpts{
@@ -29,11 +32,31 @@ func (m *Sunangel) UpdateDependencies(
 				"*.mod",
 			},
 		})
+}
 
-	rustDir, err := mergeDirectories(ctx, []*dagger.Directory{
-		rustDir,
-		goDir,
-	})
+// TODO: also test before merging
+type directoryGenerator = func(context.Context, *dagger.Directory) *dagger.Directory
+
+// Update all dependencies
+func (m *Sunangel) UpdateDependencies(
+	ctx context.Context,
+	// +defaultPath="/"
+	source *dagger.Directory,
+) (*dagger.Directory, error) {
+	var dirs []*dagger.Directory
+	for _, f := range []directoryGenerator{
+		updateRust,
+		updateGo,
+	} {
+		dir := f(ctx, source)
+		if dir == nil { // TODO: how to handle, error?
+			continue
+		}
+
+		dirs = append(dirs, dir)
+	}
+
+	rustDir, err := mergeDirectories(ctx, dirs)
 	if err != nil {
 		return nil, fmt.Errorf("could not merge directories: %w", err)
 	}
