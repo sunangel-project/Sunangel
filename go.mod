@@ -1,12 +1,10 @@
 module sunangel
 
-go 1.24.0
-
-toolchain go1.24.7
+go 1.25.0
 
 require (
 	github.com/joho/godotenv v1.5.1
-	github.com/nats-io/nats.go v1.49.0
+	github.com/nats-io/nats.go v1.50.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.9.4
 	github.com/sunangel-project/go-horizon-service v0.0.0-20230410205040-cb80c5377293
@@ -14,13 +12,13 @@ require (
 )
 
 require (
-	github.com/klauspost/compress v1.18.4 // indirect
+	github.com/klauspost/compress v1.18.5 // indirect
 	github.com/nats-io/nkeys v0.4.15 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/sunangel-project/angle v0.1.0 // indirect
 	github.com/sunangel-project/directory v0.1.0 // indirect
 	github.com/tkrajina/go-elevations v0.1.0 // indirect
-	golang.org/x/crypto v0.48.0 // indirect
-	golang.org/x/sys v0.41.0 // indirect
-	golang.org/x/text v0.34.0 // indirect
+	golang.org/x/crypto v0.49.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
+	golang.org/x/text v0.35.0 // indirect
 )
