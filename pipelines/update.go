@@ -51,14 +51,6 @@ func updateTypescript(
 // TODO: also test before merging
 type directoryGenerator = func(context.Context, *dagger.Directory) *dagger.Directory
 
-func (m *Sunangel) Scratch(
-	ctx context.Context,
-	// +defaultPath="/"
-	source *dagger.Directory,
-) *dagger.Directory {
-	return updateTypescript(ctx, source)
-}
-
 // Update all dependencies
 func (m *Sunangel) UpdateDependencies(
 	ctx context.Context,

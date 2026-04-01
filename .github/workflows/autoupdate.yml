@@ -3,6 +3,7 @@ name: Update Dependencies
 on:
   schedule:
     - cron: "0 3 28 * *"
+  push: {}
 
 jobs:
   update-dep:
@@ -12,27 +13,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        #with:
+        #  ref: latest
+
+      - name: Update Dependencies
+        uses: dagger/dagger-for-github@v8.4.1
         with:
-          ref: latest
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v2
-
-      - name: Update Rust dependencies
-        run: |
-          cargo install cargo-edit
-          cargo update
-          cargo upgrade
-
-      - name: Update Go dependencies
-        run: go get -u ./...
-
-      - name: Setup bun
-        uses: oven-sh/setup-bun@v2
-
-      - name: Update node dependencies
-        run: |
-          cd front
-          bun update
+          version: "latest"
+          verb: call
+          args: update-dependencies export --path .
+          cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v8
