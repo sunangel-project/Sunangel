@@ -9,6 +9,7 @@ import (
 const (
 	RustVersion = "1.94"
 	GoVersion   = "1.26"
+	BunVersion  = "1.3"
 
 	AlpineVersion = "3.23"
 )

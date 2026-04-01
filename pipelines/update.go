@@ -34,8 +34,30 @@ func updateGo(
 		})
 }
 
+func updateTypescript(
+	ctx context.Context,
+	source *dagger.Directory,
+) *dagger.Directory {
+	return cachedBunBuilder(source).
+		WithWorkdir("front").
+		WithExec([]string{"bun", "update"}).
+		WithWorkdir("..").
+		Directory("").
+		Filter(dagger.DirectoryFilterOpts{
+			Include: []string{"front/bun.lock"},
+		})
+}
+
 // TODO: also test before merging
 type directoryGenerator = func(context.Context, *dagger.Directory) *dagger.Directory
+
+func (m *Sunangel) Scratch(
+	ctx context.Context,
+	// +defaultPath="/"
+	source *dagger.Directory,
+) *dagger.Directory {
+	return updateTypescript(ctx, source)
+}
 
 // Update all dependencies
 func (m *Sunangel) UpdateDependencies(
@@ -46,6 +68,7 @@ func (m *Sunangel) UpdateDependencies(
 	var dirs []*dagger.Directory
 	for _, f := range []directoryGenerator{
 		updateRust,
+		updateTypescript,
 		updateGo,
 	} {
 		dir := f(ctx, source)
