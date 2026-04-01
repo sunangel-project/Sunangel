@@ -7,14 +7,14 @@ jobs:
     name: Build and Test Backend
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Build and Test All
-        uses: dagger/dagger-for-github@v6
+        uses: dagger/dagger-for-github@v8.4.1
         with:
           version: "latest"
           verb: call
-          args: build-and-test-backend --source=.
+          args: build-and-test-backend
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
 
   publish_and_deploy_backend:
@@ -27,14 +27,14 @@ jobs:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Publish Backend Images
-        uses: dagger/dagger-for-github@v6
+        uses: dagger/dagger-for-github@v8.4.1
         with:
           version: "latest"
           verb: call
-          args: publish-images --source=. --version=$VERSION --actor=$GITHUB_ACTOR --token=env:GITHUB_TOKEN
+          args: publish-images --version=$VERSION --actor=$GITHUB_ACTOR --token=env:GITHUB_TOKEN
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
         env:
           GITHUB_ACTOR: ${{ github.actor }}
@@ -53,7 +53,7 @@ jobs:
     name: Build and Test Frontend
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup bun
         uses: oven-sh/setup-bun@v2
@@ -64,7 +64,7 @@ jobs:
           bun ci
           bun run build
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: ./front/dist
 
@@ -87,4 +87,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
