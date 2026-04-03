@@ -8,7 +8,7 @@
     {
       "name": "merge-dirs",
       "source": "github.com/cloudsftp/daggerverse/merge-dirs@latest",
-      "pin": "36b64f71ca742be30e1701e9328689ed737ccfaf"
+      "pin": "068562bf281f73ffdb219aafd6be84093201edfb"
     }
   ],
   "source": "pipelines",

@@ -69,6 +69,6 @@ func (m *Sunangel) UpdateDependencies(
 		dirs = append(dirs, dir)
 	}
 
-	merged := dag.MergeDirs().MergeDirectories(dirs)
+	merged := dag.MergeDirs().Merge(dirs)
 	return merged, nil
 }
