@@ -1,7 +1,0 @@
-# syntax=docker/dockerfile:1
-
-FROM rust-run
-
-COPY --from=rust-build /bin/sky-service /bin/sky-service
-
-ENTRYPOINT ["/bin/sky-service"]

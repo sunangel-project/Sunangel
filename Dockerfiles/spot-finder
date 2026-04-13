@@ -1,7 +1,0 @@
-# syntax=docker/dockerfile:1
-
-FROM rust-run
-
-COPY --from=rust-build /bin/spot-finder /bin/spot-finder
-
-ENTRYPOINT ["/bin/spot-finder"]
