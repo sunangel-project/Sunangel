@@ -14,7 +14,7 @@ version-common = { path = "version-common" }
 messages-common = { path = "messages-common" }
 
 anyhow = "1.0.102"
-async-nats = "0.46.0"
+async-nats = "0.47.0"
 bytes = "1.11.1"
 chrono = { version = "0.4.44", features = ["serde"] }
 chrono-tz = { version = "0.10.4", features = ["serde"] }
