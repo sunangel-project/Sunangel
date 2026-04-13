@@ -1,4 +1,4 @@
-import { createApp } from "vue";
+import { createApp, type Plugin } from "vue";
 import { createRouter, createWebHashHistory } from "vue-router";
 
 import OpenLayersMap from "vue3-openlayers";
@@ -28,6 +28,6 @@ const router = createRouter({
 
 const app = createApp(App);
 app.use(router);
-app.use(OpenLayersMap);
-app.use(createVfm());
+app.use(OpenLayersMap as Plugin);
+app.use(createVfm() as Plugin);
 app.mount("#app");
