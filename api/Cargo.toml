@@ -3,29 +3,30 @@ name = "api"
 version = "0.1.0"
 edition = "2024"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+messages-common = { workspace = true }
+version-common = { workspace = true }
+
+anyhow = { workspace = true }
+async-nats = { workspace = true }
+bytes = { workspace = true }
+chrono = { workspace = true }
+chrono-tz = { workspace = true }
+dotenv = { workspace = true }
+env_logger = { workspace = true }
+futures = { workspace = true }
+futures-util = { workspace = true }
+log = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+actix-web = { version = "4.13.0", features = ["openssl"] }
+actix-cors = "0.7.1"
 juniper = { version = "0.17.1", features = ["chrono", "chrono-tz"] }
 juniper_graphql_ws = "0.5.0"
 juniper_actix = { version = "0.7.0", features = ["subscriptions"] }
-actix-web = { version = "4.13.0", features = ["openssl"] }
-actix-cors = "0.7.1"
-chrono = { version = "0.4.44", features = ["serde"] }
-chrono-tz = { version = "0.10.4", features = ["serde"] }
-async-nats = "0.46.0"
-futures-util = "0.3.32"
-serde = "1.0.228"
-serde_json = "1.0.149"
-uuid = { version = "1.21.0", features = ["v4"] }
-messages-common = { path = "../messages-common" }
-version-common = { path = "../version-common" }
-futures = "0.3.32"
-log = "0.4.29"
-anyhow = "1.0.102"
-bytes = "1.11.1"
-env_logger = "0.11.9"
+
 async-stream = "0.3.6"
 openssl = "0.10.75"
-dotenv = "0.15.0"
+uuid = { version = "1.21.0", features = ["v4"] }
 
