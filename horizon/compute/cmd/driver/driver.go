@@ -4,21 +4,23 @@ import (
 	"encoding/json"
 
 	"github.com/nats-io/nats.go"
-	"github.com/sunangel-project/go-horizon-service/src/messaging"
+	"sunangel/horizon/common"
+	"sunangel/horizon/messages"
 )
 
 func main() {
 	// Connect to a server
 	nc, _ := nats.Connect(nats.DefaultURL)
 
-	test_spot_msg := messaging.SpotMessage{
-		Part: messaging.PartSubMessage{
-			Id: 0, Of: 1,
+	test_spot_msg := messages.HorizonRequest{
+		Part: messages.Part{
+			Id: 0,
+			Of: 1,
 		},
-		Spot: messaging.SpotSubMessage{
+		Spot: messages.Spot{
 			Dir:  0.,
 			Kind: "bench",
-			Loc: messaging.Location{
+			Loc: messages.Location{
 				Lat: 48.818611,
 				Lon: 9.587340,
 			},
@@ -31,7 +33,7 @@ func main() {
 	}
 
 	// Simple Publisher
-	err = nc.Publish(messaging.IN_Q, []byte(payload))
+	err = nc.Publish(common.REQ_GET_Q, []byte(payload))
 	if err != nil {
 		panic(err)
 	}
