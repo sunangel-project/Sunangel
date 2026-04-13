@@ -9,6 +9,7 @@ import (
 // Instantiates all backend services
 func (m *Sunangel) LocalManualTesting(
 	ctx context.Context,
+	// +defaultPath="/"
 	source *dagger.Directory,
 ) (*dagger.Container, error) {
 	envFile := source.File(".env")

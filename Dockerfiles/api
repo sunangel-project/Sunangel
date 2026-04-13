@@ -1,9 +1,0 @@
-# syntax=docker/dockerfile:1
-
-FROM rust-run
-
-COPY --from=rust-build /bin/api /bin/api
-
-EXPOSE 6660
-
-ENTRYPOINT ["/bin/api"]

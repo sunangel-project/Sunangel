@@ -1,8 +1,9 @@
 {
   "name": "Sunangel",
-  "engineVersion": "v0.17.0",
+  "engineVersion": "v0.20.5",
   "sdk": {
     "source": "go"
   },
-  "source": "pipelines"
+  "source": "pipelines",
+  "disableDefaultFunctionCaching": true
 }

@@ -7,10 +7,11 @@ import (
 )
 
 const (
-	RustVersion = "1.91"
-	GoVersion   = "1.25"
+	RustVersion = "1.94"
+	GoVersion   = "1.26"
+	BunVersion  = "1.3"
 
-	AlpineVersion = "3.22"
+	AlpineVersion = "3.23"
 )
 
 type Sunangel struct{}
@@ -18,6 +19,7 @@ type Sunangel struct{}
 // Build backend and run extensive testing
 func (m *Sunangel) BuildAndTestBackend(
 	ctx context.Context,
+	// +defaultPath="/"
 	source *dagger.Directory,
 ) error {
 	err := m.Check(ctx, source)
@@ -41,6 +43,7 @@ func (m *Sunangel) BuildAndTestBackend(
 // Checks that all code compiles
 func (m *Sunangel) Check(
 	ctx context.Context,
+	// +defaultPath="/"
 	source *dagger.Directory,
 ) error {
 	_, err := m.CheckGo(ctx, source)
@@ -55,6 +58,7 @@ func (m *Sunangel) Check(
 // Checks that the go code compiles
 func (m *Sunangel) CheckGo(
 	ctx context.Context,
+	// +defaultPath="/"
 	source *dagger.Directory,
 ) (string, error) {
 	return cachedGoBuilder(source).
@@ -65,6 +69,7 @@ func (m *Sunangel) CheckGo(
 // Checks that the rust code compiles
 func (m *Sunangel) CheckRust(
 	ctx context.Context,
+	// +defaultPath="/"
 	source *dagger.Directory,
 ) (string, error) {
 	return cachedRustBuilder(source).
@@ -75,6 +80,7 @@ func (m *Sunangel) CheckRust(
 // Run linters
 func (m *Sunangel) Lint(
 	ctx context.Context,
+	// +defaultPath="/"
 	source *dagger.Directory,
 ) (string, error) {
 	goLintResults, err := cachedGoBuilder(source).
@@ -99,6 +105,7 @@ func (m *Sunangel) Lint(
 // Run unit tests
 func (m *Sunangel) Test(
 	ctx context.Context,
+	// +defaultPath="/"
 	source *dagger.Directory,
 ) (string, error) {
 	goTestResults, err := cachedGoBuilder(source).

@@ -11,6 +11,7 @@ import (
 // Publish all images
 func (m *Sunangel) PublishImages(
 	ctx context.Context,
+	// +defaultPath="/"
 	source *dagger.Directory,
 	version string,
 	actor string,
@@ -57,6 +58,7 @@ func (m *Sunangel) PublishImages(
 // Build image of the api service
 func (m *Sunangel) ImageApi(
 	ctx context.Context,
+	// +defaultPath="/"
 	source *dagger.Directory,
 ) *dagger.Container {
 	executable := buildRustServiceExecutable(ctx, source, "api")
@@ -69,6 +71,7 @@ func (m *Sunangel) ImageApi(
 // Build image of the spot-finder service
 func (m *Sunangel) ImageSpotFinder(
 	ctx context.Context,
+	// +defaultPath="/"
 	source *dagger.Directory,
 ) *dagger.Container {
 	return buildRustServiceImage(ctx, source, "spot-finder")
@@ -77,6 +80,7 @@ func (m *Sunangel) ImageSpotFinder(
 // Build image of the sky-service service
 func (m *Sunangel) ImageSkyService(
 	ctx context.Context,
+	// +defaultPath="/"
 	source *dagger.Directory,
 ) *dagger.Container {
 	return buildRustServiceImage(ctx, source, "sky-service")
@@ -85,6 +89,7 @@ func (m *Sunangel) ImageSkyService(
 // Build image of the horizon-get service
 func (m *Sunangel) ImageHorizonGet(
 	ctx context.Context,
+	// +defaultPath="/"
 	source *dagger.Directory,
 ) *dagger.Container {
 	return buildGoServiceImage(ctx, source, "horizon/get", "horizon-get")
@@ -93,6 +98,7 @@ func (m *Sunangel) ImageHorizonGet(
 // Build image of the horizon-compute service
 func (m *Sunangel) ImageHorizonCompute(
 	ctx context.Context,
+	// +defaultPath="/"
 	source *dagger.Directory,
 ) *dagger.Container {
 	return buildGoServiceImage(ctx, source, "horizon/compute", "horizon-compute")
