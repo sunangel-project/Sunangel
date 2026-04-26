@@ -7,8 +7,13 @@
   "dependencies": [
     {
       "name": "merge-dirs",
-      "source": "github.com/cloudsftp/daggerverse/merge-dirs@latest",
-      "pin": "6e25e5da6767d91affaf362dbc3ee52f7fef4296"
+      "source": "codeberg.org/clouds666/daggerverse/merge-dirs@latest",
+      "pin": "ec9958b5cfd3c6eaf6b64ab27ff667befe6637f3"
+    },
+    {
+      "name": "rust",
+      "source": "codeberg.org/clouds666/daggerverse/rust@latest",
+      "pin": "ec9958b5cfd3c6eaf6b64ab27ff667befe6637f3"
     }
   ],
   "source": "pipelines",

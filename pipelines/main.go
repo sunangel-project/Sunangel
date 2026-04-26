@@ -22,17 +22,19 @@ func (m *Sunangel) BuildAndTestBackend(
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) error {
-	err := m.Check(ctx, source)
+	r := rustBuilder()
+
+	err := r.Check(ctx, source)
 	if err != nil {
 		return err
 	}
 
-	_, err = m.Test(ctx, source)
+	err = r.Test(ctx, source)
 	if err != nil {
 		return err
 	}
 
-	_, err = m.Lint(ctx, source)
+	err = r.Lint(ctx, source)
 	if err != nil {
 		return err
 	}
@@ -51,7 +53,7 @@ func (m *Sunangel) Check(
 		return err
 	}
 
-	_, err = m.CheckRust(ctx, source)
+	err = m.CheckRust(ctx, source)
 	return err
 }
 
@@ -71,10 +73,9 @@ func (m *Sunangel) CheckRust(
 	ctx context.Context,
 	// +defaultPath="/"
 	source *dagger.Directory,
-) (string, error) {
-	return cachedRustBuilder(source).
-		WithExec([]string{"cargo", "check"}).
-		Stdout(ctx)
+) error {
+	r := rustBuilder()
+	return r.Check(ctx, source)
 }
 
 // Run linters
@@ -82,24 +83,19 @@ func (m *Sunangel) Lint(
 	ctx context.Context,
 	// +defaultPath="/"
 	source *dagger.Directory,
-) (string, error) {
-	goLintResults, err := cachedGoBuilder(source).
+) error {
+	if _, err := cachedGoBuilder(source).
 		WithExec([]string{"golangci-lint", "run"}).
-		Stdout(ctx)
-
-	if err != nil {
-		return "", err
+		Stdout(ctx); err != nil {
+		return err
 	}
 
-	rustLintResults, err := cachedRustBuilder(source).
-		WithExec([]string{"cargo", "clippy", "--", "-D", "warnings"}).
-		Stdout(ctx)
-
-	if err != nil {
-		return "", err
+	r := rustBuilder()
+	if err := r.Lint(ctx, source); err != nil {
+		return err
 	}
 
-	return goLintResults + "\n" + rustLintResults, nil
+	return nil
 }
 
 // Run unit tests
@@ -107,22 +103,19 @@ func (m *Sunangel) Test(
 	ctx context.Context,
 	// +defaultPath="/"
 	source *dagger.Directory,
-) (string, error) {
-	goTestResults, err := cachedGoBuilder(source).
+) error {
+	_, err := cachedGoBuilder(source).
 		WithExec([]string{"go", "test", "./..."}).
 		Stdout(ctx)
 
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	rustTestResults, err := cachedRustBuilder(source).
-		WithExec([]string{"cargo", "test"}).
-		Stdout(ctx)
-
-	if err != nil {
-		return "", err
+	r := rustBuilder()
+	if err := r.Test(ctx, source); err != nil {
+		return err
 	}
 
-	return goTestResults + "\n" + rustTestResults, nil
+	return nil
 }
