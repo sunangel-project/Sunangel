@@ -46,14 +46,7 @@ func (m *Sunangel) LocalManualTesting(
 		return nil, err
 	}
 
-	apiExecutable := buildRustServiceExecutable(ctx, source, "api")
-
-	return createServiceContainer(apiExecutable).
-			WithServiceBinding("nats", natsService).
-			WithFile("/.env", envFile).
-			WithExposedPort(6660).
-			WithEntrypoint([]string{"/server"}),
-		nil
+	return buildRustImage(source, "api", natsService, envFile).WithExposedPort(6660), nil
 }
 
 func buildSpotFinderService(
@@ -62,11 +55,12 @@ func buildSpotFinderService(
 	natsService *dagger.Service,
 	envFile *dagger.File,
 ) *dagger.Service {
-	return buildRustService(
-		buildRustServiceExecutable(ctx, source, "spot-finder"),
+	return buildRustImage(
+		source,
+		"spot-finder",
 		natsService,
 		envFile,
-	)
+	).AsService()
 }
 
 func buildSkyServiceService(
@@ -75,23 +69,24 @@ func buildSkyServiceService(
 	natsService *dagger.Service,
 	envFile *dagger.File,
 ) *dagger.Service {
-	return buildRustService(
-		buildRustServiceExecutable(ctx, source, "sky-service"),
+	return buildRustImage(
+		source,
+		"sky-service",
 		natsService,
 		envFile,
-	)
+	).AsService()
 }
 
-func buildRustService(
-	executable *dagger.File,
+func buildRustImage(
+	source *dagger.Directory,
+	pkg string,
 	natsService *dagger.Service,
 	envFile *dagger.File,
-) *dagger.Service {
-	return createServiceContainer(executable).
+) *dagger.Container {
+	r := rustBuilder()
+	return r.BuildImage(source, pkg).
 		WithServiceBinding("nats", natsService).
-		WithFile("/.env", envFile).
-		WithEntrypoint([]string{"/server"}).
-		AsService()
+		WithFile("/.env", envFile)
 }
 
 func buildHorizonGetService(
