@@ -7,9 +7,10 @@ import (
 )
 
 const (
-	RustVersion = "1.94"
-	GoVersion   = "1.26"
-	BunVersion  = "1.3"
+	RustVersion     = "1.94"
+	GoVersion       = "1.26"
+	GolangCiVersion = "2.11"
+	BunVersion      = "1.3"
 
 	AlpineVersion = "3.23"
 )
@@ -48,7 +49,7 @@ func (m *Sunangel) Check(
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) error {
-	_, err := m.CheckGo(ctx, source)
+	err := m.CheckGo(ctx, source)
 	if err != nil {
 		return err
 	}
@@ -62,10 +63,9 @@ func (m *Sunangel) CheckGo(
 	ctx context.Context,
 	// +defaultPath="/"
 	source *dagger.Directory,
-) (string, error) {
-	return cachedGoBuilder(source).
-		WithExec([]string{"go", "vet", "./..."}).
-		Stdout(ctx)
+) error {
+	g := dag.Go()
+	return g.Vet(ctx, source)
 }
 
 // Checks that the rust code compiles
@@ -84,9 +84,8 @@ func (m *Sunangel) Lint(
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) error {
-	if _, err := cachedGoBuilder(source).
-		WithExec([]string{"golangci-lint", "run"}).
-		Stdout(ctx); err != nil {
+	g := dag.Go()
+	if err := g.Lint(ctx, source); err != nil {
 		return err
 	}
 
@@ -104,11 +103,8 @@ func (m *Sunangel) Test(
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) error {
-	_, err := cachedGoBuilder(source).
-		WithExec([]string{"go", "test", "./..."}).
-		Stdout(ctx)
-
-	if err != nil {
+	g := goBuilder()
+	if err := g.Test(ctx, source); err != nil {
 		return err
 	}
 

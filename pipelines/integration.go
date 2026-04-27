@@ -83,8 +83,8 @@ func buildRustImage(
 	natsService *dagger.Service,
 	envFile *dagger.File,
 ) *dagger.Container {
-	r := rustBuilder()
-	return r.BuildImage(source, pkg).
+	return rustBuilder().
+		BuildImage(source, pkg).
 		WithServiceBinding("nats", natsService).
 		WithFile("/.env", envFile)
 }
@@ -95,11 +95,13 @@ func buildHorizonGetService(
 	natsService *dagger.Service,
 	envFile *dagger.File,
 ) *dagger.Service {
-	return buildGoService(
-		buildGoServiceExecutable(ctx, source, "horizon/get", "horizon-get"),
+	return buildGoImage(
+		source,
+		"horizon-get",
+		"horizon/get",
 		natsService,
 		envFile,
-	)
+	).AsService()
 }
 
 func buildHorizonComputeService(
@@ -108,21 +110,26 @@ func buildHorizonComputeService(
 	natsService *dagger.Service,
 	envFile *dagger.File,
 ) *dagger.Service {
-	return buildGoService(
-		buildGoServiceExecutable(ctx, source, "horizon/compute", "horizon-compute"),
+	return buildGoImage(
+		source,
+		"horizon-compute",
+		"horizon/compute",
 		natsService,
 		envFile,
-	)
+	).AsService()
 }
 
-func buildGoService(
-	executable *dagger.File,
+func buildGoImage(
+	source *dagger.Directory,
+	name string,
+	path string,
 	natsService *dagger.Service,
 	envFile *dagger.File,
-) *dagger.Service {
-	return createServiceContainer(executable).
+) *dagger.Container {
+	return goBuilder().
+		BuildImage(source, name, dagger.GoBuildImageOpts{
+			Path: path,
+		}).
 		WithServiceBinding("nats", natsService).
-		WithFile("/.env", envFile).
-		WithEntrypoint([]string{"/server"}).
-		AsService()
+		WithFile("/.env", envFile)
 }

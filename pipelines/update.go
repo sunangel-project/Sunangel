@@ -23,7 +23,8 @@ func updateGo(
 	ctx context.Context,
 	source *dagger.Directory,
 ) *dagger.Directory {
-	return cachedGoBuilder(source).
+	return goBuilder().
+		Builder(source).
 		WithExec([]string{"go", "get", "-u", "./..."}).
 		Directory("").
 		Filter(dagger.DirectoryFilterOpts{

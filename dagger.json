@@ -6,14 +6,19 @@
   },
   "dependencies": [
     {
+      "name": "go",
+      "source": "codeberg.org/clouds666/daggerverse/go@latest",
+      "pin": "751305ebda66f7275ed177e99e6396520de4a2ef"
+    },
+    {
       "name": "merge-dirs",
       "source": "codeberg.org/clouds666/daggerverse/merge-dirs@latest",
-      "pin": "ec9958b5cfd3c6eaf6b64ab27ff667befe6637f3"
+      "pin": "751305ebda66f7275ed177e99e6396520de4a2ef"
     },
     {
       "name": "rust",
       "source": "codeberg.org/clouds666/daggerverse/rust@latest",
-      "pin": "ec9958b5cfd3c6eaf6b64ab27ff667befe6637f3"
+      "pin": "751305ebda66f7275ed177e99e6396520de4a2ef"
     }
   ],
   "source": "pipelines",
