@@ -39,7 +39,7 @@ func updateTypescript(
 	ctx context.Context,
 	source *dagger.Directory,
 ) *dagger.Directory {
-	return cachedBunBuilder(source).
+	return bunBuilder(source).
 		WithWorkdir("front").
 		WithExec([]string{"bun", "update"}).
 		WithWorkdir("..").
