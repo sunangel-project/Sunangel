@@ -46,14 +46,7 @@ func (m *Sunangel) LocalManualTesting(
 		return nil, err
 	}
 
-	apiExecutable := buildRustServiceExecutable(ctx, source, "api")
-
-	return createServiceContainer(apiExecutable).
-			WithServiceBinding("nats", natsService).
-			WithFile("/.env", envFile).
-			WithExposedPort(6660).
-			WithEntrypoint([]string{"/server"}),
-		nil
+	return buildRustImage(source, "api", natsService, envFile).WithExposedPort(6660), nil
 }
 
 func buildSpotFinderService(
@@ -62,11 +55,12 @@ func buildSpotFinderService(
 	natsService *dagger.Service,
 	envFile *dagger.File,
 ) *dagger.Service {
-	return buildRustService(
-		buildRustServiceExecutable(ctx, source, "spot-finder"),
+	return buildRustImage(
+		source,
+		"spot-finder",
 		natsService,
 		envFile,
-	)
+	).AsService()
 }
 
 func buildSkyServiceService(
@@ -75,23 +69,24 @@ func buildSkyServiceService(
 	natsService *dagger.Service,
 	envFile *dagger.File,
 ) *dagger.Service {
-	return buildRustService(
-		buildRustServiceExecutable(ctx, source, "sky-service"),
+	return buildRustImage(
+		source,
+		"sky-service",
 		natsService,
 		envFile,
-	)
+	).AsService()
 }
 
-func buildRustService(
-	executable *dagger.File,
+func buildRustImage(
+	source *dagger.Directory,
+	pkg string,
 	natsService *dagger.Service,
 	envFile *dagger.File,
-) *dagger.Service {
-	return createServiceContainer(executable).
+) *dagger.Container {
+	return rustBuilder().
+		BuildImage(source, pkg).
 		WithServiceBinding("nats", natsService).
-		WithFile("/.env", envFile).
-		WithEntrypoint([]string{"/server"}).
-		AsService()
+		WithFile("/.env", envFile)
 }
 
 func buildHorizonGetService(
@@ -100,11 +95,13 @@ func buildHorizonGetService(
 	natsService *dagger.Service,
 	envFile *dagger.File,
 ) *dagger.Service {
-	return buildGoService(
-		buildGoServiceExecutable(ctx, source, "horizon/get", "horizon-get"),
+	return buildGoImage(
+		source,
+		"horizon-get",
+		"horizon/get",
 		natsService,
 		envFile,
-	)
+	).AsService()
 }
 
 func buildHorizonComputeService(
@@ -113,21 +110,26 @@ func buildHorizonComputeService(
 	natsService *dagger.Service,
 	envFile *dagger.File,
 ) *dagger.Service {
-	return buildGoService(
-		buildGoServiceExecutable(ctx, source, "horizon/compute", "horizon-compute"),
+	return buildGoImage(
+		source,
+		"horizon-compute",
+		"horizon/compute",
 		natsService,
 		envFile,
-	)
+	).AsService()
 }
 
-func buildGoService(
-	executable *dagger.File,
+func buildGoImage(
+	source *dagger.Directory,
+	name string,
+	path string,
 	natsService *dagger.Service,
 	envFile *dagger.File,
-) *dagger.Service {
-	return createServiceContainer(executable).
+) *dagger.Container {
+	return goBuilder().
+		BuildImage(source, name, dagger.GoBuildImageOpts{
+			Path: path,
+		}).
 		WithServiceBinding("nats", natsService).
-		WithFile("/.env", envFile).
-		WithEntrypoint([]string{"/server"}).
-		AsService()
+		WithFile("/.env", envFile)
 }

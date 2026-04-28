@@ -7,9 +7,10 @@ import (
 )
 
 const (
-	RustVersion = "1.94"
-	GoVersion   = "1.26"
-	BunVersion  = "1.3"
+	RustVersion     = "1.94"
+	GoVersion       = "1.26"
+	GolangCiVersion = "2.11"
+	BunVersion      = "1.3"
 
 	AlpineVersion = "3.23"
 )
@@ -22,17 +23,19 @@ func (m *Sunangel) BuildAndTestBackend(
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) error {
-	err := m.Check(ctx, source)
+	r := rustBuilder()
+
+	err := r.Check(ctx, source)
 	if err != nil {
 		return err
 	}
 
-	_, err = m.Test(ctx, source)
+	err = r.Test(ctx, source)
 	if err != nil {
 		return err
 	}
 
-	_, err = m.Lint(ctx, source)
+	err = r.Lint(ctx, source)
 	if err != nil {
 		return err
 	}
@@ -46,12 +49,12 @@ func (m *Sunangel) Check(
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) error {
-	_, err := m.CheckGo(ctx, source)
+	err := m.CheckGo(ctx, source)
 	if err != nil {
 		return err
 	}
 
-	_, err = m.CheckRust(ctx, source)
+	err = m.CheckRust(ctx, source)
 	return err
 }
 
@@ -60,10 +63,8 @@ func (m *Sunangel) CheckGo(
 	ctx context.Context,
 	// +defaultPath="/"
 	source *dagger.Directory,
-) (string, error) {
-	return cachedGoBuilder(source).
-		WithExec([]string{"go", "vet", "./..."}).
-		Stdout(ctx)
+) error {
+	return goBuilder().Vet(ctx, source)
 }
 
 // Checks that the rust code compiles
@@ -71,10 +72,8 @@ func (m *Sunangel) CheckRust(
 	ctx context.Context,
 	// +defaultPath="/"
 	source *dagger.Directory,
-) (string, error) {
-	return cachedRustBuilder(source).
-		WithExec([]string{"cargo", "check"}).
-		Stdout(ctx)
+) error {
+	return rustBuilder().Check(ctx, source)
 }
 
 // Run linters
@@ -82,24 +81,16 @@ func (m *Sunangel) Lint(
 	ctx context.Context,
 	// +defaultPath="/"
 	source *dagger.Directory,
-) (string, error) {
-	goLintResults, err := cachedGoBuilder(source).
-		WithExec([]string{"golangci-lint", "run"}).
-		Stdout(ctx)
-
-	if err != nil {
-		return "", err
+) error {
+	if err := goBuilder().Lint(ctx, source); err != nil {
+		return err
 	}
 
-	rustLintResults, err := cachedRustBuilder(source).
-		WithExec([]string{"cargo", "clippy", "--", "-D", "warnings"}).
-		Stdout(ctx)
-
-	if err != nil {
-		return "", err
+	if err := rustBuilder().Lint(ctx, source); err != nil {
+		return err
 	}
 
-	return goLintResults + "\n" + rustLintResults, nil
+	return nil
 }
 
 // Run unit tests
@@ -107,22 +98,14 @@ func (m *Sunangel) Test(
 	ctx context.Context,
 	// +defaultPath="/"
 	source *dagger.Directory,
-) (string, error) {
-	goTestResults, err := cachedGoBuilder(source).
-		WithExec([]string{"go", "test", "./..."}).
-		Stdout(ctx)
-
-	if err != nil {
-		return "", err
+) error {
+	if err := goBuilder().Test(ctx, source); err != nil {
+		return err
 	}
 
-	rustTestResults, err := cachedRustBuilder(source).
-		WithExec([]string{"cargo", "test"}).
-		Stdout(ctx)
-
-	if err != nil {
-		return "", err
+	if err := rustBuilder().Test(ctx, source); err != nil {
+		return err
 	}
 
-	return goTestResults + "\n" + rustTestResults, nil
+	return nil
 }

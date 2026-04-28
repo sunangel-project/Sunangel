@@ -40,11 +40,11 @@ func (m *Sunangel) PublishImages(
 		image *dagger.Container
 		name  string
 	}{
-		{m.ImageApi(ctx, source), "api"},
+		{m.ImageApi(source), "api"},
 		{m.ImageHorizonGet(ctx, source), "horizon-get"},
 		{m.ImageHorizonCompute(ctx, source), "horizon-compute"},
-		{m.ImageSkyService(ctx, source), "sky-service"},
-		{m.ImageSpotFinder(ctx, source), "spot-finder"},
+		{m.ImageSkyService(source), "sky-service"},
+		{m.ImageSpotFinder(source), "spot-finder"},
 	} {
 		err := publishImage(pair.image, pair.name)
 		if err != nil {
@@ -57,33 +57,28 @@ func (m *Sunangel) PublishImages(
 
 // Build image of the api service
 func (m *Sunangel) ImageApi(
-	ctx context.Context,
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) *dagger.Container {
-	executable := buildRustServiceExecutable(ctx, source, "api")
-
-	return createServiceContainer(executable).
-		WithExposedPort(6660).
-		WithEntrypoint([]string{"/server"})
+	return rustBuilder().
+		BuildImage(source, "api").
+		WithExposedPort(6660)
 }
 
 // Build image of the spot-finder service
 func (m *Sunangel) ImageSpotFinder(
-	ctx context.Context,
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) *dagger.Container {
-	return buildRustServiceImage(ctx, source, "spot-finder")
+	return rustBuilder().BuildImage(source, "spot-finder")
 }
 
 // Build image of the sky-service service
 func (m *Sunangel) ImageSkyService(
-	ctx context.Context,
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) *dagger.Container {
-	return buildRustServiceImage(ctx, source, "sky-service")
+	return rustBuilder().BuildImage(source, "sky-service")
 }
 
 // Build image of the horizon-get service
@@ -92,7 +87,10 @@ func (m *Sunangel) ImageHorizonGet(
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) *dagger.Container {
-	return buildGoServiceImage(ctx, source, "horizon/get", "horizon-get")
+	return goBuilder().
+		BuildImage(source, "horizon-compute", dagger.GoBuildImageOpts{
+			Path: "horizon/compute",
+		})
 }
 
 // Build image of the horizon-compute service
@@ -101,5 +99,8 @@ func (m *Sunangel) ImageHorizonCompute(
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) *dagger.Container {
-	return buildGoServiceImage(ctx, source, "horizon/compute", "horizon-compute")
+	return goBuilder().
+		BuildImage(source, "horizon-get", dagger.GoBuildImageOpts{
+			Path: "horizon/get",
+		})
 }

@@ -1,9 +1,31 @@
 {
   "name": "Sunangel",
-  "engineVersion": "v0.20.5",
+  "engineVersion": "v0.20.6",
   "sdk": {
     "source": "go"
   },
+  "dependencies": [
+    {
+      "name": "bun",
+      "source": "codeberg.org/clouds666/daggerverse/bun@latest",
+      "pin": "520c710d9430255bb1e97b31f7ecd5c0f8b974ba"
+    },
+    {
+      "name": "go",
+      "source": "codeberg.org/clouds666/daggerverse/go@latest",
+      "pin": "520c710d9430255bb1e97b31f7ecd5c0f8b974ba"
+    },
+    {
+      "name": "merge-dirs",
+      "source": "codeberg.org/clouds666/daggerverse/merge-dirs@latest",
+      "pin": "520c710d9430255bb1e97b31f7ecd5c0f8b974ba"
+    },
+    {
+      "name": "rust",
+      "source": "codeberg.org/clouds666/daggerverse/rust@latest",
+      "pin": "520c710d9430255bb1e97b31f7ecd5c0f8b974ba"
+    }
+  ],
   "source": "pipelines",
   "disableDefaultFunctionCaching": true
 }
