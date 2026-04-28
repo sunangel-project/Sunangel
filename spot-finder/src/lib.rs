@@ -26,7 +26,10 @@ async fn get_osm_data(
     );
 
     let client = reqwest::Client::new();
-    let request = client.post(OVERPASS_URL).body(body);
+    let request = client
+        .post(OVERPASS_URL)
+        .body(body)
+        .header("Referer", "sunn.cloudsftp.de");
     let response = request.send().await?;
 
     if response.status() == StatusCode::OK {
