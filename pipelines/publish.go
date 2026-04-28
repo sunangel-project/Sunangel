@@ -62,8 +62,7 @@ func (m *Sunangel) ImageApi(
 ) *dagger.Container {
 	return rustBuilder().
 		BuildImage(source, "api").
-		WithExposedPort(6660).
-		WithEntrypoint([]string{"/api"})
+		WithExposedPort(6660)
 }
 
 // Build image of the spot-finder service
