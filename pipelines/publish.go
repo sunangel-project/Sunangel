@@ -60,8 +60,8 @@ func (m *Sunangel) ImageApi(
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) *dagger.Container {
-	r := rustBuilder()
-	return r.BuildImage(source, "api").
+	return rustBuilder().
+		BuildImage(source, "api").
 		WithExposedPort(6660).
 		WithEntrypoint([]string{"/api"})
 }
@@ -71,8 +71,7 @@ func (m *Sunangel) ImageSpotFinder(
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) *dagger.Container {
-	r := rustBuilder()
-	return r.BuildImage(source, "spot-finder")
+	return rustBuilder().BuildImage(source, "spot-finder")
 }
 
 // Build image of the sky-service service
@@ -80,8 +79,7 @@ func (m *Sunangel) ImageSkyService(
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) *dagger.Container {
-	r := rustBuilder()
-	return r.BuildImage(source, "sky-service")
+	return rustBuilder().BuildImage(source, "sky-service")
 }
 
 // Build image of the horizon-get service

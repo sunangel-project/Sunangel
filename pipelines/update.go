@@ -10,8 +10,8 @@ func updateRust(
 	ctx context.Context,
 	source *dagger.Directory,
 ) *dagger.Directory {
-	r := rustBuilder()
-	return r.Builder(source).
+	return rustBuilder().
+		Builder(source).
 		WithExec([]string{"cargo", "update"}).
 		Directory("").
 		Filter(dagger.DirectoryFilterOpts{

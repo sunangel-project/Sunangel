@@ -64,8 +64,7 @@ func (m *Sunangel) CheckGo(
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) error {
-	g := dag.Go()
-	return g.Vet(ctx, source)
+	return goBuilder().Vet(ctx, source)
 }
 
 // Checks that the rust code compiles
@@ -74,8 +73,7 @@ func (m *Sunangel) CheckRust(
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) error {
-	r := rustBuilder()
-	return r.Check(ctx, source)
+	return rustBuilder().Check(ctx, source)
 }
 
 // Run linters
@@ -84,13 +82,11 @@ func (m *Sunangel) Lint(
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) error {
-	g := dag.Go()
-	if err := g.Lint(ctx, source); err != nil {
+	if err := goBuilder().Lint(ctx, source); err != nil {
 		return err
 	}
 
-	r := rustBuilder()
-	if err := r.Lint(ctx, source); err != nil {
+	if err := rustBuilder().Lint(ctx, source); err != nil {
 		return err
 	}
 
@@ -103,13 +99,11 @@ func (m *Sunangel) Test(
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) error {
-	g := goBuilder()
-	if err := g.Test(ctx, source); err != nil {
+	if err := goBuilder().Test(ctx, source); err != nil {
 		return err
 	}
 
-	r := rustBuilder()
-	if err := r.Test(ctx, source); err != nil {
+	if err := rustBuilder().Test(ctx, source); err != nil {
 		return err
 	}
 
