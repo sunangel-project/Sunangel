@@ -1,6 +1,8 @@
 name: Update Dependencies
 
-on: []
+on:
+  schedule:
+    - cron: "0 3 28 * *"
 
 jobs:
   update-dep:
