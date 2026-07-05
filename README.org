@@ -1,21 +1,10 @@
 #+title: Sunangel Home Edition
 
-#+BEGIN_HTML
-<p align="center">
-    <a href="https://img.shields.io/badge/Version-v0.2.20-blue">
-        <img src="https://img.shields.io/badge/Version-v0.2.20-blue">
-    </a>
-    <a href="https://img.shields.io/badge/API-v0.2.0-blue">
-        <img src="https://img.shields.io/badge/API-v0.2.0-blue">
-    </a>
-    <a href="https://github.com/sunangel-project/Sunangel/actions/workflows/pipeline.yml">
-        <img src="https://github.com/sunangel-project/Sunangel/actions/workflows/pipeline.yml/badge.svg">
-    </a>
-    <a href="https://sunn.cloudsftp.de">
-        <img src="https://img.shields.io/badge/Website-limegreen">
-    </a>
-</p>
-#+END_HTML
+#+ATTR_HTML: :align center
+[[https://img.shields.io/badge/Version-v0.2.20-blue][https://img.shields.io/badge/Version-v0.2.20-blue.svg]]
+[[https://img.shields.io/badge/API-v0.2.0-blue][https://img.shields.io/badge/API-v0.2.0-blue.svg]]
+[[https://github.com/sunangel-project/Sunangel/actions/workflows/pipeline.yml][https://github.com/sunangel-project/Sunangel/actions/workflows/pipeline.yml/badge.svg]]
+[[https://sunn.cloudsftp.de][https://img.shields.io/badge/Website-limegreen.svg]]
 
 * Execution
 
