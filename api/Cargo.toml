@@ -20,13 +20,13 @@ log = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 
-actix-web = { version = "4.13.0", features = ["openssl"] }
+actix-web = { version = "4.14.0", features = ["openssl"] }
 actix-cors = "0.7.1"
 juniper = { version = "0.17.1", features = ["chrono", "chrono-tz"] }
 juniper_graphql_ws = "0.5.0"
 juniper_actix = { version = "0.7.0", features = ["subscriptions"] }
 
 async-stream = "0.3.6"
-openssl = "0.10.75"
-uuid = { version = "1.21.0", features = ["v4"] }
+openssl = "0.10.81"
+uuid = { version = "1.23.4", features = ["v4"] }
 
