@@ -1,6 +1,6 @@
 name: Update Dependencies
 
-on: {}
+on: []
 
 jobs:
   update-dep:
