@@ -1,0 +1,21 @@
+on:
+  push:
+    branches:
+      - publish-frontend
+    tags:
+      - v*
+
+jobs:
+  build:
+    runs-on: debian
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Build frontend
+        run: |
+          cd front
+          bun ci
+          bun run build
