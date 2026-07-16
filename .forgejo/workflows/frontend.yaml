@@ -1,12 +1,7 @@
-on:
-  push:
-    branches:
-      - publish-frontend
-    tags:
-      - v*
+on: [push]
 
 jobs:
-  build:
+  build-frontend:
     runs-on: debian
     steps:
       - uses: actions/checkout@v6
@@ -16,6 +11,32 @@ jobs:
 
       - name: Build frontend
         run: |
+          set +x
+
           cd front
           bun ci
           bun run build
+
+      - uses: https://data.forgejo.org/forgejo/upload-artifact@cb8afe72b42edc798abfb8fcb556cf660d894245 # v5
+        with:
+          name: frontend-dist
+          path: ./front/dist
+
+  deploy-frontend:
+    runs-on: debian
+
+    needs:
+      - build-frontend
+
+    if: forge.event_name == 'push' && contains(github.ref, 'refs/tags/')
+
+    steps:
+      - uses: actions/download-artifact@a9bc5e6ef2cb54c177f32aa5726adaa15e7e2d59 # v3
+        with:
+          name: frontend-dist
+          path: dist
+
+      - run: |
+          set +x
+
+          ls -l .
