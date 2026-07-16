@@ -34,9 +34,17 @@ jobs:
       - uses: actions/download-artifact@a9bc5e6ef2cb54c177f32aa5726adaa15e7e2d59 # v3
         with:
           name: frontend-dist
-          path: dist
 
       - run: |
           set +x
 
-          ls -l .
+          mkdir dist
+          unzip frontend-dist -d dist
+          ls -l dist
+
+      - uses: actions/git-pages@v2
+        with:
+          site: https://sunn.cloudsftp.de/
+          server: pages.energiesandsuch.com
+          token: ${{ forge.token }}
+          source: ./dist/
