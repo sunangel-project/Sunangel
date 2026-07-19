@@ -109,3 +109,15 @@ func (m *Sunangel) Test(
 
 	return nil
 }
+
+// Build frontend
+func (m *Sunangel) BuildFrontend(
+	ctx context.Context,
+	// +defaultPath="/front"
+	source *dagger.Directory,
+) *dagger.Directory {
+	return bunBuilder(source).
+		WithExec([]string{"bun", "install"}).
+		WithExec([]string{"bun", "run", "build"}).
+		Directory("dist")
+}

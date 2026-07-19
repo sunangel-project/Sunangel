@@ -2,28 +2,15 @@ on: [push]
 
 jobs:
   build-frontend:
-    runs-on: debian
+    runs-on: dagger
     steps:
       - uses: actions/checkout@v6
 
-      - name: Setup bun
-        uses: oven-sh/setup-bun@v2
-
       - name: Build frontend
-        run: |
-          set +x
-
-          cd front
-          bun ci
-          bun run build
-
-      - uses: https://data.forgejo.org/forgejo/upload-artifact@cb8afe72b42edc798abfb8fcb556cf660d894245 # v5
-        with:
-          name: frontend-dist
-          path: ./front/dist
+        run: dagger call build-frontend
 
   deploy-frontend:
-    runs-on: debian
+    runs-on: dagger
 
     needs:
       - build-frontend
@@ -31,19 +18,24 @@ jobs:
     if: forge.ref_name == 'forgejo-workflows' # TODO: switch to latest branch
 
     steps:
-      - uses: https://data.forgejo.org/forgejo/download-artifact@769f970437aa3291b13f35dc23fc87967d7fb19f # v7
-        with:
-          name: frontend-dist
+      - uses: actions/checkout@v6
 
-      - run: |
-          set +x
+      - name: Build frontend
+        run: |
+          set -x
 
-          mkdir dist
-          unzip frontend-dist -d dist
+          mkdir ./frontend-dist
+          dagger call build-frontend export --path ./frontend-dist
+
+      - name: Debug
+        run: |
+          touch test-file
+          ls -la
+          chmod 755 ./frontend-dist
 
       - uses: actions/git-pages@v2
         with:
           site: https://sunn.cloudsftp.de/
           server: pages.energiesandsuch.com
           token: ${{ forge.token }}
-          source: ./dist/
+          source: ./frontend-dist

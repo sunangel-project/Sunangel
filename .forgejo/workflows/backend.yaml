@@ -1,0 +1,14 @@
+on: [push]
+
+jobs:
+  build-backend:
+    runs-on: dagger
+    steps:
+      - uses: actions/checkout@v6
+
+      #- name: Build and Test All
+      #  run: dagger call build-backend export --path ./bins
+
+      #- name: Build and Export
+
+
