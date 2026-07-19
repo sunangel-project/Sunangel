@@ -4,6 +4,7 @@ pub mod location;
 use std::io::Cursor;
 
 use anyhow::anyhow;
+use async_nats::jetstream::Context;
 use location::Location;
 use osm_xml::{Node, OSM};
 use reqwest::StatusCode;
@@ -39,12 +40,18 @@ async fn get_osm_data(
     }
 }
 
-// Spot
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Spot {
     pub kind: String,
     pub loc: Location,
     pub dir: Option<f64>,
+    pub source: DataSource,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum DataSource {
+    OpenStreetMap,
+    Manual,
 }
 
 // Searching
@@ -82,6 +89,7 @@ pub fn search_area_short_enough(
 }
 
 pub async fn find_spots(
+    jetstream: &Context,
     lower_left: Location,
     upper_right: Location,
 ) -> Result<Vec<Spot>, anyhow::Error> {
@@ -96,6 +104,7 @@ pub async fn find_spots(
             kind: "bench".to_string(),
             loc: Location::from(node),
             dir: direction_of_node(node),
+            source: DataSource::OpenStreetMap,
         })
         .collect();
 

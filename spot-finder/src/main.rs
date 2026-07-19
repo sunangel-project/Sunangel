@@ -81,11 +81,11 @@ async fn handle_message(jetstream: &Context, message: Message) -> Result<(), asy
         query.upper_right,
         UPPER_SEARCH_AREA_DIAGONAL_LIMIT,
     ) {
-        find_spots(query.lower_left, query.upper_right).await
+        find_spots(jetstream, query.lower_left, query.upper_right).await
     } else {
         // _ = message.ack().await; // Ignore result, next error is more important
         // moved ack to main fun
-        // TODO: work out concept for recoverable vs non-retryable errors (ack vs nack)
+        // TODO: work out concept for recoverable vs non-recoverable errors (ack vs nack)
 
         Err(anyhow!(
             "search area too big, diagonal was larger than {} meters",
