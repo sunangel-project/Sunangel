@@ -11,6 +11,7 @@ const (
 	GoVersion       = "1.26"
 	GolangCiVersion = "2.11"
 	BunVersion      = "1.3"
+	GitPagesVersion = "1.10.0"
 
 	AlpineVersion = "3.23"
 )
@@ -120,4 +121,16 @@ func (m *Sunangel) BuildFrontend(
 		WithExec([]string{"bun", "install"}).
 		WithExec([]string{"bun", "run", "build"}).
 		Directory("dist")
+}
+
+// Deploy frontend
+func (m *Sunangel) DeployFrontend(
+	ctx context.Context,
+	// +defaultPath="/front"
+	source *dagger.Directory,
+	token *dagger.Secret,
+) error {
+	dist := m.BuildFrontend(ctx, source)
+
+	return m.PublishGitPage(ctx, dist, token)
 }

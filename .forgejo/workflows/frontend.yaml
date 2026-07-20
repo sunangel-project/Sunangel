@@ -1,5 +1,7 @@
 on: [push]
 
+enable-email-notifications: true
+
 jobs:
   build-frontend:
     runs-on: dagger
@@ -20,24 +22,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Build frontend
+      - name: Deploy frontend
+        env:
+          TOKEN: ${{ forge.token }}
         run: |
           set -x
 
-          mkdir ./frontend-dist
-          dagger call build-frontend export --path ./frontend-dist
+          dagger call deploy-frontend --token env://TOKEN
 
-      - name: Debug
-        run: |
-          set -x
-
-          touch test-file
-          ls -la
-
-      - uses: actions/git-pages@v2
-        # TODO: use dagger
-        with:
-          site: https://sunn.cloudsftp.de/
-          server: pages.energiesandsuch.com
-          token: ${{ forge.token }}
-          source: ./frontend-dist
