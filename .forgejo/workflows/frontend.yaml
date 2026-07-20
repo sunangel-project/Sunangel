@@ -29,11 +29,13 @@ jobs:
 
       - name: Debug
         run: |
+          set -x
+
           touch test-file
           ls -la
-          chmod 755 ./frontend-dist
 
       - uses: actions/git-pages@v2
+        # TODO: use dagger
         with:
           site: https://sunn.cloudsftp.de/
           server: pages.energiesandsuch.com
