@@ -132,5 +132,10 @@ func (m *Sunangel) DeployFrontend(
 ) error {
 	dist := m.BuildFrontend(ctx, source)
 
-	return m.PublishGitPage(ctx, dist, token)
+	site := "https://sunn.cloudsftp.de/"
+	server := "pages.energiesandsuch.com"
+
+	return dag.GitPages(dagger.GitPagesOpts{
+		GitPagesVersion: GitPagesVersion,
+	}).Deploy(ctx, dist, token, site, server)
 }
