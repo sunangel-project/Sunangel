@@ -1,14 +1,32 @@
 on: [push]
 
+enable-email-notifications: true
+
 jobs:
-  build-backend:
+  build-and-test:
     runs-on: dagger
     steps:
       - uses: actions/checkout@v6
 
-      #- name: Build and Test All
-      #  run: dagger call build-backend export --path ./bins
+      - name: Build and test backend
+        run: dagger call build-and-test-backend
 
-      #- name: Build and Export
+  publish-and-deploy:
+    runs-on: dagger
 
+    needs:
+      - build-and-test
 
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Publish backend images
+        env:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        run: |
+          set -x
+
+          dagger call publish-images \
+            --tag ${{ forge.ref_name }} \
+            --actor ${{ forge.actor }} \
+            --token env://ACCESS_TOKEN

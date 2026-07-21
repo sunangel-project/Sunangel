@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"dagger/sunangel/internal/dagger"
 )
@@ -13,24 +12,19 @@ func (m *Sunangel) PublishImages(
 	ctx context.Context,
 	// +defaultPath="/"
 	source *dagger.Directory,
-	version string,
+	tag string,
 	actor string,
 	token *dagger.Secret,
 ) error {
-	version = strings.TrimLeft(version, "v")
-
-	tags := []string{"latest", version}
 
 	publishImage := func(image *dagger.Container, name string) error {
-		for _, tag := range tags {
-			url := fmt.Sprintf("ghcr.io/sunangel-project/%s:%s", name, tag)
+		url := fmt.Sprintf("codeberg.org/sunangel-project/%s:%s", name, tag)
 
-			_, err := image.
-				WithRegistryAuth("ghcr.io", actor, token).
-				Publish(ctx, url)
-			if err != nil {
-				return err
-			}
+		_, err := image.
+			WithRegistryAuth("codeberg.org", actor, token).
+			Publish(ctx, url)
+		if err != nil {
+			return err
 		}
 
 		return nil

@@ -3,20 +3,6 @@ name: Build, Test, and Deploy
 on: [push]
 
 jobs:
-  build_and_test_backend:
-    name: Build and Test Backend
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Build and Test All
-        uses: dagger/dagger-for-github@v8.4.1
-        with:
-          version: "latest"
-          verb: call
-          args: build-and-test-backend
-          cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
-
   publish_and_deploy_backend:
     name: Publish and Deploy Backend
     runs-on: ubuntu-latest
@@ -28,18 +14,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-
-      - name: Publish Backend Images
-        uses: dagger/dagger-for-github@v8.4.1
-        with:
-          version: "latest"
-          verb: call
-          args: publish-images --version=$VERSION --actor=$GITHUB_ACTOR --token=env:GITHUB_TOKEN
-          cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
-        env:
-          GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_TOKEN: ${{ github.token }}
-          VERSION: ${{ github.ref_name }}
 
       - name: Deploy backend on kusomiso
         uses: appleboy/ssh-action@v1.0.3
