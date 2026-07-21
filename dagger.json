@@ -16,13 +16,13 @@
       "pin": "4a51cec7f5b81ceaef3f3a1316803f43b4559cc6"
     },
     {
-      "name": "merge-dirs",
-      "source": "codeberg.org/clouds666/daggerverse/merge-dirs@latest",
+      "name": "rust",
+      "source": "codeberg.org/clouds666/daggerverse/rust@latest",
       "pin": "4a51cec7f5b81ceaef3f3a1316803f43b4559cc6"
     },
     {
-      "name": "rust",
-      "source": "codeberg.org/clouds666/daggerverse/rust@latest",
+      "name": "merge-dirs",
+      "source": "codeberg.org/clouds666/daggerverse/merge-dirs@latest",
       "pin": "4a51cec7f5b81ceaef3f3a1316803f43b4559cc6"
     },
     {
