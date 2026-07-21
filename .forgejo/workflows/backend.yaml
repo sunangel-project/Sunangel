@@ -17,7 +17,7 @@ jobs:
     needs:
       - build-and-test
 
-    if: forge.ref_name == 'forgejo-workflows'
+    if: forge.ref_name == 'latest'
 
     steps:
       - uses: actions/checkout@v6

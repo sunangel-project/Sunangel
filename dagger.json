@@ -8,27 +8,32 @@
     {
       "name": "bun",
       "source": "codeberg.org/clouds666/daggerverse/bun@latest",
-      "pin": "4a51cec7f5b81ceaef3f3a1316803f43b4559cc6"
-    },
-    {
-      "name": "go",
-      "source": "codeberg.org/clouds666/daggerverse/go@latest",
-      "pin": "4a51cec7f5b81ceaef3f3a1316803f43b4559cc6"
-    },
-    {
-      "name": "rust",
-      "source": "codeberg.org/clouds666/daggerverse/rust@latest",
-      "pin": "4a51cec7f5b81ceaef3f3a1316803f43b4559cc6"
-    },
-    {
-      "name": "merge-dirs",
-      "source": "codeberg.org/clouds666/daggerverse/merge-dirs@latest",
-      "pin": "4a51cec7f5b81ceaef3f3a1316803f43b4559cc6"
+      "pin": "55517e5c747fabbbf86bee6d762982cccb2fb481"
     },
     {
       "name": "git-pages",
       "source": "codeberg.org/clouds666/daggerverse/git-pages@latest",
-      "pin": "4a51cec7f5b81ceaef3f3a1316803f43b4559cc6"
+      "pin": "55517e5c747fabbbf86bee6d762982cccb2fb481"
+    },
+    {
+      "name": "go",
+      "source": "codeberg.org/clouds666/daggerverse/go@latest",
+      "pin": "55517e5c747fabbbf86bee6d762982cccb2fb481"
+    },
+    {
+      "name": "merge-dirs",
+      "source": "codeberg.org/clouds666/daggerverse/merge-dirs@latest",
+      "pin": "55517e5c747fabbbf86bee6d762982cccb2fb481"
+    },
+    {
+      "name": "rust",
+      "source": "codeberg.org/clouds666/daggerverse/rust@latest",
+      "pin": "55517e5c747fabbbf86bee6d762982cccb2fb481"
+    },
+    {
+      "name": "ssh",
+      "source": "codeberg.org/clouds666/daggerverse/ssh@latest",
+      "pin": "55517e5c747fabbbf86bee6d762982cccb2fb481"
     }
   ],
   "source": "pipelines",
