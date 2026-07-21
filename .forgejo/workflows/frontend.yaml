@@ -17,7 +17,7 @@ jobs:
     needs:
       - build-frontend
 
-    if: forge.ref_name == 'forgejo-workflows' # TODO: switch to latest branch
+    if: forge.ref_name == 'latest'
 
     steps:
       - uses: actions/checkout@v6
@@ -25,8 +25,5 @@ jobs:
       - name: Deploy frontend
         env:
           TOKEN: ${{ forge.token }}
-        run: |
-          set -x
-
-          dagger call deploy-frontend --token env://TOKEN
+        run: dagger call deploy-frontend --token env://TOKEN
 
