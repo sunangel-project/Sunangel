@@ -7,12 +7,13 @@ import (
 )
 
 const (
-	RustVersion     = "1.94"
+	RustVersion     = "1.96"
 	GoVersion       = "1.26"
-	GolangCiVersion = "2.11"
+	GolangCiVersion = "2.12"
 	BunVersion      = "1.3"
+	GitPagesVersion = "1.10.0"
 
-	AlpineVersion = "3.23"
+	AlpineVersion = "3.24"
 )
 
 type Sunangel struct{}
@@ -108,4 +109,33 @@ func (m *Sunangel) Test(
 	}
 
 	return nil
+}
+
+// Build frontend
+func (m *Sunangel) BuildFrontend(
+	ctx context.Context,
+	// +defaultPath="/front"
+	source *dagger.Directory,
+) *dagger.Directory {
+	return bunBuilder(source).
+		WithExec([]string{"bun", "install"}).
+		WithExec([]string{"bun", "run", "build"}).
+		Directory("dist")
+}
+
+// Deploy frontend
+func (m *Sunangel) DeployFrontend(
+	ctx context.Context,
+	// +defaultPath="/front"
+	source *dagger.Directory,
+	token *dagger.Secret,
+) error {
+	dist := m.BuildFrontend(ctx, source)
+
+	site := "https://sunn.cloudsftp.de/"
+	server := "pages.energiesandsuch.com"
+
+	return dag.GitPages(dagger.GitPagesOpts{
+		GitPagesVersion: GitPagesVersion,
+	}).Deploy(ctx, dist, token, site, server)
 }
