@@ -1,0 +1,22 @@
+on:
+  schedule:
+    - cron: '32 * * * *'
+
+enable-email-notifications: true
+
+jobs:
+  run-renovate:
+    runs-on: dagger
+    steps:
+      - uses: https://data.forgejo.org/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Run renovate
+        env:
+          FORGE_TOKEN: ${{ forge.TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RENOVATE_GITHUB_COM_TOKEN }}
+        run: |
+          set -x
+
+          dagger call run-renovate \
+            --forge-token env://FORGE_TOKEN \
+            --github-token env://GITHUB_TOKEN

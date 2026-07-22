@@ -2,75 +2,41 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"dagger/sunangel/internal/dagger"
 )
 
-func updateRust(
+// Run renovate
+func (m *Sunangel) RunRenovate(
 	ctx context.Context,
-	source *dagger.Directory,
-) *dagger.Directory {
-	return rustBuilder().
-		Builder(source).
-		WithExec([]string{"cargo", "update"}).
-		Directory("").
-		Filter(dagger.DirectoryFilterOpts{
-			Include: []string{"Cargo.lock"},
-		})
-}
+	forgeToken *dagger.Secret,
+	githubToken *dagger.Secret,
+) (string, error) {
+	platform := "forgejo"
+	endpoint := "https://codeberg.org/api/v1/"
+	repository := "sunangel-project/sunangel"
 
-func updateGo(
-	ctx context.Context,
-	source *dagger.Directory,
-) *dagger.Directory {
-	return goBuilder().
-		Builder(source).
-		WithExec([]string{"go", "get", "-u", "./..."}).
-		Directory("").
-		Filter(dagger.DirectoryFilterOpts{
-			Include: []string{
-				"*.sum",
-				"*.mod",
-			},
-		})
-}
-
-func updateTypescript(
-	ctx context.Context,
-	source *dagger.Directory,
-) *dagger.Directory {
-	return bunBuilder(source).
-		WithWorkdir("front").
-		WithExec([]string{"bun", "update"}).
-		WithWorkdir("..").
-		Directory("").
-		Filter(dagger.DirectoryFilterOpts{
-			Include: []string{"front/bun.lock"},
-		})
-}
-
-type directoryGenerator = func(context.Context, *dagger.Directory) *dagger.Directory
-
-// Update all dependencies
-func (m *Sunangel) UpdateDependencies(
-	ctx context.Context,
-	// +defaultPath="/"
-	source *dagger.Directory,
-) (*dagger.Directory, error) {
-	var dirs []*dagger.Directory
-	for _, f := range []directoryGenerator{
-		updateRust,
-		updateTypescript,
-		updateGo,
-	} {
-		dir := f(ctx, source)
-		if dir == nil {
-			continue
+	config := fmt.Sprintf(`
+		module.exports = {
+		  "repositories": [
+		    "%s"
+		  ]
 		}
+		`,
+		repository,
+	)
 
-		dirs = append(dirs, dir)
-	}
+	return dag.Container().
+		From("renovate/renovate:"+RenovateVersion).
+		WithNewFile("config.js", config).
+		WithSecretVariable("RENOVATE_TOKEN", forgeToken).
+		WithSecretVariable("GITHUB_COM_TOKEN", githubToken).
+		WithExec([]string{
+			"renovate",
+			"--platform", platform,
+			"--endpoint", endpoint,
+		}).
+		Stdout(ctx)
 
-	merged := dag.MergeDirs().Merge(dirs)
-	return merged, nil
 }
