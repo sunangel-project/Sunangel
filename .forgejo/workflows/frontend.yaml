@@ -6,7 +6,7 @@ jobs:
   build-frontend:
     runs-on: dagger
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Build frontend
         run: dagger call build-frontend
@@ -20,7 +20,7 @@ jobs:
     if: forge.ref_name == 'latest'
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Deploy frontend
         env:
