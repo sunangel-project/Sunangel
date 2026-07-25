@@ -1,6 +1,6 @@
 on:
   schedule:
-    - cron: '32 * * * *'
+    - cron: '40 * * * *'
 
 enable-email-notifications: true
 
@@ -12,7 +12,7 @@ jobs:
 
       - name: Run renovate
         env:
-          FORGE_TOKEN: ${{ forge.TOKEN }}
+          FORGE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.RENOVATE_GITHUB_COM_TOKEN }}
         run: |
           set -x
