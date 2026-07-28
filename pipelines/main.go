@@ -16,6 +16,10 @@ const (
 	AlpineVersion = "3.24"
 )
 
+var (
+	RustAlpinePackages = []string{"openssl-dev", "openssl-libs-static"}
+)
+
 type Sunangel struct{}
 
 // Build backend and run extensive testing

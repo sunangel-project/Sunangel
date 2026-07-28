@@ -39,6 +39,11 @@
       "name": "ssh",
       "source": "codeberg.org/clouds666/daggerverse/ssh@latest",
       "pin": "9d1fc497dc26358e082c2fd71afa8362e3a230db"
+    },
+    {
+      "name": "alpine",
+      "source": "codeberg.org/clouds666/daggerverse/alpine@latest",
+      "pin": "9d1fc497dc26358e082c2fd71afa8362e3a230db"
     }
   ],
   "source": "pipelines",

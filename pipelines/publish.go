@@ -54,8 +54,7 @@ func (m *Sunangel) ImageApi(
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) *dagger.Container {
-	return rustBuilder().
-		BuildImage(source, "api").
+	return buildRustImage(source, "api").
 		WithExposedPort(6660)
 }
 
@@ -64,7 +63,7 @@ func (m *Sunangel) ImageSpotFinder(
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) *dagger.Container {
-	return rustBuilder().BuildImage(source, "spot-finder")
+	return buildRustImage(source, "spot-finder")
 }
 
 // Build image of the sky-service service
@@ -72,7 +71,7 @@ func (m *Sunangel) ImageSkyService(
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) *dagger.Container {
-	return rustBuilder().BuildImage(source, "sky-service")
+	return buildRustImage(source, "sky-service")
 }
 
 // Build image of the horizon-get service
@@ -81,10 +80,7 @@ func (m *Sunangel) ImageHorizonGet(
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) *dagger.Container {
-	return goBuilder().
-		BuildImage(source, "horizon-compute", dagger.GoBuildImageOpts{
-			Path: "horizon/compute",
-		})
+	return buildGoImage(source, "horizon/compute", "horizon-compute")
 }
 
 // Build image of the horizon-compute service
@@ -93,8 +89,30 @@ func (m *Sunangel) ImageHorizonCompute(
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) *dagger.Container {
-	return goBuilder().
-		BuildImage(source, "horizon-get", dagger.GoBuildImageOpts{
-			Path: "horizon/get",
+	return buildGoImage(source, "horizon/get", "horizon-get")
+}
+
+func buildRustImage(
+	source *dagger.Directory,
+	pkg string,
+) *dagger.Container {
+	binary := rustBuilder().
+		BuildExecutable(source, pkg)
+
+	return rustAlpine().
+		ServiceContainer(binary, pkg)
+}
+
+func buildGoImage(
+	source *dagger.Directory,
+	path string,
+	name string,
+) *dagger.Container {
+	binary := goBuilder().
+		Compile(source, name, dagger.GoCompileOpts{
+			Path: path,
 		})
+
+	return goAlpine().
+		ServiceContainer(binary, name)
 }

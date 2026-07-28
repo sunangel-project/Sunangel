@@ -11,3 +11,9 @@ func goBuilder() *dagger.Go {
 		AlpineVersion:   AlpineVersion,
 	})
 }
+
+func goAlpine() *dagger.Alpine {
+	return dag.Alpine(dagger.AlpineOpts{
+		AlpineVersion: AlpineVersion,
+	})
+}

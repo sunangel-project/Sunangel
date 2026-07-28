@@ -26,36 +26,40 @@ func (m *Sunangel) LocalManualTesting(
 		WithExposedPort(8222).
 		AsService()
 
-	_, err := buildSpotFinderService(ctx, source, natsService, envFile).Start(ctx)
+	_, err := buildSpotFinderService(source, natsService, envFile).Start(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = buildHorizonGetService(ctx, source, natsService, envFile).Start(ctx)
+	_, err = buildHorizonGetService(source, natsService, envFile).Start(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = buildHorizonComputeService(ctx, source, natsService, envFile).Start(ctx)
+	_, err = buildHorizonComputeService(source, natsService, envFile).Start(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = buildSkyServiceService(ctx, source, natsService, envFile).Start(ctx)
+	_, err = buildSkyServiceService(source, natsService, envFile).Start(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return buildRustImage(source, "api", natsService, envFile).WithExposedPort(6660), nil
+	return buildRustImageIntegration(
+		source,
+		"api",
+		natsService,
+		envFile,
+	).WithExposedPort(6660), nil
 }
 
 func buildSpotFinderService(
-	ctx context.Context,
 	source *dagger.Directory,
 	natsService *dagger.Service,
 	envFile *dagger.File,
 ) *dagger.Service {
-	return buildRustImage(
+	return buildRustImageIntegration(
 		source,
 		"spot-finder",
 		natsService,
@@ -64,12 +68,11 @@ func buildSpotFinderService(
 }
 
 func buildSkyServiceService(
-	ctx context.Context,
 	source *dagger.Directory,
 	natsService *dagger.Service,
 	envFile *dagger.File,
 ) *dagger.Service {
-	return buildRustImage(
+	return buildRustImageIntegration(
 		source,
 		"sky-service",
 		natsService,
@@ -77,25 +80,30 @@ func buildSkyServiceService(
 	).AsService()
 }
 
-func buildRustImage(
+func buildRustImageIntegration(
 	source *dagger.Directory,
 	pkg string,
 	natsService *dagger.Service,
 	envFile *dagger.File,
 ) *dagger.Container {
-	return rustBuilder().
-		BuildImage(source, pkg).
+	binary := rustBuilder().
+		BuildExecutable(source, pkg)
+
+	return dag.Alpine(dagger.AlpineOpts{
+		AlpineVersion: AlpineVersion,
+		Packages:      RustAlpinePackages,
+	}).
+		ServiceContainer(binary, pkg).
 		WithServiceBinding("nats", natsService).
 		WithFile("/.env", envFile)
 }
 
 func buildHorizonGetService(
-	ctx context.Context,
 	source *dagger.Directory,
 	natsService *dagger.Service,
 	envFile *dagger.File,
 ) *dagger.Service {
-	return buildGoImage(
+	return buildGoImageIntegration(
 		source,
 		"horizon-get",
 		"horizon/get",
@@ -105,12 +113,11 @@ func buildHorizonGetService(
 }
 
 func buildHorizonComputeService(
-	ctx context.Context,
 	source *dagger.Directory,
 	natsService *dagger.Service,
 	envFile *dagger.File,
 ) *dagger.Service {
-	return buildGoImage(
+	return buildGoImageIntegration(
 		source,
 		"horizon-compute",
 		"horizon/compute",
@@ -119,17 +126,20 @@ func buildHorizonComputeService(
 	).AsService()
 }
 
-func buildGoImage(
+func buildGoImageIntegration(
 	source *dagger.Directory,
 	name string,
 	path string,
 	natsService *dagger.Service,
 	envFile *dagger.File,
 ) *dagger.Container {
-	return goBuilder().
-		BuildImage(source, name, dagger.GoBuildImageOpts{
+	binary := goBuilder().
+		Compile(source, name, dagger.GoCompileOpts{
 			Path: path,
-		}).
+		})
+
+	return goAlpine().
+		ServiceContainer(binary, name).
 		WithServiceBinding("nats", natsService).
 		WithFile("/.env", envFile)
 }
