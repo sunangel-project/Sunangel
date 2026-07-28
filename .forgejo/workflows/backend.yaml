@@ -1,4 +1,7 @@
-on: [push]
+on:
+  push:
+    branches:
+      - latest
 
 enable-email-notifications: true
 
