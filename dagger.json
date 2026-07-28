@@ -6,44 +6,44 @@
   },
   "dependencies": [
     {
+      "name": "alpine",
+      "source": "codeberg.org/clouds666/daggerverse/alpine@latest",
+      "pin": "ddcf4456327cb478c49fdfa5d5cd79202badc823"
+    },
+    {
       "name": "bun",
       "source": "codeberg.org/clouds666/daggerverse/bun@latest",
-      "pin": "9d1fc497dc26358e082c2fd71afa8362e3a230db"
+      "pin": "ddcf4456327cb478c49fdfa5d5cd79202badc823"
     },
     {
       "name": "git-pages",
       "source": "codeberg.org/clouds666/daggerverse/git-pages@latest",
-      "pin": "9d1fc497dc26358e082c2fd71afa8362e3a230db"
+      "pin": "ddcf4456327cb478c49fdfa5d5cd79202badc823"
     },
     {
       "name": "go",
       "source": "codeberg.org/clouds666/daggerverse/go@latest",
-      "pin": "9d1fc497dc26358e082c2fd71afa8362e3a230db"
+      "pin": "ddcf4456327cb478c49fdfa5d5cd79202badc823"
     },
     {
       "name": "merge-dirs",
       "source": "codeberg.org/clouds666/daggerverse/merge-dirs@latest",
-      "pin": "9d1fc497dc26358e082c2fd71afa8362e3a230db"
+      "pin": "ddcf4456327cb478c49fdfa5d5cd79202badc823"
     },
     {
       "name": "renovate",
-      "source": "codeberg.org/clouds666/daggerverse/renovate@renovate",
-      "pin": "f1e077fbc100a5200bf2e5e82b38cde0ca578281"
+      "source": "codeberg.org/clouds666/daggerverse/renovate@latest",
+      "pin": "ddcf4456327cb478c49fdfa5d5cd79202badc823"
     },
     {
       "name": "rust",
       "source": "codeberg.org/clouds666/daggerverse/rust@latest",
-      "pin": "9d1fc497dc26358e082c2fd71afa8362e3a230db"
+      "pin": "ddcf4456327cb478c49fdfa5d5cd79202badc823"
     },
     {
       "name": "ssh",
       "source": "codeberg.org/clouds666/daggerverse/ssh@latest",
-      "pin": "9d1fc497dc26358e082c2fd71afa8362e3a230db"
-    },
-    {
-      "name": "alpine",
-      "source": "codeberg.org/clouds666/daggerverse/alpine@latest",
-      "pin": "9d1fc497dc26358e082c2fd71afa8362e3a230db"
+      "pin": "ddcf4456327cb478c49fdfa5d5cd79202badc823"
     }
   ],
   "source": "pipelines",
