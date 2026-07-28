@@ -13,8 +13,7 @@ const (
 	BunVersion      = "1.3"
 	GitPagesVersion = "1.10.0"
 
-	AlpineVersion   = "3.24"
-	RenovateVersion = "43.278"
+	AlpineVersion = "3.24"
 )
 
 type Sunangel struct{}

@@ -17,6 +17,8 @@ jobs:
         run: |
           set -x
 
-          dagger call run-renovate \
+          dagger -m renovate \
+            --repositories "${{ forge.repository }}" \
             --forge-token env://FORGE_TOKEN \
-            --github-token env://GITHUB_TOKEN
+            --github-token env://GITHUB_TOKEN \
+          call run
