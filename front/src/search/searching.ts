@@ -1,7 +1,6 @@
 import { gql, useSubscription } from "@urql/vue";
 import { v4 as uuidv4 } from "uuid";
 import { time, spots, type Spot, type Result, searchArea } from "./state";
-import { toRefs } from "vue";
 
 export function search() {
   if (spots.loading) {
@@ -60,10 +59,10 @@ subscription spot(
   spots.subscription = useSubscription(
     {
       query: query,
-      variables: {
-        ...toRefs(searchArea),
-        ...toRefs(time),
-      },
+      variables: () => ({
+        ...searchArea,
+        ...time,
+      }),
       pause: true,
     },
     (_, result) => {

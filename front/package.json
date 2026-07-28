@@ -11,7 +11,7 @@
     },
     "dependencies": {
         "@urql/core": "^6.0.0",
-        "@urql/vue": "^1.4.3",
+        "@urql/vue": "^2.0.0",
         "graphql-ws": "^6.0.8",
         "caniuse-lite": "^1.0.30001787",
         "geodesy": "^2.4.0",
