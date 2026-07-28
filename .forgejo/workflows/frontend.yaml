@@ -1,4 +1,8 @@
-on: [push]
+on:
+  push:
+    branches:
+      - latest
+  pull_request:
 
 enable-email-notifications: true
 
