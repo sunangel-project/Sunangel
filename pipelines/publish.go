@@ -97,7 +97,12 @@ func buildRustImage(
 	pkg string,
 ) *dagger.Container {
 	binary := rustBuilder().
-		BuildExecutable(source, pkg)
+		BuildExecutable(
+			source, pkg,
+			dagger.RustBuildExecutableOpts{
+				Target: "x86_64-unknown-linux-musl",
+			},
+		)
 
 	return rustAlpine().
 		ServiceContainer(binary, pkg)
