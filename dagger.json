@@ -37,8 +37,8 @@
     },
     {
       "name": "rust",
-      "source": "codeberg.org/clouds666/daggerverse/rust@latest",
-      "pin": "ba16bce19babbebc8f2b773b1d10a4cff1745813"
+      "source": "codeberg.org/clouds666/daggerverse/rust@rust-target",
+      "pin": "9e4965dee499955733d79c6d78e43d7189a2ff80"
     },
     {
       "name": "ssh",

@@ -16,7 +16,6 @@ func (m *Sunangel) PublishImages(
 	actor string,
 	token *dagger.Secret,
 ) error {
-
 	publishImage := func(image *dagger.Container, name string) error {
 		url := fmt.Sprintf("codeberg.org/energiesandsuch/%s:%s", name, tag)
 
@@ -100,7 +99,7 @@ func buildRustImage(
 		BuildExecutable(
 			source, pkg,
 			dagger.RustBuildExecutableOpts{
-				Target: "x86_64-unknown-linux-musl",
+				Target: RustBinaryTargetx86_64Alpine,
 			},
 		)
 

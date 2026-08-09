@@ -14,6 +14,8 @@ const (
 	GitPagesVersion = "1.10.0"
 
 	AlpineVersion = "3.24"
+
+	RustBinaryTargetx86_64Alpine = "x86_64-unknown-linux-musl"
 )
 
 var (

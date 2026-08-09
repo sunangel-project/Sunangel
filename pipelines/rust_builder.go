@@ -8,6 +8,7 @@ func rustBuilder() *dagger.Rust {
 	return dag.Rust(dagger.RustOpts{
 		RustVersion:   RustVersion,
 		AlpineVersion: AlpineVersion,
+		Targets:       []string{RustBinaryTargetx86_64Alpine},
 		Packages:      RustAlpinePackages,
 	})
 }
