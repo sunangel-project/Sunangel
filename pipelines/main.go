@@ -18,6 +18,10 @@ const (
 	RustBinaryTargetx86_64Alpine = "x86_64-unknown-linux-musl"
 )
 
+var (
+	RustAplinePackages = []string{"zig"}
+)
+
 type Sunangel struct{}
 
 // Build backend and run extensive testing
