@@ -33,7 +33,7 @@ jobs:
           set -x
 
           dagger call publish-images \
-            --tag ${{ forge.ref_name }} \
+            --tag latest \
             --actor ${{ forge.actor }} \
             --token env://ACCESS_TOKEN
 

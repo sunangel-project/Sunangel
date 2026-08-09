@@ -96,15 +96,17 @@ func buildRustImage(
 	pkg string,
 ) *dagger.Container {
 	binary := rustBuilder().
-		BuildExecutableZig(
+		BuildExecutable(
 			source, pkg,
-			dagger.RustBuildExecutableZigOpts{
+			dagger.RustBuildExecutableOpts{
 				Target: RustBinaryTargetx86_64Alpine,
 			},
 		)
 
 	return rustAlpine().
-		ServiceContainer(binary, pkg)
+		ServiceContainer(binary, pkg, dagger.AlpineServiceContainerOpts{
+			Platform: "linux/amd64",
+		})
 }
 
 func buildGoImage(
