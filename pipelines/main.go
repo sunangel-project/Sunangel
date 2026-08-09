@@ -18,10 +18,6 @@ const (
 	RustBinaryTargetx86_64Alpine = "x86_64-unknown-linux-musl"
 )
 
-var (
-	RustAlpinePackages = []string{"openssl-dev", "openssl-libs-static"}
-)
-
 type Sunangel struct{}
 
 // Build backend and run extensive testing
