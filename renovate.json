@@ -5,5 +5,17 @@
   ],
   "ignorePaths": [
     "pipelines"
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": [
+      "at any time"
+    ]
+  },
+  "packageRules": [
+    {
+      "matchManagers": ["cargo"],
+      "rangeStrategy": "bump"
+    }
   ]
 }
