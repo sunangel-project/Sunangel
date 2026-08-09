@@ -18,7 +18,7 @@ func (m *Sunangel) PublishImages(
 ) error {
 
 	publishImage := func(image *dagger.Container, name string) error {
-		url := fmt.Sprintf("codeberg.org/sunangel-project/%s:%s", name, tag)
+		url := fmt.Sprintf("codeberg.org/energiesandsuch/%s:%s", name, tag)
 
 		_, err := image.
 			WithRegistryAuth("codeberg.org", actor, token).
