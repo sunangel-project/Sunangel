@@ -105,7 +105,7 @@ func buildRustImage(
 
 	return rustAlpine().
 		ServiceContainer(binary, pkg, dagger.AlpineServiceContainerOpts{
-			Platform: "linux/amd64",
+			Platform: TargetContainerPlatform,
 		})
 }
 
@@ -117,8 +117,12 @@ func buildGoImage(
 	binary := goBuilder().
 		Compile(source, name, dagger.GoCompileOpts{
 			Path: path,
+			Os:   GoBinaryTargetOS,
+			Arch: GoBinaryTargetArch,
 		})
 
 	return goAlpine().
-		ServiceContainer(binary, name)
+		ServiceContainer(binary, name, dagger.AlpineServiceContainerOpts{
+			Platform: TargetContainerPlatform,
+		})
 }
