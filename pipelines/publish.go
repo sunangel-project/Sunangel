@@ -16,7 +16,6 @@ func (m *Sunangel) PublishImages(
 	actor string,
 	token *dagger.Secret,
 ) error {
-
 	publishImage := func(image *dagger.Container, name string) error {
 		url := fmt.Sprintf("codeberg.org/energiesandsuch/%s:%s", name, tag)
 
@@ -97,10 +96,17 @@ func buildRustImage(
 	pkg string,
 ) *dagger.Container {
 	binary := rustBuilder().
-		BuildExecutable(source, pkg)
+		BuildExecutable(
+			source, pkg,
+			dagger.RustBuildExecutableOpts{
+				Target: RustBinaryTargetx86_64Alpine,
+			},
+		)
 
 	return rustAlpine().
-		ServiceContainer(binary, pkg)
+		ServiceContainer(binary, pkg, dagger.AlpineServiceContainerOpts{
+			Platform: TargetContainerPlatform,
+		})
 }
 
 func buildGoImage(
@@ -111,8 +117,12 @@ func buildGoImage(
 	binary := goBuilder().
 		Compile(source, name, dagger.GoCompileOpts{
 			Path: path,
+			Os:   GoBinaryTargetOS,
+			Arch: GoBinaryTargetArch,
 		})
 
 	return goAlpine().
-		ServiceContainer(binary, name)
+		ServiceContainer(binary, name, dagger.AlpineServiceContainerOpts{
+			Platform: TargetContainerPlatform,
+		})
 }

@@ -14,10 +14,11 @@ const (
 	GitPagesVersion = "1.10.0"
 
 	AlpineVersion = "3.24"
-)
 
-var (
-	RustAlpinePackages = []string{"openssl-dev", "openssl-libs-static"}
+	RustBinaryTargetx86_64Alpine = "x86_64-unknown-linux-musl"
+	GoBinaryTargetOS             = "linux"
+	GoBinaryTargetArch           = "amd64"
+	TargetContainerPlatform      = "linux/amd64"
 )
 
 type Sunangel struct{}
@@ -125,21 +126,4 @@ func (m *Sunangel) BuildFrontend(
 		WithExec([]string{"bun", "install"}).
 		WithExec([]string{"bun", "run", "build"}).
 		Directory("dist")
-}
-
-// Deploy frontend
-func (m *Sunangel) DeployFrontend(
-	ctx context.Context,
-	// +defaultPath="/front"
-	source *dagger.Directory,
-	token *dagger.Secret,
-) error {
-	dist := m.BuildFrontend(ctx, source)
-
-	site := "https://sunn.cloudsftp.de/"
-	server := "pages.energiesandsuch.com"
-
-	return dag.GitPages(dagger.GitPagesOpts{
-		GitPagesVersion: GitPagesVersion,
-	}).Deploy(ctx, dist, token, site, server)
 }

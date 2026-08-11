@@ -24,7 +24,7 @@ jobs:
     if: forge.ref_name == 'latest'
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: https://data.forgejo.org/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Publish backend images
         env:
@@ -33,7 +33,7 @@ jobs:
           set -x
 
           dagger call publish-images \
-            --tag ${{ forge.ref_name }} \
+            --tag latest \
             --actor ${{ forge.actor }} \
             --token env://ACCESS_TOKEN
 
@@ -42,7 +42,7 @@ jobs:
           KUSOMISO_KEY: ${{ secrets.KUSOMISO_KEY }}
         run: |
           set -x
-      
+
           dagger call deploy-backend \
             --host ${{ secrets.KUSOMISO_HOST }} \
             --user ${{ secrets.KUSOMISO_USER }} \

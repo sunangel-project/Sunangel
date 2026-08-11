@@ -91,7 +91,6 @@ func buildRustImageIntegration(
 
 	return dag.Alpine(dagger.AlpineOpts{
 		AlpineVersion: AlpineVersion,
-		Packages:      RustAlpinePackages,
 	}).
 		ServiceContainer(binary, pkg).
 		WithServiceBinding("nats", natsService).
