@@ -1,7 +1,7 @@
 #+title: Sunangel Home Edition
 
 #+ATTR_HTML: :align center
-[[https://img.shields.io/badge/Version-v0.2.21-blue.svg]]
+[[https://img.shields.io/badge/Version-v0.2.22-blue.svg]]
 [[https://img.shields.io/badge/API-v0.2.0-blue][https://img.shields.io/badge/API-v0.2.0-blue.svg]]
 [[https://sunn.cloudsftp.de][https://img.shields.io/badge/Website-limegreen.svg]]
 
