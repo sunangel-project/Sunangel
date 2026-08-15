@@ -31,11 +31,6 @@
       "pin": "851db4738ad7e777dca6f5be4d6c8aae25d1d645"
     },
     {
-      "name": "renovate",
-      "source": "codeberg.org/clouds666/daggerverse/renovate@latest",
-      "pin": "851db4738ad7e777dca6f5be4d6c8aae25d1d645"
-    },
-    {
       "name": "rust",
       "source": "codeberg.org/clouds666/daggerverse/rust@latest",
       "pin": "851db4738ad7e777dca6f5be4d6c8aae25d1d645"
