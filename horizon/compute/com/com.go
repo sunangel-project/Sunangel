@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	uuid "github.com/satori/go.uuid"
-	"github.com/sunangel-project/horizon/location"
+	"codeberg.org/energiesandsuch/horizon/location"
 )
 
 const STORE_NAME = "horizons"
