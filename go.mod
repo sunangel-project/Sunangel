@@ -5,9 +5,9 @@ go 1.25.0
 require (
 	codeberg.org/energiesandsuch/horizon v0.0.3
 	github.com/joho/godotenv v1.5.1
-	github.com/nats-io/nats.go v1.52.0
+	github.com/nats-io/nats.go v1.53.1
 	github.com/satori/go.uuid v1.2.0
-	github.com/sirupsen/logrus v1.9.4
+	github.com/sirupsen/logrus v1.10.0
 )
 
 require (
