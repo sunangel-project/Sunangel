@@ -9,8 +9,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/nats-io/nats.go/jetstream"
 	"github.com/sirupsen/logrus"
-	"github.com/sunangel-project/horizon"
-	"github.com/sunangel-project/horizon/location"
+	"codeberg.org/energiesandsuch/horizon"
+	"codeberg.org/energiesandsuch/horizon/location"
 
 	"sunangel/horizon/common"
 	"sunangel/horizon/messages"
