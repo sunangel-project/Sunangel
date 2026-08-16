@@ -9,22 +9,8 @@ enable-email-notifications: true
 
 jobs:
   run-renovate:
-    runs-on: debian
+    runs-on: dagger
     steps:
-      - name: Setup go
-        uses: https://data.forgejo.org/actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
-        with:
-          go-version: "1.26"
-
-      - uses: https://github.com/actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: "1.29"
-          cache: false
-
-      - uses: https://github.com/oven-sh/setup-bun@v2
-        with:
-          bun-version: "1.3"
-
       - name: Run renovate
         env:
           RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
@@ -32,8 +18,11 @@ jobs:
         run: |
           set -x
 
-          LOG_LEVEL=debug npx renovate \
-            --platform "forgejo" \
-            --endpoint "${{ forge.api_url }}" \
-            "${{ forge.repository }}" \
-            "${{ forge.repository_owner }}/horizon"
+          dagger \
+            -m https://codeberg.org/clouds666/daggerverse/renovate@latest \
+              --languages go,rust \
+            call run \
+              --renovate-token env://RENOVATE_TOKEN \
+              --github-com-token env://GITHUB_COM_TOKEN \
+              --repositories \
+              "${{ forge.repository }},${{ forge.repository_owner }}/horizon"
