@@ -1,6 +1,9 @@
 on:
+  push:
+    branches:
+      - "renovate-config"
   schedule:
-    - cron: '40 * * * *'
+    - cron: "40 * * * *"
 
 enable-email-notifications: true
 
@@ -8,17 +11,18 @@ jobs:
   run-renovate:
     runs-on: dagger
     steps:
-      - uses: https://data.forgejo.org/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
       - name: Run renovate
         env:
-          FORGE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.RENOVATE_GITHUB_COM_TOKEN }}
+          RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
+          GITHUB_COM_TOKEN: ${{ secrets.RENOVATE_GITHUB_COM_TOKEN }}
         run: |
           set -x
 
-          dagger -m renovate \
-            --repositories "${{ forge.repository }}" \
-            --forge-token env://FORGE_TOKEN \
-            --github-token env://GITHUB_TOKEN \
-          call run
+          dagger \
+            -m https://codeberg.org/clouds666/daggerverse/renovate@latest \
+              --languages go,rust \
+            call run \
+              --renovate-token env://RENOVATE_TOKEN \
+              --github-com-token env://GITHUB_COM_TOKEN \
+              --repositories \
+              "${{ forge.repository }},${{ forge.repository_owner }}/horizon"
