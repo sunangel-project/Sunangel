@@ -21,7 +21,7 @@
       },
       "devDependencies": {
         "@tailwindcss/vite": "4.3.3",
-        "@tsconfig/node18": "18.2.7",
+        "@tsconfig/node20": "20.1.0",
         "@types/geodesy": "2.2.8",
         "@types/node": "26.2.0",
         "@types/uuid": "11.0.0",
@@ -126,7 +126,7 @@
 
     "@tailwindcss/vite": ["@tailwindcss/vite@4.3.3", "", { "dependencies": { "@tailwindcss/node": "4.3.3", "@tailwindcss/oxide": "4.3.3", "tailwindcss": "4.3.3" }, "peerDependencies": { "vite": "^5.2.0 || ^6 || ^7 || ^8" } }, "sha512-yYU8cogLeSh/ms2jh8Fj7jaba/EWa7Ja6GoUqYZaraEuCI5YS6ms6ObZgjjedm+jm6XZjdNRWBpPP6Z86oOxcw=="],
 
-    "@tsconfig/node18": ["@tsconfig/node18@18.2.7", "", {}, "sha512-UyenTORreCUh8MKh2qbLGGHTRrxjBbSwvX0ZoWs6Jx1jrNS62PXEA3+VaLvmb0YDQrgGU3v3h7zB9Xs/BN1ozg=="],
+    "@tsconfig/node20": ["@tsconfig/node20@20.1.0", "", {}, "sha512-7Yz1xDv3sot8+NwiYA8wkx60qr3Tr+soJwlqVQSkiEqqgYoNmMmqSPiYs1vMmTxneB3igHAD11dGOR2+BShzTA=="],
 
     "@turf/bbox": ["@turf/bbox@7.3.3", "", { "dependencies": { "@turf/helpers": "7.3.3", "@turf/meta": "7.3.3", "@types/geojson": "^7946.0.10", "tslib": "^2.8.1" } }, "sha512-1zNO/JUgDp0N+3EG5fG7+8EolE95OW1LD8ur0hRP0JK+lRyN0gAvJT7n1I9pu/NIqTa8x/zXxGRc1dcOdohYkg=="],
 
