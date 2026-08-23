@@ -1,9 +1,12 @@
+name: Update dependencies
+
 on:
   push:
     branches:
-      - "renovate-config"
+      - "renovate/configure"
   schedule:
     - cron: "40 * * * *"
+  workflow_dispatch:
 
 enable-email-notifications: true
 
@@ -20,7 +23,7 @@ jobs:
 
           dagger \
             -m https://codeberg.org/clouds666/daggerverse/renovate@latest \
-              --languages go,rust \
+              --languages go,cargo,bun \
             call run \
               --renovate-token env://RENOVATE_TOKEN \
               --github-com-token env://GITHUB_COM_TOKEN \
