@@ -25,7 +25,7 @@
         "vue3-openlayers": "^12.2.2"
     },
     "devDependencies": {
-        "@tsconfig/node18": "18.2.7",
+        "@tsconfig/node20": "20.1.0",
         "@types/geodesy": "2.2.8",
         "@types/node": "26.2.0",
         "@types/uuid": "11.0.0",
