@@ -5,7 +5,7 @@ on:
     branches:
       - "renovate/configure"
   schedule:
-    - cron: "40 * * * *"
+    - cron: "@daily"
   workflow_dispatch:
 
 enable-email-notifications: true
