@@ -20,7 +20,7 @@
         "proj4": "^2.20.8",
         "uuid": "^14.0.0",
         "vue": "^3.5.32",
-        "vue-final-modal": "^4.5.5",
+        "vue-final-modal": "^5.0.0",
         "vue-router": "^5.0.4",
         "vue3-openlayers": "^12.2.2"
     },
