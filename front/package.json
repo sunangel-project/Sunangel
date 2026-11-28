@@ -25,17 +25,17 @@
         "vue3-openlayers": "^12.2.2"
     },
     "devDependencies": {
-        "@tsconfig/node24": "24.0.5",
+        "@tsconfig/node24": "24.0.6",
         "@types/geodesy": "2.2.8",
-        "@types/node": "26.6.6",
+        "@types/node": "26.6.7",
         "@types/uuid": "11.0.0",
-        "@vitejs/plugin-vue": "6.0.10",
+        "@vitejs/plugin-vue": "6.0.11",
         "@vue/tsconfig": "0.9.1",
-        "@tailwindcss/vite": "4.3.4",
-        "tailwindcss": "4.3.4",
+        "@tailwindcss/vite": "4.3.5",
+        "tailwindcss": "4.3.5",
         "typescript": "6.0.3",
-        "vite": "8.3.5",
+        "vite": "8.3.8",
         "vue-tsc": "3.3.14",
-        "npm-run-all2": "9.0.4"
+        "npm-run-all2": "9.1.0"
     }
 }
